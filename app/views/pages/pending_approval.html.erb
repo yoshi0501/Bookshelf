@@ -1,0 +1,15 @@
+<div class="bg-white shadow sm:rounded-lg">
+  <div class="px-4 py-5 sm:p-6 text-center">
+    <svg class="mx-auto h-12 w-12 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+    </svg>
+    <h3 class="mt-4 text-lg font-semibold text-gray-900">Pending Approval</h3>
+    <div class="mt-2 max-w-xl mx-auto text-sm text-gray-500">
+      <p>Your account is pending approval from your company administrator.</p>
+      <p class="mt-2">You will be notified once your account has been approved.</p>
+    </div>
+    <div class="mt-5">
+      <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    </div>
+  </div>
+</div>

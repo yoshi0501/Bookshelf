@@ -1,0 +1,41 @@
+<%= form_with model: [:admin, company], class: "space-y-6" do |f| %>
+  <%= render "shared/form_errors", resource: company %>
+
+  <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
+    <div class="grid grid-cols-6 gap-6">
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :code, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :code, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :order_prefix, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :order_prefix, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "e.g., ORD" %>
+        <p class="mt-1 text-xs text-gray-500">Uppercase alphanumeric only</p>
+      </div>
+
+      <div class="col-span-6">
+        <label class="block text-sm font-medium text-gray-700">Domains</label>
+        <p class="mt-1 text-sm text-gray-500">Enter email domains (one per line) that should be associated with this company.</p>
+        <textarea name="company[domains][]" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="example.com&#10;subdomain.example.com"><%= company.domains.join("\n") %></textarea>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <div class="flex items-center">
+          <%= f.check_box :is_active, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+          <%= f.label :is_active, "Active", class: "ml-2 block text-sm text-gray-900" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", admin_companies_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  </div>
+<% end %>

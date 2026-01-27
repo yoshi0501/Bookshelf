@@ -1,0 +1,37 @@
+<nav class="bg-indigo-600">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <span class="text-white font-bold text-xl">B2B Orders</span>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-4">
+            <%= link_to "Dashboard", dashboard_path, class: "#{request.path == dashboard_path ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <%= link_to "Customers", customers_path, class: "#{controller_name == 'customers' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <%= link_to "Items", items_path, class: "#{controller_name == 'items' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <%= link_to "Orders", orders_path, class: "#{controller_name == 'orders' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+              <%= link_to "Approvals", admin_approval_requests_path, class: "#{controller_name == 'approval_requests' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+              <%= link_to "Members", admin_user_profiles_path, class: "#{controller_name == 'user_profiles' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <% end %>
+            <% if current_user&.internal_admin? %>
+              <%= link_to "Companies", admin_companies_path, class: "#{controller_name == 'companies' ? 'bg-indigo-700' : 'hover:bg-indigo-500'} text-white rounded-md px-3 py-2 text-sm font-medium" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="ml-4 flex items-center md:ml-6">
+          <span class="text-indigo-200 text-sm mr-4">
+            <%= current_company&.name %>
+          </span>
+          <span class="text-white text-sm mr-4">
+            <%= current_user&.email %>
+          </span>
+          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "bg-indigo-500 hover:bg-indigo-400 text-white rounded-md px-3 py-2 text-sm font-medium" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

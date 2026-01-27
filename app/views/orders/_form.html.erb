@@ -1,0 +1,60 @@
+<%= form_with model: order, class: "space-y-6" do |f| %>
+  <%= render "shared/form_errors", resource: order %>
+
+  <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Order Information</h3>
+    <div class="grid grid-cols-6 gap-6">
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :order_date, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.date_field :order_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :customer_id, "Customer", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.collection_select :customer_id, @customers, :id, :display_name, { prompt: "Select Customer" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <% if order.persisted? %>
+        <div class="col-span-6 sm:col-span-3">
+          <%= f.label :shipping_status, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.select :shipping_status, Order.shipping_statuses.keys.map { |s| [s.titleize, s] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Order Lines</h3>
+    <div id="order-lines">
+      <%= f.fields_for :order_lines do |line_form| %>
+        <div class="order-line grid grid-cols-12 gap-4 mb-4 items-end">
+          <div class="col-span-5">
+            <%= line_form.label :item_id, "Item", class: "block text-sm font-medium text-gray-700" %>
+            <%= line_form.collection_select :item_id, @items, :id, :display_name, { prompt: "Select Item" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+          <div class="col-span-3">
+            <%= line_form.label :quantity, class: "block text-sm font-medium text-gray-700" %>
+            <%= line_form.number_field :quantity, min: 1, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+          <div class="col-span-2">
+            <% if line_form.object.persisted? %>
+              <span class="text-sm text-gray-500"><%= number_to_currency(line_form.object.amount, unit: "¥", precision: 0) %></span>
+            <% end %>
+          </div>
+          <div class="col-span-2">
+            <% if line_form.object.persisted? %>
+              <%= line_form.check_box :_destroy, class: "h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500" %>
+              <%= line_form.label :_destroy, "Remove", class: "ml-2 text-sm text-red-600" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <p class="text-sm text-gray-500 mt-2">Add items to the order. Prices will be calculated automatically.</p>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", orders_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  </div>
+<% end %>

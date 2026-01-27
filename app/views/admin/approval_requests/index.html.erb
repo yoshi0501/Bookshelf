@@ -1,0 +1,55 @@
+<div class="sm:flex sm:items-center mb-8">
+  <div class="sm:flex-auto">
+    <h1 class="text-2xl font-bold text-gray-900">Approval Requests</h1>
+    <p class="mt-2 text-sm text-gray-700">Manage pending approval requests for new users.</p>
+  </div>
+</div>
+
+<div class="bg-white shadow rounded-lg overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <% @approval_requests.each do |request| %>
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <%= request.user_profile.name %>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <%= request.user_profile.user.email %>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <%= time_ago_in_words(request.created_at) %> ago
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <% case request.status %>
+            <% when "pending" %>
+              <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Pending</span>
+            <% when "approved" %>
+              <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Approved</span>
+            <% when "rejected" %>
+              <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Rejected</span>
+            <% end %>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <% if request.status_pending? %>
+              <%= button_to "Approve", approve_admin_approval_request_path(request), method: :post, class: "text-green-600 hover:text-green-900 mr-3" %>
+              <%= button_to "Reject", reject_admin_approval_request_path(request), method: :post, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-900" %>
+            <% else %>
+              <%= link_to "View", admin_approval_request_path(request), class: "text-indigo-600 hover:text-indigo-900" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%= render "shared/pagination", pagy: @pagy %>

@@ -1,23 +1,60 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t 'hello'
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t('hello') %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more, please read the Rails Internationalization guide
-# available at http://guides.rubyonrails.org/i18n.html.
-
 en:
   hello: "Hello world"
+
+  errors:
+    record_not_found: "Record not found or access denied"
+    messages:
+      not_saved:
+        one: "1 error prohibited this %{resource} from being saved"
+        other: "%{count} errors prohibited this %{resource} from being saved"
+
+  pundit:
+    not_authorized: "You are not authorized to perform this action"
+
+  devise:
+    failure:
+      account_rejected: "Your account has been rejected"
+      unassigned_company: "Your email domain is not associated with any company"
+      pending_approval: "Your account is pending approval"
+    registrations:
+      invalid_email_domain: "Your email domain is not associated with any registered company"
+
+  customers:
+    created: "Customer was successfully created"
+    updated: "Customer was successfully updated"
+    deactivated: "Customer was deactivated"
+    deactivate_failed: "Could not deactivate customer"
+
+  items:
+    created: "Item was successfully created"
+    updated: "Item was successfully updated"
+    deactivated: "Item was deactivated"
+    deactivate_failed: "Could not deactivate item"
+
+  orders:
+    created: "Order was successfully created"
+    updated: "Order was successfully updated"
+    cancelled: "Order was cancelled"
+    cancel_failed: "Could not cancel order"
+    shipped: "Order marked as shipped"
+    ship_failed: "Could not mark order as shipped"
+    delivered: "Order marked as delivered"
+    deliver_failed: "Could not mark order as delivered"
+
+  approval_requests:
+    approved: "User has been approved"
+    approve_failed: "Could not approve user"
+    rejected: "User has been rejected"
+    reject_failed: "Could not reject user"
+
+  companies:
+    created: "Company was successfully created"
+    updated: "Company was successfully updated"
+
+  user_profiles:
+    updated: "Profile was successfully updated"
+    invalid_role: "Invalid role specified"
+    cannot_change_own_role: "You cannot change your own role"
+    cannot_grant_internal_admin: "Only internal admins can grant internal admin role"
+    role_changed: "User role was successfully changed"
+    role_change_failed: "Could not change user role"
