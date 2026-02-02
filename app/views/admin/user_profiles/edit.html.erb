@@ -1,0 +1,32 @@
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-gray-900">Edit Profile</h1>
+</div>
+
+<%= form_with model: [:admin, @user_profile], class: "space-y-6" do |f| %>
+  <%= render "shared/form_errors", resource: @user_profile %>
+
+  <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
+    <div class="grid grid-cols-6 gap-6">
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :phone, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :phone, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+
+      <div class="col-span-6 sm:col-span-3">
+        <%= f.label :supervisor_id, "上司", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.collection_select :supervisor_id, @supervisor_options, :last, :first, { include_blank: "上司を選択（任意）" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <p class="mt-1 text-xs text-gray-500">発注承認依頼が送信される上司を選択してください</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", admin_user_profile_path(@user_profile), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit "Update Profile", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  </div>
+<% end %>

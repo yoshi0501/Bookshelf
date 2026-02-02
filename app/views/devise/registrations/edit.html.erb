@@ -1,0 +1,63 @@
+<div class="card shadow-lg border-0">
+  <div class="card-body p-5">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient mb-3 shadow-sm" style="width: 64px; height: 64px;">
+        <i class="bi bi-key text-white" style="font-size: 2rem;"></i>
+      </div>
+      <h2 class="card-title fw-bold mb-2"><%= t('devise.registrations.edit.title') %></h2>
+      <p class="text-muted small"><%= t('devise.registrations.edit.description') %></p>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "needs-validation", novalidate: true }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="mb-3">
+        <%= f.label :email, t('devise.registrations.edit.email'), class: "form-label fw-semibold" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control form-control-lg", readonly: true %>
+        <div class="form-text"><%= t('devise.registrations.edit.email_readonly') %></div>
+      </div>
+
+      <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+        <div class="alert alert-warning">
+          <%= t('devise.registrations.edit.currently_waiting_confirmation_for_email', email: resource.unconfirmed_email) %>
+        </div>
+      <% end %>
+
+      <hr class="my-4">
+
+      <h5 class="fw-semibold mb-3"><%= t('devise.registrations.edit.change_password') %></h5>
+
+      <div class="mb-3">
+        <%= f.label :current_password, t('devise.registrations.edit.current_password'), class: "form-label fw-semibold" %>
+        <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control form-control-lg", required: true %>
+        <div class="form-text"><%= t('devise.registrations.edit.current_password_help') %></div>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password, t('devise.registrations.edit.new_password'), class: "form-label fw-semibold" %>
+        <%= f.password_field :password, autocomplete: "new-password", class: "form-control form-control-lg" %>
+        <% if @minimum_password_length %>
+          <div class="form-text"><%= t('devise.registrations.edit.password_minimum', count: @minimum_password_length) %></div>
+        <% end %>
+        <div class="form-text"><%= t('devise.registrations.edit.password_leave_blank') %></div>
+      </div>
+
+      <div class="mb-4">
+        <%= f.label :password_confirmation, t('devise.registrations.edit.password_confirmation'), class: "form-label fw-semibold" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control form-control-lg" %>
+      </div>
+
+      <div class="d-grid mb-4">
+        <%= f.submit t('devise.registrations.edit.update'), class: "btn btn-primary btn-lg" %>
+      </div>
+    <% end %>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+      <%= link_to dashboard_path, class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-arrow-left me-1"></i> <%= t('devise.registrations.edit.back_to_dashboard') %>
+      <% end %>
+    </div>
+  </div>
+</div>

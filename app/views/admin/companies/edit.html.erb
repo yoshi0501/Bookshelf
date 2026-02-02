@@ -1,0 +1,13 @@
+<div class="card shadow-lg border-0">
+  <div class="card-body p-5">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient mb-3 shadow-sm" style="width: 64px; height: 64px;">
+        <i class="bi bi-building text-white" style="font-size: 2rem;"></i>
+      </div>
+      <h2 class="card-title fw-bold mb-2"><%= t('companies.edit.title') %></h2>
+      <p class="text-muted small"><%= t('companies.edit.description') %></p>
+    </div>
+
+    <%= render "form", company: @company %>
+  </div>
+</div>

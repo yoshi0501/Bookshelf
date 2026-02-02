@@ -1,0 +1,98 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
+  <div class="container-fluid">
+    <%= link_to dashboard_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+      <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
+      <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+    <% end %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <%= link_to dashboard_path, class: "nav-link #{request.path == dashboard_path ? 'active fw-semibold' : ''}" do %>
+            <i class="bi bi-house-door me-1"></i> <%= t('shared.navbar.dashboard') %>
+          <% end %>
+        </li>
+        <% if current_user&.internal_admin? || current_user&.company_admin? %>
+          <li class="nav-item">
+            <%= link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.customers') %>
+            <% end %>
+          </li>
+        <% end %>
+        <li class="nav-item">
+          <%= link_to items_path, class: "nav-link #{controller_name == 'items' ? 'active fw-semibold' : ''}" do %>
+            <%= t('shared.navbar.items') %>
+          <% end %>
+        </li>
+        <li class="nav-item">
+          <%= link_to orders_path, class: "nav-link #{controller_name == 'orders' ? 'active fw-semibold' : ''}" do %>
+            <%= t('shared.navbar.orders') %>
+          <% end %>
+        </li>
+        <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
+          <li class="nav-item">
+            <%= link_to order_approval_requests_path, class: "nav-link #{controller_name == 'order_approval_requests' ? 'active fw-semibold' : ''}" do %>
+              発注承認
+            <% end %>
+          </li>
+        <% end %>
+        <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+          <li class="nav-item">
+            <%= link_to admin_approval_requests_path, class: "nav-link #{controller_name == 'approval_requests' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.approvals') %>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to admin_user_profiles_path, class: "nav-link #{controller_name == 'user_profiles' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.members') %>
+            <% end %>
+          </li>
+        <% end %>
+        <% if current_user&.internal_admin? %>
+          <li class="nav-item">
+            <%= link_to admin_companies_path, class: "nav-link #{controller_name == 'companies' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.companies') %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <div class="dropdown">
+          <button class="btn btn-light d-flex align-items-center px-3 py-2 border" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+              <% if current_user&.internal_admin? %>
+                <span class="text-white small fw-bold">A</span>
+              <% else %>
+                <span class="text-white small fw-bold"><%= current_company&.name&.first&.upcase %></span>
+              <% end %>
+            </div>
+            <div class="d-flex flex-column text-start">
+              <% if current_user&.internal_admin? %>
+                <small class="fw-semibold text-dark">システム管理者</small>
+              <% else %>
+                <small class="fw-semibold text-dark"><%= current_company&.name %></small>
+              <% end %>
+              <small class="text-muted"><%= current_user&.email %></small>
+            </div>
+            <i class="bi bi-chevron-down ms-2"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+            <li>
+              <%= link_to edit_user_registration_path, class: "dropdown-item" do %>
+                <i class="bi bi-key me-2"></i> <%= t('shared.navbar.change_password') %>
+              <% end %>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item text-danger", form: { style: "display: inline;" } do %>
+                <i class="bi bi-box-arrow-right me-2"></i> <%= t('shared.navbar.logout') %>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,93 @@
+<%= form_with model: customer do |f| %>
+  <%= render "shared/form_errors", resource: customer %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-building me-2"></i><%= t('customers.form.basic_info') %>
+      </h5>
+      <small class="text-muted"><%= t('customers.form.basic_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <% if current_user&.internal_admin? %>
+        <div class="row g-3 mb-3">
+          <div class="col-md-12">
+            <%= f.label :company_id, t('customers.form.company'), class: "form-label fw-semibold" %>
+            <%= f.collection_select :company_id, @companies, :id, :name, 
+                { prompt: t('customers.form.select_company') }, 
+                { class: "form-select" } %>
+          </div>
+        </div>
+      <% end %>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :center_code, t('customers.form.center_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :center_code, class: "form-control font-monospace" %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :center_name, t('customers.form.center_name'), class: "form-label fw-semibold" %>
+          <%= f.text_field :center_name, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-geo-alt me-2"></i><%= t('customers.form.address_info') %>
+      </h5>
+      <small class="text-muted"><%= t('customers.form.address_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <%= f.label :postal_code, t('customers.form.postal_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :postal_code, placeholder: "123-4567", class: "form-control" %>
+        </div>
+
+        <div class="col-md-4">
+          <%= f.label :prefecture, t('customers.form.prefecture'), class: "form-label fw-semibold" %>
+          <%= f.text_field :prefecture, class: "form-control" %>
+        </div>
+
+        <div class="col-md-4">
+          <%= f.label :city, t('customers.form.city'), class: "form-label fw-semibold" %>
+          <%= f.text_field :city, class: "form-control" %>
+        </div>
+
+        <div class="col-12">
+          <%= f.label :address1, t('customers.form.address1'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address1, class: "form-control" %>
+        </div>
+
+        <div class="col-12">
+          <%= f.label :address2, t('customers.form.address2'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address2, class: "form-control" %>
+          <small class="form-text text-muted"><%= t('customers.form.address2_optional') %></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-toggle-on me-2"></i><%= t('customers.form.status') %>
+      </h5>
+      <small class="text-muted"><%= t('customers.form.status_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="form-check form-switch">
+        <%= f.check_box :is_active, class: "form-check-input", role: "switch" %>
+        <%= f.label :is_active, t('customers.form.is_active'), class: "form-check-label fw-semibold" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <%= link_to t('shared.actions.cancel'), customers_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+  </div>
+<% end %>

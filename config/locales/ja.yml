@@ -1,0 +1,484 @@
+ja:
+  hello: "こんにちは"
+
+  errors:
+    record_not_found: "レコードが見つからないか、アクセスが拒否されました"
+    messages:
+      not_saved:
+        one: "%{resource}の保存時に1件のエラーが発生しました"
+        other: "%{resource}の保存時に%{count}件のエラーが発生しました"
+
+  pundit:
+    not_authorized: "この操作を実行する権限がありません"
+
+  devise:
+    failure:
+      account_rejected: "アカウントが拒否されました"
+      unassigned_company: "メールドメインがどの会社にも関連付けられていません"
+      pending_approval: "アカウントは承認待ちです"
+    registrations:
+      invalid_email_domain: "メールドメインが登録されている会社に関連付けられていません"
+      updated: "アカウント情報を更新しました"
+      update_needs_confirmation: "アカウント情報を更新しました。確認メールを送信しましたので、メール内のリンクをクリックして変更を確認してください。"
+      updated_but_not_signed_in: "アカウント情報を更新しましたが、サインインできませんでした。"
+    sessions:
+      signed_in: "ログインしました"
+      signed_out: "ログアウトしました"
+    passwords:
+      send_instructions: "パスワードリセットの手順をメールで送信しました"
+      updated: "パスワードを変更しました"
+      updated_not_active: "パスワードを変更しましたが、アカウントが有効化されていないため、サインインできませんでした。"
+    edit:
+      title: "アカウント設定"
+      description: "アカウント情報とパスワードを変更できます"
+      email: "メールアドレス"
+      email_readonly: "メールアドレスは変更できません"
+      currently_waiting_confirmation_for_email: "%{email}の確認を待っています"
+      change_password: "パスワードを変更"
+      current_password: "現在のパスワード"
+      current_password_help: "パスワードを変更するには現在のパスワードが必要です"
+      new_password: "新しいパスワード"
+      password_confirmation: "新しいパスワード（確認）"
+      password_minimum: "%{count}文字以上"
+      password_leave_blank: "変更しない場合は空白のままにしてください"
+      update: "更新"
+      back_to_dashboard: "ダッシュボードに戻る"
+      cancel_my_account: "アカウントを削除"
+      cancel_my_account_confirm: "本当にアカウントを削除しますか？この操作は取り消せません。"
+      cancel_my_account_confirmed: "アカウントを削除しました。またのご利用をお待ちしております。"
+      we_need_your_current_password_to_confirm_your_changes: "変更を確認するために現在のパスワードが必要です"
+
+  customers:
+    created: "顧客が正常に作成されました"
+    updated: "顧客が正常に更新されました"
+    deactivated: "顧客が無効化されました"
+    deactivate_failed: "顧客を無効化できませんでした"
+    index:
+      title: "センター一覧"
+      description: "自社の配送センター一覧です"
+      add_customer: "センター追加"
+    show:
+      title: "顧客詳細"
+      edit: "編集"
+      back: "戻る"
+    new:
+      title: "新規センター登録"
+      description: "新しい配送センターを登録します"
+    edit:
+      title: "センター編集"
+      description: "配送センター情報を編集します"
+    form:
+      basic_info: "基本情報"
+      basic_info_desc: "センターの基本情報を入力してください"
+      address_info: "住所情報"
+      address_info_desc: "配送先住所を入力してください"
+      status: "ステータス"
+      status_desc: "センターの有効/無効を設定します"
+      company: "会社"
+      select_company: "会社を選択してください"
+      center_code: "センターコード"
+      center_name: "センター名"
+      postal_code: "郵便番号"
+      prefecture: "都道府県"
+      city: "市区町村"
+      address1: "住所1"
+      address2: "住所2"
+      address2_optional: "建物名・部屋番号など（任意）"
+      is_active: "有効"
+    table:
+      code: "コード"
+      name: "名前"
+      address: "住所"
+      status: "ステータス"
+      actions: "操作"
+    status:
+      active: "有効"
+      inactive: "無効"
+
+  items:
+    created: "商品が正常に作成されました"
+    updated: "商品が正常に更新されました"
+    deactivated: "商品が無効化されました"
+    deactivate_failed: "商品を無効化できませんでした"
+    index:
+      title: "商品一覧"
+      description: "自社の商品一覧です"
+      add_item: "商品を追加"
+    show:
+      title: "商品詳細"
+      edit: "編集"
+      back: "戻る"
+    new:
+      title: "新規商品登録"
+      description: "新しい商品を登録します"
+    edit:
+      title: "商品編集"
+      description: "商品情報を編集します"
+    form:
+      basic_info: "基本情報"
+      basic_info_desc: "商品の基本情報を入力してください"
+      price_info: "価格・環境情報"
+      price_info_desc: "商品の価格とCO2排出量を入力してください"
+      visible_companies: "表示する会社"
+      visible_companies_desc: "この商品を表示する会社を選択してください"
+      visible_companies_help: "商品の所有者会社は自動的に表示されます。他の会社にも表示する場合はチェックを入れてください。"
+      status: "ステータス"
+      status_desc: "商品の有効/無効を設定します"
+      company: "会社"
+      select_company: "会社を選択してください"
+      item_code: "商品コード"
+      name: "商品名"
+      unit_price: "単価"
+      co2_per_unit: "CO2/単位"
+      is_active: "有効"
+    table:
+      code: "コード"
+      name: "名前"
+      unit_price: "単価"
+      co2_per_unit: "CO2/単位"
+      status: "ステータス"
+      actions: "操作"
+    status:
+      active: "有効"
+      inactive: "無効"
+
+  orders:
+    created: "発注が正常に作成されました"
+    updated: "発注が正常に更新されました"
+    cancelled: "発注がキャンセルされました"
+    cancel_failed: "発注をキャンセルできませんでした"
+    shipped: "発注が出荷済みとしてマークされました"
+    ship_failed: "発注が出荷済みとしてマークできませんでした"
+    delivered: "発注が配送済みとしてマークされました"
+    deliver_failed: "発注が配送済みとしてマークできませんでした"
+    index:
+      title: "発注一覧"
+      description: "自社の発注一覧です"
+      new_order: "新規発注"
+      export_csv: "CSVエクスポート"
+      search: "検索"
+      clear: "クリア"
+      order_no: "発注番号"
+      status: "ステータス"
+      date_from: "開始日"
+      date_to: "終了日"
+      all_statuses: "すべてのステータス"
+    show:
+      title: "発注詳細"
+      edit: "編集"
+      back: "戻る"
+      ship: "出荷済みにする"
+      deliver: "配送済みにする"
+      cancel: "キャンセル"
+    new:
+      title: "新規発注登録"
+      description: "新しい発注を作成します"
+    edit:
+      title: "発注編集"
+      description: "発注情報を編集します"
+    form:
+      basic_info: "基本情報"
+      basic_info_desc: "発注の基本情報を入力してください"
+      customer: "顧客"
+      select_customer: "センターを選択"
+      item: "商品"
+      select_item: "商品を選択"
+      order_date: "発注日"
+      order_lines: "発注明細"
+      order_lines_desc: "発注する商品を追加してください"
+      quantity: "数量"
+      amount: "金額"
+      status: "ステータス"
+      add_line: "明細を追加"
+      remove_line: "削除"
+      price_calc_note: "商品を追加すると、価格が自動計算されます"
+    table:
+      order_no: "発注番号"
+      date: "日付"
+      customer: "顧客"
+      status: "ステータス"
+      amount: "金額"
+      actions: "操作"
+    status:
+      pending: "発注済み"
+      shipped: "出荷済み"
+      delivered: "配送済み"
+      cancelled: "キャンセル"
+
+  approval_requests:
+    approved: "ユーザーが承認されました"
+    approve_failed: "ユーザーを承認できませんでした"
+    rejected: "ユーザーが拒否されました"
+    reject_failed: "ユーザーを拒否できませんでした"
+    index:
+      title: "承認リクエスト"
+      description: "新規ユーザーの承認待ちリクエストを管理します"
+    show:
+      title: "承認リクエスト詳細"
+      back: "戻る"
+    table:
+      user: "ユーザー"
+      email: "メールアドレス"
+      requested: "リクエスト日時"
+      status: "ステータス"
+      actions: "操作"
+    status:
+      pending: "承認待ち"
+      approved: "承認済み"
+      rejected: "拒否済み"
+    actions:
+      approve: "承認"
+      reject: "拒否"
+      view: "詳細"
+      confirm_reject: "本当に拒否しますか？"
+
+  companies:
+    created: "会社が正常に作成されました"
+    updated: "会社が正常に更新されました"
+    index:
+      title: "会社一覧"
+      description: "登録されているすべての会社を管理します（内部管理者のみ）"
+      add_company: "会社を追加"
+    show:
+      title: "会社詳細"
+      edit: "編集"
+      back: "戻る"
+    new:
+      title: "新規会社登録"
+      description: "新しい会社を登録します"
+    edit:
+      title: "会社編集"
+      description: "会社情報を編集します"
+    form:
+      basic_info: "基本情報"
+      basic_info_desc: "会社の基本情報を入力してください"
+      settings: "設定"
+      settings_desc: "会社の設定情報を入力してください"
+      status: "ステータス"
+      status_desc: "会社の有効/無効を設定します"
+      code: "会社コード"
+      name: "会社名"
+      domains: "ドメイン"
+      domains_help: "この会社に関連付けるメールドメインを1行に1つずつ入力してください"
+      order_prefix: "発注番号プレフィックス"
+      order_prefix_help: "発注番号の先頭に付ける文字列（大文字英数字のみ、最大10文字）"
+      is_active: "有効"
+    table:
+      code: "コード"
+      name: "名前"
+      domains: "ドメイン"
+      order_prefix: "発注番号プレフィックス"
+      status: "ステータス"
+      actions: "操作"
+    status:
+      active: "有効"
+      inactive: "無効"
+
+  user_profiles:
+    updated: "プロフィールが正常に更新されました"
+    invalid_role: "無効なロールが指定されました"
+    cannot_change_own_role: "自分のロールを変更することはできません"
+    cannot_grant_internal_admin: "内部管理者ロールを付与できるのは内部管理者のみです"
+    role_changed: "ユーザーロールが正常に変更されました"
+    role_change_failed: "ユーザーロールを変更できませんでした"
+    index:
+      title: "チームメンバー"
+      description: "自社のアクティブなメンバーを管理します"
+    show:
+      title: "メンバー詳細"
+      edit: "編集"
+      back: "戻る"
+    edit:
+      title: "メンバー編集"
+    form:
+      name: "名前"
+      phone: "電話番号"
+      role: "ロール"
+    table:
+      name: "名前"
+      email: "メールアドレス"
+      role: "ロール"
+      phone: "電話番号"
+      actions: "操作"
+    roles:
+      internal_admin: "内部管理者"
+      company_admin: "会社管理者"
+      normal: "一般"
+
+  dashboard:
+    title: "ダッシュボード"
+    welcome: "おかえりなさい、%{name}"
+    today: "今日"
+    orders_this_month: "今月の発注数"
+    total_amount: "合計金額"
+    pending_approvals: "承認待ち"
+    review_now: "今すぐ確認"
+    recent_orders:
+      title: "最近の発注"
+      description: "最新の発注アクティビティ"
+      view_all: "すべて表示"
+      no_orders: "発注がまだありません"
+      create_first: "最初の発注を作成"
+
+  pages:
+    home:
+      title: "プラRE"
+      description: "B2Bパートナー向けマルチテナント発注管理ポータル"
+      tagline: "強力な発注管理プラットフォームでビジネス運営を効率化"
+      sign_in: "ログイン"
+      sign_up: "新規登録"
+      features:
+        fast: "高速・効率的"
+        fast_desc: "発注処理を効率化"
+        secure: "セキュア"
+        secure_desc: "エンタープライズレベルのセキュリティ"
+        multi_tenant: "マルチテナント"
+        multi_tenant_desc: "会社ごとに分離されたデータ"
+    pending_approval:
+      title: "承認待ち"
+      description: "アカウントは会社管理者による承認待ちです"
+      notification: "アカウントが承認され次第、通知されます"
+      sign_out: "ログアウト"
+
+  shared:
+    navbar:
+      brand: "プラRE"
+      dashboard: "ダッシュボード"
+      customers: "顧客"
+      items: "商品"
+      orders: "発注"
+      approvals: "承認"
+      members: "メンバー"
+      companies: "会社"
+      change_password: "パスワード変更"
+      logout: "ログアウト"
+    actions:
+      view: "詳細"
+      edit: "編集"
+      delete: "削除"
+      cancel: "キャンセル"
+      save: "保存"
+      back: "戻る"
+      create: "作成"
+      update: "更新"
+    form:
+      submit: "送信"
+      cancel: "キャンセル"
+    flash:
+      notice: "通知"
+      alert: "警告"
+
+  devise:
+    sessions:
+      new:
+        title: "アカウントにログイン"
+        description: "おかえりなさい！詳細を入力してください"
+        email: "メールアドレス"
+        password: "パスワード"
+        remember_me: "ログイン状態を保持"
+        forgot_password: "パスワードを忘れた場合"
+        sign_in: "ログイン"
+        no_account: "アカウントをお持ちでない場合"
+        sign_up: "無料で新規登録"
+    registrations:
+      new:
+        title: "アカウントを作成"
+        description: "メールドメインは登録されている会社のドメインと一致する必要があります"
+        email: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "パスワード（確認）"
+        password_minimum: "文字以上"
+        sign_up: "新規登録"
+        have_account: "既にアカウントをお持ちの場合"
+        sign_in: "こちらからログイン"
+
+  activerecord:
+    attributes:
+      customer:
+        center_code: "センターコード"
+        center_name: "センター名"
+        postal_code: "郵便番号"
+        prefecture: "都道府県"
+        city: "市区町村"
+        address1: "住所1"
+        address2: "住所2"
+        is_active: "有効"
+      item:
+        item_code: "商品コード"
+        name: "商品名"
+        unit_price: "単価"
+        co2_per_unit: "CO2/単位"
+        is_active: "有効"
+      order:
+        order_no: "発注番号"
+        order_date: "発注日"
+        customer_id: "顧客"
+        shipping_status: "配送ステータス"
+        ship_date: "出荷日"
+        tracking_no: "追跡番号"
+        delivered_date: "配送日"
+        total_amount: "合計金額"
+        co2_total: "CO2合計"
+      order_line:
+        item_id: "商品"
+        quantity: "数量"
+        unit_price_snapshot: "単価（スナップショット）"
+        amount: "金額"
+        co2_amount: "CO2金額"
+      company:
+        code: "会社コード"
+        name: "会社名"
+        domains: "ドメイン"
+        order_prefix: "発注番号プレフィックス"
+        is_active: "有効"
+      user_profile:
+        name: "名前"
+        phone: "電話番号"
+        role: "ロール"
+        member_status: "メンバーステータス"
+      user:
+        email: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "パスワード（確認）"
+        current_password: "現在のパスワード"
+    models:
+      customer: "顧客"
+      item: "商品"
+      order: "発注"
+      order_line: "発注明細"
+      company: "会社"
+      user_profile: "ユーザープロフィール"
+      user: "ユーザー"
+    errors:
+      models:
+        customer:
+          attributes:
+            center_code:
+              taken: "このセンターコードは既に使用されています"
+            center_name:
+              blank: "センター名を入力してください"
+        item:
+          attributes:
+            item_code:
+              taken: "この商品コードは既に使用されています"
+            name:
+              blank: "商品名を入力してください"
+        order:
+          attributes:
+            order_date:
+              blank: "発注日を入力してください"
+            customer_id:
+              blank: "顧客を選択してください"
+        user:
+          attributes:
+            email:
+              blank: "メールアドレスを入力してください"
+              invalid: "メールアドレスの形式が正しくありません"
+              taken: "このメールアドレスは既に使用されています"
+            password:
+              blank: "パスワードを入力してください"
+              too_short: "パスワードは%{count}文字以上で入力してください"
+              confirmation: "パスワード（確認）と一致しません"
+            current_password:
+              blank: "現在のパスワードを入力してください"
+              invalid: "現在のパスワードが正しくありません"

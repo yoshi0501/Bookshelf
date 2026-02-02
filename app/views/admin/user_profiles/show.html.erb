@@ -1,0 +1,80 @@
+<div class="mb-8 flex justify-between items-center">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900"><%= @user_profile.name %></h1>
+    <p class="mt-1 text-sm text-gray-500"><%= @user_profile.user.email %></p>
+  </div>
+  <div class="flex space-x-3">
+    <%= link_to "Edit", edit_admin_user_profile_path(@user_profile), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= link_to "Back to List", admin_user_profiles_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+  </div>
+</div>
+
+<div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Profile Information</h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Name</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.name %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Email</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.user.email %></dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.phone || "-" %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Role</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <% case @user_profile.role %>
+          <% when "internal_admin" %>
+            <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">Internal Admin</span>
+          <% when "company_admin" %>
+            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Company Admin</span>
+          <% when "normal" %>
+            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Normal</span>
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+            <%= @user_profile.member_status.titleize %>
+          </span>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">上司</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <% if @user_profile.supervisor %>
+            <%= @user_profile.supervisor.name %> (<%= @user_profile.supervisor.user.email %>)
+          <% else %>
+            <span class="text-gray-400">未設定</span>
+            <span class="text-xs text-gray-500 ml-2">（未設定の場合は会社管理者に承認依頼が送信されます）</span>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<% if current_user.id != @user_profile.user_id && current_user.user_profile.can_approve_members? %>
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Change Role</h3>
+    <div class="flex flex-wrap gap-2">
+      <% UserProfile.roles.keys.each do |role| %>
+        <% next if role == "internal_admin" && !current_user.internal_admin? %>
+        <%= button_to role.titleize,
+            change_role_admin_user_profile_path(@user_profile, role: role),
+            method: :post,
+            disabled: @user_profile.role == role,
+            class: "rounded-md #{@user_profile.role == role ? 'bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

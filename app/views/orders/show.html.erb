@@ -1,0 +1,152 @@
+<div class="mb-8 flex justify-between items-center">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Order <%= @order.order_no %></h1>
+    <p class="mt-1 text-sm text-gray-500">Created on <%= @order.order_date %></p>
+  </div>
+  <div class="flex space-x-3">
+    <% if @order.can_be_edited? %>
+      <%= link_to "Edit", edit_order_path(@order), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <% end %>
+    <%= link_to "Back to List", orders_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">Order Details</h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <dl>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+            <%= render "orders/status_badge", status: @order.shipping_status %>
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Order Date</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.order_date %></dd>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Ordered By</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.ordered_by_user.email %></dd>
+        </div>
+        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 font-semibold">
+            <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
+          </dd>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">CO2 Total</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.co2_total %> kg</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">Shipping Information</h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <dl>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Customer</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+            <% if current_user&.internal_admin? || current_user&.company_admin? %>
+              <%= link_to @order.customer.display_name, customer_path(@order.customer), class: "text-indigo-600 hover:text-indigo-500" %>
+            <% else %>
+              <%= @order.customer.display_name %>
+            <% end %>
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Ship To</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.full_shipping_address %></dd>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Tracking No</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.tracking_no || "-" %></dd>
+        </div>
+        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Ship Date</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.ship_date || "-" %></dd>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Delivered Date</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.delivered_date || "-" %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Order Lines</h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Code</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% @order_lines.each do |line| %>
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= line.item_code %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= line.item_name %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right"><%= line.quantity %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+              <%= number_to_currency(line.unit_price_snapshot, unit: "¥", precision: 0) %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-semibold">
+              <%= number_to_currency(line.amount, unit: "¥", precision: 0) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot class="bg-gray-50">
+        <tr>
+          <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 text-right">Total:</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-bold">
+            <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="bg-white shadow rounded-lg p-6">
+  <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Actions</h3>
+  <div class="flex flex-wrap gap-3">
+    <% if @order.shipping_status_draft? %>
+      <%= button_to "Confirm Order", "#", method: :post, disabled: true, class: "rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50" %>
+    <% end %>
+
+    <% if @order.shipping_status_confirmed? %>
+      <%= form_with url: ship_order_path(@order), method: :post, class: "flex items-center space-x-2" do %>
+        <input type="text" name="tracking_no" placeholder="Tracking No" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+        <button type="submit" class="rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500">
+          Mark as Shipped
+        </button>
+      <% end %>
+    <% end %>
+
+    <% if @order.shipping_status_shipped? %>
+      <%= button_to "Mark as Delivered", deliver_order_path(@order), method: :post, class: "rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500" %>
+    <% end %>
+
+    <% if @order.can_be_cancelled? %>
+      <%= button_to "Cancel Order", cancel_order_path(@order), method: :post, data: { confirm: "Are you sure you want to cancel this order?" }, class: "rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,152 @@
+<%= form_with model: order do |f| %>
+  <%= render "shared/form_errors", resource: order %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-info-circle me-2"></i><%= t('orders.form.basic_info') %>
+      </h5>
+      <small class="text-muted"><%= t('orders.form.basic_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :order_date, t('orders.form.order_date'), class: "form-label fw-semibold" %>
+          <%= f.date_field :order_date, class: "form-control" %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :customer_id, t('orders.form.customer'), class: "form-label fw-semibold" %>
+          <%= f.collection_select :customer_id, @customers, :id, :display_name, { prompt: t('orders.form.select_customer') }, { id: "order_customer_id", class: "form-select" } %>
+        </div>
+
+        <% if order.persisted? %>
+          <div class="col-md-6">
+            <%= f.label :shipping_status, t('orders.form.status'), class: "form-label fw-semibold" %>
+            <%= f.select :shipping_status, Order.shipping_statuses.keys.map { |s| [t("orders.status.#{s}"), s] }, {}, { class: "form-select" } %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-list-ul me-2"></i><%= t('orders.form.order_lines') %>
+        </h5>
+        <small class="text-muted"><%= t('orders.form.order_lines_desc') %></small>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="order-lines">
+        <%= f.fields_for :order_lines do |line_form| %>
+          <div class="order-line border rounded p-3 mb-3 bg-light">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <%= line_form.label :item_id, t('orders.form.item'), class: "form-label fw-semibold" %>
+                <%= line_form.collection_select :item_id, @items, :id, :display_name, { prompt: t('orders.form.select_item') }, { class: "form-select order-line-item-select" } %>
+              </div>
+              <div class="col-md-3">
+                <%= line_form.label :quantity, t('orders.form.quantity'), class: "form-label fw-semibold" %>
+                <%= line_form.number_field :quantity, min: 1, class: "form-control" %>
+              </div>
+              <div class="col-md-2">
+                <% if line_form.object.persisted? %>
+                  <label class="form-label fw-semibold"><%= t('orders.form.amount') %></label>
+                  <div class="form-control-plaintext fw-bold text-primary">
+                    <%= number_to_currency(line_form.object.amount, unit: "¥", precision: 0) %>
+                  </div>
+                <% end %>
+              </div>
+              <div class="col-md-1">
+                <% if line_form.object.persisted? %>
+                  <label class="form-label">&nbsp;</label>
+                  <div class="form-check form-check-danger">
+                    <%= line_form.check_box :_destroy, class: "form-check-input" %>
+                    <%= line_form.label :_destroy, t('orders.form.remove_line'), class: "form-check-label small text-danger" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div class="text-muted small mt-2">
+        <i class="bi bi-info-circle me-1"></i><%= t('orders.form.price_calc_note') %>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <%= link_to t('shared.actions.cancel'), orders_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<script>
+(function() {
+  function initCustomerSelect() {
+    const selectElement = document.getElementById('order_customer_id');
+    if (selectElement && !selectElement.tomselect) {
+      new TomSelect('#order_customer_id', {
+        placeholder: '<%= t('orders.form.select_customer') %>',
+        allowEmptyOption: false,
+        searchPlaceholder: 'センターを検索...',
+        noResultsText: '該当するセンターが見つかりません',
+        noOptionsText: '選択可能なセンターがありません',
+        loadingText: '読み込み中...',
+        plugins: ['clear_button']
+      });
+    }
+  }
+
+  function initItemSelects() {
+    // 商品選択フィールドをすべて初期化
+    const itemSelects = document.querySelectorAll('.order-line-item-select:not([data-tomselect-initialized])');
+    itemSelects.forEach(function(select) {
+      if (!select.tomselect) {
+        new TomSelect(select, {
+          placeholder: '<%= t('orders.form.select_item') %>',
+          allowEmptyOption: false,
+          searchPlaceholder: '商品を検索...',
+          noResultsText: '該当する商品が見つかりません',
+          noOptionsText: '選択可能な商品がありません',
+          loadingText: '読み込み中...',
+          plugins: ['clear_button']
+        });
+        select.setAttribute('data-tomselect-initialized', 'true');
+      }
+    });
+  }
+
+  function initAllSelects() {
+    initCustomerSelect();
+    initItemSelects();
+  }
+
+  // DOMContentLoadedとTurboのイベントに対応
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAllSelects);
+  } else {
+    initAllSelects();
+  }
+
+  // Turboのページロード時にも初期化
+  document.addEventListener('turbo:load', initAllSelects);
+  document.addEventListener('turbo:frame-load', initAllSelects);
+
+  // 動的に追加される明細行にも対応（MutationObserver）
+  const orderLinesContainer = document.getElementById('order-lines');
+  if (orderLinesContainer) {
+    const observer = new MutationObserver(function(mutations) {
+      initItemSelects();
+    });
+    observer.observe(orderLinesContainer, {
+      childList: true,
+      subtree: true
+    });
+  }
+})();
+</script>

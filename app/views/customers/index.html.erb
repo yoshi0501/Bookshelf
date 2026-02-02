@@ -1,0 +1,75 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('customers.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('customers.index.description') %></p>
+  </div>
+  <% if current_user&.internal_admin? %>
+    <div>
+      <%= link_to t('customers.index.add_customer'), new_customer_path, class: "btn btn-primary btn-sm" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="card-title mb-1 fw-bold"><%= t('customers.index.title') %></h5>
+      <small class="text-muted"><%= t('customers.index.description') %></small>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if @customers.empty? %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+          <i class="bi bi-geo-alt text-muted fs-3"></i>
+        </div>
+        <p class="text-muted fw-medium mb-3">センターがありません</p>
+        <% if current_user&.internal_admin? %>
+          <%= link_to new_customer_path, class: "btn btn-primary" do %>
+            <i class="bi bi-plus-circle me-1"></i> 新規センターを追加
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('customers.table.code') %></th>
+              <th><%= t('customers.table.name') %></th>
+              <th><%= t('customers.table.address') %></th>
+              <th><%= t('customers.table.status') %></th>
+              <th class="text-end"><%= t('customers.table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @customers.each do |customer| %>
+              <tr>
+                <td class="font-monospace fw-semibold"><%= customer.center_code %></td>
+                <td class="fw-medium"><%= customer.center_name %></td>
+                <td class="text-muted"><%= customer.full_address %></td>
+                <td>
+                  <% if customer.is_active %>
+                    <span class="badge bg-success"><%= t('customers.status.active') %></span>
+                  <% else %>
+                    <span class="badge bg-secondary"><%= t('customers.status.inactive') %></span>
+                  <% end %>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex gap-2 justify-content-end">
+                    <%= link_to t('shared.actions.view'), customer_path(customer), class: "btn btn-sm btn-outline-primary" %>
+                    <% if current_user&.internal_admin? %>
+                      <%= link_to t('shared.actions.edit'), edit_customer_path(customer), class: "btn btn-sm btn-outline-secondary" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= render "shared/pagination", pagy: @pagy %>

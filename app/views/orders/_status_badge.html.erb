@@ -1,0 +1,19 @@
+<%
+  badge_classes = case status
+  when "draft"
+    "bg-secondary"
+  when "confirmed"
+    "bg-primary"
+  when "shipped"
+    "bg-warning"
+  when "delivered"
+    "bg-success"
+  when "cancelled"
+    "bg-danger"
+  else
+    "bg-secondary"
+  end
+%>
+<span class="badge <%= badge_classes %>">
+  <%= t("orders.status.#{status}") %>
+</span>

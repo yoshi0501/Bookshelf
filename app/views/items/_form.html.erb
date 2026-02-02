@@ -1,0 +1,125 @@
+<%= form_with model: item do |f| %>
+  <%= render "shared/form_errors", resource: item %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-box me-2"></i><%= t('items.form.basic_info') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.basic_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :company_id, t('items.form.company'), class: "form-label fw-semibold" %>
+          <%= f.collection_select :company_id, @companies, :id, :name, 
+              { prompt: t('items.form.select_company') }, 
+              { class: "form-select" } %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :item_code, t('items.form.item_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :item_code, class: "form-control font-monospace" %>
+        </div>
+      </div>
+      <div class="row g-3 mt-2">
+        <div class="col-md-12">
+          <%= f.label :name, t('items.form.name'), class: "form-label fw-semibold" %>
+          <%= f.text_field :name, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-currency-yen me-2"></i><%= t('items.form.price_info') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.price_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :unit_price, t('items.form.unit_price'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <span class="input-group-text">¥</span>
+            <%= f.number_field :unit_price, step: 0.01, min: 0, class: "form-control" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :co2_per_unit, t('items.form.co2_per_unit'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <%= f.number_field :co2_per_unit, step: 0.0001, min: 0, class: "form-control" %>
+            <span class="input-group-text">kg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if current_user&.internal_admin? %>
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-building me-2"></i><%= t('items.form.visible_companies') %>
+        </h5>
+        <small class="text-muted"><%= t('items.form.visible_companies_desc') %></small>
+      </div>
+      <div class="card-body">
+        <% company_id = item.company_id || current_company&.id %>
+        <% if company_id.present? %>
+          <%= hidden_field_tag "item[visible_company_ids][]", company_id %>
+        <% end %>
+        <div class="row g-2">
+          <% @companies.each do |company| %>
+            <% is_own_company = company.id == (item.company_id || current_company&.id) %>
+            <div class="col-md-6">
+              <div class="form-check">
+                <% if is_own_company %>
+                  <%= check_box_tag "item[visible_company_ids][]", company.id, true,
+                      class: "form-check-input", 
+                      id: "item_visible_company_#{company.id}",
+                      disabled: true %>
+                <% else %>
+                  <%= check_box_tag "item[visible_company_ids][]", company.id, 
+                      (item.persisted? && item.visible_companies.include?(company)),
+                      class: "form-check-input", 
+                      id: "item_visible_company_#{company.id}" %>
+                <% end %>
+                <%= label_tag "item[visible_company_ids][]", company.name, 
+                    class: "form-check-label", 
+                    for: "item_visible_company_#{company.id}" %>
+                <% if is_own_company %>
+                  <small class="text-muted ms-2">（自社）</small>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="form-text mt-2"><%= t('items.form.visible_companies_help') %></div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-toggle-on me-2"></i><%= t('items.form.status') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.status_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="form-check form-switch">
+        <%= f.check_box :is_active, class: "form-check-input", role: "switch" %>
+        <%= f.label :is_active, t('items.form.is_active'), class: "form-check-label fw-semibold" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <%= link_to t('shared.actions.cancel'), items_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+  </div>
+<% end %>

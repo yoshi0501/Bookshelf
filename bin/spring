@@ -1,9 +1,27 @@
 #!/usr/bin/env ruby
-
 # This file loads Spring without using Bundler, in order to be fast.
 # It gets overwritten when you run the `spring binstub` command.
 
+# Ensure we use the correct Ruby version from rbenv
+ENV['RBENV_VERSION'] = '3.2.2' unless ENV['RBENV_VERSION']
+
 unless defined?(Spring)
+  # Use rbenv's Ruby and Bundler
+  rbenv_ruby = File.expand_path('~/.rbenv/versions/3.2.2')
+  if File.exist?(rbenv_ruby)
+    # Add rbenv's Ruby to the load path
+    ruby_lib = File.join(rbenv_ruby, 'lib/ruby/3.2.0')
+    $LOAD_PATH.unshift(ruby_lib) unless $LOAD_PATH.include?(ruby_lib)
+    
+    # Use rbenv's Bundler
+    gem_path = File.join(rbenv_ruby, 'lib/ruby/gems/3.2.0/gems')
+    bundler_gem = Dir.glob(File.join(gem_path, 'bundler-*/lib/bundler.rb')).sort.last
+    if bundler_gem
+      bundler_lib = File.dirname(bundler_gem)
+      $LOAD_PATH.unshift(bundler_lib) unless $LOAD_PATH.include?(bundler_lib)
+    end
+  end
+  
   require 'rubygems'
   require 'bundler'
 
