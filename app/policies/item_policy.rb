@@ -30,6 +30,11 @@ class ItemPolicy < ApplicationPolicy
     internal_admin?
   end
 
+  def import?
+    # CSV一括登録は内部管理者のみ
+    internal_admin?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.user_profile&.active?

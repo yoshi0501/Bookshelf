@@ -4,8 +4,9 @@
     <p class="text-muted mb-0"><%= t('items.index.description') %></p>
   </div>
   <% if current_user&.internal_admin? %>
-    <div>
+    <div class="d-flex gap-2">
       <%= link_to t('items.index.add_item'), new_item_path, class: "btn btn-primary btn-sm" %>
+      <%= link_to t('items.import.title'), import_items_path, class: "btn btn-outline-primary btn-sm" %>
     </div>
   <% end %>
 </div>

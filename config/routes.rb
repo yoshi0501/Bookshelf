@@ -23,7 +23,12 @@ Rails.application.routes.draw do
       post :import
     end
   end
-  resources :items
+  resources :items do
+    collection do
+      get :import
+      post :import
+    end
+  end
 
   resources :orders do
     member do
