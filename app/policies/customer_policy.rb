@@ -2,23 +2,27 @@
 
 class CustomerPolicy < ApplicationPolicy
   def index?
-    admin_or_company_admin? && active_user?
+    # 全ユーザーが閲覧可能（Internal Adminは全社、会社管理者は自社のみ）
+    active_user?
   end
 
   def show?
-    admin_or_company_admin? && active_user? && same_company?
+    active_user? && (internal_admin? || same_company?)
   end
 
   def create?
-    admin_or_company_admin? && active_user?
+    # 顧客（センター）の作成はInternal Adminのみ
+    internal_admin?
   end
 
   def update?
-    admin_or_company_admin? && active_user? && same_company?
+    # 顧客（センター）の編集はInternal Adminのみ
+    internal_admin?
   end
 
   def destroy?
-    admin_or_company_admin? && same_company?
+    # 顧客（センター）の削除はInternal Adminのみ
+    internal_admin?
   end
 
   class Scope < ApplicationPolicy::Scope

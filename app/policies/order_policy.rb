@@ -10,7 +10,8 @@ class OrderPolicy < ApplicationPolicy
   end
 
   def create?
-    active_user?
+    # Internal Adminは発注を作成できない（会社に紐づいていないため）
+    active_user? && !internal_admin?
   end
 
   def update?
@@ -34,7 +35,8 @@ class OrderPolicy < ApplicationPolicy
   end
 
   def export?
-    active_user?
+    # Internal Adminは発注のエクスポートはできない（会社に紐づいていないため）
+    active_user? && !internal_admin?
   end
 
   class Scope < ApplicationPolicy::Scope

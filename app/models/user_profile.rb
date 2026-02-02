@@ -20,7 +20,7 @@ class UserProfile < ApplicationRecord
   validates :phone, length: { maximum: 50 }, allow_blank: true
   validates :role, presence: true
   validates :member_status, presence: true
-  validates :company_id, presence: true, unless: :unassigned?
+  validates :company_id, presence: true, unless: -> { unassigned? || role_internal_admin? }
   validate :supervisor_must_be_same_company
   validate :cannot_be_own_supervisor
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_31_115059) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -74,6 +74,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_31_115059) do
     t.index ["company_id", "integration_type"], name: "index_integration_logs_on_company_id_and_integration_type"
     t.index ["company_id"], name: "index_integration_logs_on_company_id"
     t.index ["order_id"], name: "index_integration_logs_on_order_id"
+  end
+
+  create_table "item_companies", force: :cascade do |t|
+    t.bigint "item_id", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_item_companies_on_company_id"
+    t.index ["item_id", "company_id"], name: "index_item_companies_on_item_id_and_company_id", unique: true
+    t.index ["item_id"], name: "index_item_companies_on_item_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -221,6 +231,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_31_115059) do
   add_foreign_key "customers", "companies"
   add_foreign_key "integration_logs", "companies"
   add_foreign_key "integration_logs", "orders"
+  add_foreign_key "item_companies", "companies"
+  add_foreign_key "item_companies", "items"
   add_foreign_key "items", "companies"
   add_foreign_key "order_approval_requests", "companies"
   add_foreign_key "order_approval_requests", "orders"

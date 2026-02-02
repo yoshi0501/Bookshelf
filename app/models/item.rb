@@ -6,6 +6,8 @@ class Item < ApplicationRecord
 
   # Associations
   has_many :order_lines, dependent: :restrict_with_error
+  has_many :item_companies, dependent: :destroy
+  has_many :visible_companies, through: :item_companies, source: :company
 
   # Validations
   validates :item_code, presence: true, length: { maximum: 50 },

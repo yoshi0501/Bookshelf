@@ -9,6 +9,8 @@ class Company < ApplicationRecord
   has_many :approval_requests, dependent: :restrict_with_error
   has_many :customers, dependent: :restrict_with_error
   has_many :items, dependent: :restrict_with_error
+  has_many :item_companies, dependent: :destroy
+  has_many :visible_items, through: :item_companies, source: :item
   has_many :orders, dependent: :restrict_with_error
   has_many :order_lines, dependent: :restrict_with_error
   has_many :integration_logs, dependent: :destroy

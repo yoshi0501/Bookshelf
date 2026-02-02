@@ -23,6 +23,8 @@ class OrdersController < ApplicationController
   end
 
   def new
+    return redirect_to root_path, alert: t("pundit.not_authorized") unless current_company
+    
     @order = Order.new(company: current_company, order_date: Date.current)
     @order.order_lines.build
     authorize @order
@@ -34,6 +36,8 @@ class OrdersController < ApplicationController
   end
 
   def create
+    return redirect_to root_path, alert: t("pundit.not_authorized") unless current_company
+    
     @order = Order.new(order_params)
     @order.company = current_company
     @order.ordered_by_user = current_user
@@ -110,6 +114,7 @@ class OrdersController < ApplicationController
 
   def export
     authorize Order, :export?
+    return redirect_to root_path, alert: t("pundit.not_authorized") unless current_company
 
     orders = policy_scope(Order).includes(:order_lines, :customer, :items)
 
@@ -130,7 +135,7 @@ class OrdersController < ApplicationController
           company: current_company,
           type: "csv_export",
           payload: { count: orders.count, exported_at: Time.current }
-        )
+        ) if current_company
       end
     end
   end
@@ -153,7 +158,7 @@ class OrdersController < ApplicationController
       order_lines_attributes: %i[id item_id quantity _destroy]
     ).tap do |permitted|
       # Ensure company_id is set for nested order_lines
-      if permitted[:order_lines_attributes].present?
+      if permitted[:order_lines_attributes].present? && current_company
         permitted[:order_lines_attributes].each do |_, line_attrs|
           line_attrs[:company_id] = current_company.id if line_attrs[:item_id].present?
         end

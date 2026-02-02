@@ -58,9 +58,17 @@ module Admin
     end
 
     def company_params
-      params.require(:company).permit(
-        :name, :code, :order_prefix, :is_active, domains: []
+      permitted = params.require(:company).permit(
+        :name, :code, :order_prefix, :is_active, "domains" => []
       )
+      
+      # Convert textarea domains to array if it's a string
+      if permitted["domains"].is_a?(Array) && permitted["domains"].length == 1 && permitted["domains"][0].is_a?(String)
+        # Split by newlines and filter out empty lines
+        permitted["domains"] = permitted["domains"][0].split("\n").map(&:strip).reject(&:blank?)
+      end
+      
+      permitted
     end
   end
 end

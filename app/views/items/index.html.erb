@@ -3,9 +3,11 @@
     <h1 class="h2 fw-bold mb-2"><%= t('items.index.title') %></h1>
     <p class="text-muted mb-0"><%= t('items.index.description') %></p>
   </div>
-  <div>
-    <%= link_to t('items.index.add_item'), new_item_path, class: "btn btn-primary btn-sm" %>
-  </div>
+  <% if current_user&.internal_admin? %>
+    <div>
+      <%= link_to t('items.index.add_item'), new_item_path, class: "btn btn-primary btn-sm" %>
+    </div>
+  <% end %>
 </div>
 
 <div class="card shadow-sm border-0">
@@ -22,8 +24,10 @@
           <i class="bi bi-box text-muted fs-3"></i>
         </div>
         <p class="text-muted fw-medium mb-3">商品がありません</p>
-        <%= link_to new_item_path, class: "btn btn-primary" do %>
-          <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
+        <% if current_user&.internal_admin? %>
+          <%= link_to new_item_path, class: "btn btn-primary" do %>
+            <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
+          <% end %>
         <% end %>
       </div>
     <% else %>
@@ -58,7 +62,9 @@
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end">
                     <%= link_to t('shared.actions.view'), item_path(item), class: "btn btn-sm btn-outline-primary" %>
-                    <%= link_to t('shared.actions.edit'), edit_item_path(item), class: "btn btn-sm btn-outline-secondary" %>
+                    <% if current_user&.internal_admin? %>
+                      <%= link_to t('shared.actions.edit'), edit_item_path(item), class: "btn btn-sm btn-outline-secondary" %>
+                    <% end %>
                   </div>
                 </td>
               </tr>

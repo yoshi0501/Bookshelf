@@ -74,6 +74,8 @@ ja:
       address_info_desc: "配送先住所を入力してください"
       status: "ステータス"
       status_desc: "センターの有効/無効を設定します"
+      company: "会社"
+      select_company: "会社を選択してください"
       center_code: "センターコード"
       center_name: "センター名"
       postal_code: "郵便番号"
@@ -117,8 +119,13 @@ ja:
       basic_info_desc: "商品の基本情報を入力してください"
       price_info: "価格・環境情報"
       price_info_desc: "商品の価格とCO2排出量を入力してください"
+      visible_companies: "表示する会社"
+      visible_companies_desc: "この商品を表示する会社を選択してください"
+      visible_companies_help: "商品の所有者会社は自動的に表示されます。他の会社にも表示する場合はチェックを入れてください。"
       status: "ステータス"
       status_desc: "商品の有効/無効を設定します"
+      company: "会社"
+      select_company: "会社を選択してください"
       item_code: "商品コード"
       name: "商品名"
       unit_price: "単価"
@@ -238,13 +245,23 @@ ja:
       back: "戻る"
     new:
       title: "新規会社登録"
+      description: "新しい会社を登録します"
     edit:
       title: "会社編集"
+      description: "会社情報を編集します"
     form:
+      basic_info: "基本情報"
+      basic_info_desc: "会社の基本情報を入力してください"
+      settings: "設定"
+      settings_desc: "会社の設定情報を入力してください"
+      status: "ステータス"
+      status_desc: "会社の有効/無効を設定します"
       code: "会社コード"
       name: "会社名"
       domains: "ドメイン"
+      domains_help: "この会社に関連付けるメールドメインを1行に1つずつ入力してください"
       order_prefix: "発注番号プレフィックス"
+      order_prefix_help: "発注番号の先頭に付ける文字列（大文字英数字のみ、最大10文字）"
       is_active: "有効"
     table:
       code: "コード"
@@ -305,7 +322,7 @@ ja:
 
   pages:
     home:
-      title: "B2B発注システム"
+      title: "プラRE"
       description: "B2Bパートナー向けマルチテナント発注管理ポータル"
       tagline: "強力な発注管理プラットフォームでビジネス運営を効率化"
       sign_in: "ログイン"
@@ -325,7 +342,7 @@ ja:
 
   shared:
     navbar:
-      brand: "B2B発注"
+      brand: "プラRE"
       dashboard: "ダッシュボード"
       customers: "顧客"
       items: "商品"

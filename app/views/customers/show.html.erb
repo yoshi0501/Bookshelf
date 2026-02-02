@@ -4,7 +4,9 @@
     <p class="mt-1 text-sm text-gray-500">Customer Code: <%= @customer.center_code %></p>
   </div>
   <div class="flex space-x-3">
-    <%= link_to "Edit", edit_customer_path(@customer), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <% if current_user&.internal_admin? %>
+      <%= link_to "Edit", edit_customer_path(@customer), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <% end %>
     <%= link_to "Back to List", customers_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
   </div>
 </div>

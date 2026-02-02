@@ -9,6 +9,16 @@
       <small class="text-muted"><%= t('customers.form.basic_info_desc') %></small>
     </div>
     <div class="card-body">
+      <% if current_user&.internal_admin? %>
+        <div class="row g-3 mb-3">
+          <div class="col-md-12">
+            <%= f.label :company_id, t('customers.form.company'), class: "form-label fw-semibold" %>
+            <%= f.collection_select :company_id, @companies, :id, :name, 
+                { prompt: t('customers.form.select_company') }, 
+                { class: "form-select" } %>
+          </div>
+        </div>
+      <% end %>
       <div class="row g-3">
         <div class="col-md-6">
           <%= f.label :center_code, t('customers.form.center_code'), class: "form-label fw-semibold" %>

@@ -31,7 +31,7 @@ internal_admin.confirmed_at = Time.current
 internal_admin.save!
 internal_admin.user_profile&.destroy
 internal_admin.create_user_profile!(
-  company: company_a,
+  company: nil, # Internal Adminは会社に紐づかない
   name: "System Administrator",
   role: :internal_admin,
   member_status: :active

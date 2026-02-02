@@ -14,17 +14,19 @@ class CustomersController < ApplicationController
   end
 
   def new
-    @customer = Customer.new(company: current_company)
+    @customer = Customer.new
+    @companies = Company.active.order(:name) if current_user&.internal_admin?
     authorize @customer
   end
 
   def edit
+    @companies = Company.active.order(:name) if current_user&.internal_admin?
     authorize @customer
   end
 
   def create
     @customer = Customer.new(customer_params)
-    @customer.company = current_company
+    @companies = Company.active.order(:name) if current_user&.internal_admin?
     authorize @customer
 
     if @customer.save
@@ -62,7 +64,7 @@ class CustomersController < ApplicationController
 
   def customer_params
     params.require(:customer).permit(
-      :center_code, :center_name, :postal_code, :prefecture,
+      :company_id, :center_code, :center_name, :postal_code, :prefecture,
       :city, :address1, :address2, :is_active
     )
   end
