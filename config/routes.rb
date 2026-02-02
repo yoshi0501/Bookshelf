@@ -17,7 +17,12 @@ Rails.application.routes.draw do
   get "pending_approval", to: "pages#pending_approval"
 
   # Main resources
-  resources :customers
+  resources :customers do
+    collection do
+      get :import
+      post :import
+    end
+  end
   resources :items
 
   resources :orders do

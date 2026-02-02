@@ -4,16 +4,40 @@
     <p class="text-muted mb-0"><%= t('customers.index.description') %></p>
   </div>
   <% if current_user&.internal_admin? %>
-    <div>
+    <div class="d-flex gap-2">
       <%= link_to t('customers.index.add_customer'), new_customer_path, class: "btn btn-primary btn-sm" %>
+      <%= link_to import_customers_path, class: "btn btn-outline-primary btn-sm" do %>
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV一括登録
+      <% end %>
     </div>
   <% end %>
 </div>
 
+<% if @companies.present? && @companies.size > 1 %>
+  <!-- 会社タブ（複数会社がある場合のみ表示） -->
+  <ul class="nav nav-tabs mb-4" role="tablist">
+    <% @companies.each_with_index do |company, index| %>
+      <li class="nav-item" role="presentation">
+        <%= link_to customers_path(company_id: company.id), 
+            class: "nav-link #{'active' if @selected_company&.id == company.id}",
+            data: { turbo: false } do %>
+          <i class="bi bi-building me-1"></i><%= company.name %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
 <div class="card shadow-sm border-0">
   <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
     <div>
-      <h5 class="card-title mb-1 fw-bold"><%= t('customers.index.title') %></h5>
+      <h5 class="card-title mb-1 fw-bold">
+        <% if @selected_company %>
+          <%= @selected_company.name %> - <%= t('customers.index.title') %>
+        <% else %>
+          <%= t('customers.index.title') %>
+        <% end %>
+      </h5>
       <small class="text-muted"><%= t('customers.index.description') %></small>
     </div>
   </div>
@@ -24,6 +48,13 @@
           <i class="bi bi-geo-alt text-muted fs-3"></i>
         </div>
         <p class="text-muted fw-medium mb-3">センターがありません</p>
+        <p class="text-muted small">
+          <% if @selected_company %>
+            <%= @selected_company.name %>にセンターが登録されていません。
+          <% else %>
+            センターが登録されていません。
+          <% end %>
+        </p>
         <% if current_user&.internal_admin? %>
           <%= link_to new_customer_path, class: "btn btn-primary" do %>
             <i class="bi bi-plus-circle me-1"></i> 新規センターを追加

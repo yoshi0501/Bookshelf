@@ -1,0 +1,167 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('customers.import.title') %></h1>
+    <p class="text-muted mb-0"><%= t('customers.import.description') %></p>
+  </div>
+  <div>
+    <%= link_to t('shared.actions.back'), customers_path, class: "btn btn-outline-secondary btn-sm" %>
+  </div>
+</div>
+
+<%= render "shared/form_errors", resource: Customer.new if flash[:alert] %>
+
+<% if flash[:alert] %>
+  <div class="alert alert-danger mb-4">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold">
+      <i class="bi bi-file-earmark-spreadsheet me-2"></i><%= t('customers.import.upload_section') %>
+    </h5>
+    <small class="text-muted"><%= t('customers.import.upload_desc') %></small>
+  </div>
+  <div class="card-body">
+    <%= form_with url: import_customers_path, method: :post, multipart: true, local: true do |f| %>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= label_tag :company_id, t('customers.form.company'), class: "form-label fw-semibold" %>
+          <%= select_tag :company_id, 
+              options_from_collection_for_select(@companies, :id, :name, params[:company_id]),
+              { class: "form-select", required: true, prompt: t('customers.form.select_company') } %>
+        </div>
+
+        <div class="col-md-6">
+          <%= label_tag :csv_file, t('customers.import.csv_file'), class: "form-label fw-semibold" %>
+          <%= file_field_tag :csv_file, 
+              accept: ".csv", 
+              class: "form-control", 
+              required: true %>
+          <div class="form-text"><%= t('customers.import.file_help') %></div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <%= f.submit t('customers.import.upload_button'), class: "btn btn-primary" %>
+        <%= link_to t('shared.actions.cancel'), customers_path, class: "btn btn-outline-secondary ms-2" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold">
+      <i class="bi bi-info-circle me-2"></i><%= t('customers.import.format_section') %>
+    </h5>
+    <small class="text-muted"><%= t('customers.import.format_desc') %></small>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead class="table-light">
+          <tr>
+            <th><%= t('customers.import.csv_header') %></th>
+            <th><%= t('customers.import.required') %></th>
+            <th><%= t('customers.import.description') %></th>
+            <th><%= t('customers.import.example') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>center_code</code></td>
+            <td><span class="badge bg-danger">必須</span></td>
+            <td><%= t('customers.import.center_code_desc') %></td>
+            <td><code>AC001</code></td>
+          </tr>
+          <tr>
+            <td><code>center_name</code></td>
+            <td><span class="badge bg-danger">必須</span></td>
+            <td><%= t('customers.import.center_name_desc') %></td>
+            <td><code>東京センター</code></td>
+          </tr>
+          <tr>
+            <td><code>postal_code</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.postal_code_desc') %></td>
+            <td><code>100-0001</code></td>
+          </tr>
+          <tr>
+            <td><code>prefecture</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.prefecture_desc') %></td>
+            <td><code>東京都</code></td>
+          </tr>
+          <tr>
+            <td><code>city</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.city_desc') %></td>
+            <td><code>千代田区</code></td>
+          </tr>
+          <tr>
+            <td><code>address1</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.address1_desc') %></td>
+            <td><code>千代田1-1-1</code></td>
+          </tr>
+          <tr>
+            <td><code>address2</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.address2_desc') %></td>
+            <td><code>ビル1F</code></td>
+          </tr>
+          <tr>
+            <td><code>is_active</code></td>
+            <td><span class="badge bg-secondary">任意</span></td>
+            <td><%= t('customers.import.is_active_desc') %></td>
+            <td><code>true</code> / <code>1</code> / <code>（空白）</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-info mt-3">
+      <h6 class="alert-heading"><%= t('customers.import.note_title') %></h6>
+      <ul class="mb-0">
+        <li><%= t('customers.import.note_1') %></li>
+        <li><%= t('customers.import.note_2') %></li>
+        <li><%= t('customers.import.note_3') %></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<% if @import_errors.present? && @import_errors.any? %>
+  <div class="card shadow-sm border-0 border-danger mt-4">
+    <div class="card-header bg-danger text-white">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><%= t('customers.import.errors_title') %>
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th><%= t('customers.import.error_row') %></th>
+              <th><%= t('customers.import.error_center_code') %></th>
+              <th><%= t('customers.import.error_message') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @import_errors.each do |error| %>
+              <tr>
+                <td><%= error[:row] %></td>
+                <td><%= error[:center_code] || "-" %></td>
+                <td class="text-danger"><%= error[:message] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>

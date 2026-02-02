@@ -4,9 +4,31 @@ class ItemsController < ApplicationController
   before_action :set_item, only: %i[show edit update destroy]
 
   def index
-    @pagy, @items = pagy(
-      policy_scope(Item).active.ordered_by_code
-    )
+    # 会社一覧を取得（Internal Adminは全社、Company Adminは自社のみ）
+    if current_user&.internal_admin?
+      @companies = Company.active.order(:code)
+    else
+      @companies = [current_company].compact
+    end
+
+    # 選択された会社（パラメータから、またはデフォルトで最初の会社）
+    selected_company_id = params[:company_id]&.to_i
+    if selected_company_id && @companies.map(&:id).include?(selected_company_id)
+      @selected_company = Company.find(selected_company_id)
+    else
+      @selected_company = @companies.first
+    end
+
+    # 選択された会社の商品を取得（無効なものも含む）
+    if @selected_company
+      items_scope = policy_scope(Item)
+        .for_company(@selected_company)
+        .ordered_by_code
+    else
+      items_scope = policy_scope(Item).none
+    end
+
+    @pagy, @items = pagy(items_scope)
   end
 
   def show
@@ -84,7 +106,7 @@ class ItemsController < ApplicationController
     company_ids.reject(&:blank?).each do |company_id|
       company = Company.find_by(id: company_id)
       next unless company
-      # 自社の商品は自動的に表示されるので、自社以外のみ追加
+      # 販売元会社は自動的に選択されるので、販売元以外のみ追加
       next if company.id == item.company_id
 
       ItemCompany.create!(item: item, company: company)
