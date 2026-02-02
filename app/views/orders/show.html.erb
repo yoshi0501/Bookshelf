@@ -1,152 +1,206 @@
-<div class="mb-8 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 class="text-2xl font-bold text-gray-900">Order <%= @order.order_no %></h1>
-    <p class="mt-1 text-sm text-gray-500">Created on <%= @order.order_date %></p>
+    <h1 class="h2 fw-bold mb-2"><%= t('orders.show.title') %> <%= @order.order_no %></h1>
+    <p class="text-muted mb-0">
+      <i class="bi bi-calendar me-1"></i><%= @order.order_date %>
+      <% if @order.company %>
+        <span class="ms-3">
+          <i class="bi bi-building me-1"></i><%= @order.company.name %>
+        </span>
+      <% end %>
+    </p>
   </div>
-  <div class="flex space-x-3">
-    <% if @order.can_be_edited? %>
-      <%= link_to "Edit", edit_order_path(@order), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-    <% end %>
-    <%= link_to "Back to List", orders_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
-  </div>
-</div>
-
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
-  <div class="bg-white shadow rounded-lg overflow-hidden">
-    <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg font-medium leading-6 text-gray-900">Order Details</h3>
-    </div>
-    <div class="border-t border-gray-200">
-      <dl>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Status</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            <%= render "orders/status_badge", status: @order.shipping_status %>
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Order Date</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.order_date %></dd>
-        </div>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Ordered By</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.ordered_by_user.email %></dd>
-        </div>
-        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 font-semibold">
-            <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
-          </dd>
-        </div>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">CO2 Total</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.co2_total %> kg</dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-
-  <div class="bg-white shadow rounded-lg overflow-hidden">
-    <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg font-medium leading-6 text-gray-900">Shipping Information</h3>
-    </div>
-    <div class="border-t border-gray-200">
-      <dl>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Customer</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            <% if current_user&.internal_admin? || current_user&.company_admin? %>
-              <%= link_to @order.customer.display_name, customer_path(@order.customer), class: "text-indigo-600 hover:text-indigo-500" %>
-            <% else %>
-              <%= @order.customer.display_name %>
-            <% end %>
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Ship To</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.full_shipping_address %></dd>
-        </div>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Tracking No</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.tracking_no || "-" %></dd>
-        </div>
-        <div class="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Ship Date</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.ship_date || "-" %></dd>
-        </div>
-        <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Delivered Date</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @order.delivered_date || "-" %></dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<div class="bg-white shadow rounded-lg overflow-hidden mb-6">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Order Lines</h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Code</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <% @order_lines.each do |line| %>
-          <tr>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= line.item_code %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= line.item_name %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right"><%= line.quantity %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-              <%= number_to_currency(line.unit_price_snapshot, unit: "¥", precision: 0) %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-semibold">
-              <%= number_to_currency(line.amount, unit: "¥", precision: 0) %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-      <tfoot class="bg-gray-50">
-        <tr>
-          <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 text-right">Total:</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-bold">
-            <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
-
-<div class="bg-white shadow rounded-lg p-6">
-  <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Actions</h3>
-  <div class="flex flex-wrap gap-3">
-    <% if @order.shipping_status_draft? %>
-      <%= button_to "Confirm Order", "#", method: :post, disabled: true, class: "rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50" %>
-    <% end %>
-
-    <% if @order.shipping_status_confirmed? %>
-      <%= form_with url: ship_order_path(@order), method: :post, class: "flex items-center space-x-2" do %>
-        <input type="text" name="tracking_no" placeholder="Tracking No" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-        <button type="submit" class="rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500">
-          Mark as Shipped
-        </button>
+  <div class="d-flex gap-2">
+    <% if @order.can_be_edited? && current_user&.internal_admin? %>
+      <%= link_to edit_order_path(@order), class: "btn btn-outline-secondary btn-sm" do %>
+        <i class="bi bi-pencil me-1"></i><%= t('orders.show.edit') %>
       <% end %>
     <% end %>
-
-    <% if @order.shipping_status_shipped? %>
-      <%= button_to "Mark as Delivered", deliver_order_path(@order), method: :post, class: "rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500" %>
-    <% end %>
-
-    <% if @order.can_be_cancelled? %>
-      <%= button_to "Cancel Order", cancel_order_path(@order), method: :post, data: { confirm: "Are you sure you want to cancel this order?" }, class: "rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+    <%= link_to orders_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('orders.show.back') %>
     <% end %>
   </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-info-circle me-2"></i><%= t('orders.show.order_details') %>
+        </h5>
+        <small class="text-muted"><%= t('orders.show.order_details_desc') %></small>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.status') %></label>
+            <p class="mb-0">
+              <%= render "orders/status_badge", status: @order.shipping_status %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.order_date') %></label>
+            <p class="mb-0 fw-medium"><%= @order.order_date %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.ordered_by') %></label>
+            <p class="mb-0">
+              <i class="bi bi-person me-1"></i><%= @order.ordered_by_user.email %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.total_amount') %></label>
+            <p class="mb-0 fw-bold text-primary fs-5">
+              <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.co2_total') %></label>
+            <p class="mb-0">
+              <% if @order.co2_total.present? %>
+                <i class="bi bi-cloud me-1"></i><%= @order.co2_total %> kg
+              <% else %>
+                <span class="text-muted">-</span>
+              <% end %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-truck me-2"></i><%= t('orders.show.shipping_info') %>
+        </h5>
+        <small class="text-muted"><%= t('orders.show.shipping_info_desc') %></small>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.customer') %></label>
+            <p class="mb-0">
+              <% if current_user&.internal_admin? || current_user&.company_admin? %>
+                <%= link_to(customer_path(@order.customer), class: "text-decoration-none fw-medium") do %>
+                  <i class="bi bi-building me-1"></i><%= @order.customer.display_name %>
+                <% end %>
+              <% else %>
+                <i class="bi bi-building me-1"></i><%= @order.customer.display_name %>
+              <% end %>
+            </p>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.ship_to') %></label>
+            <p class="mb-0"><%= @order.full_shipping_address %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.tracking_no') %></label>
+            <p class="mb-0 font-monospace"><%= @order.tracking_no || "-" %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.ship_date') %></label>
+            <p class="mb-0"><%= @order.ship_date || "-" %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.delivered_date') %></label>
+            <p class="mb-0"><%= @order.delivered_date || "-" %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-list-ul me-2"></i><%= t('orders.show.order_lines') %>
+        </h5>
+        <small class="text-muted"><%= t('orders.show.order_lines_desc') %></small>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th><%= t('orders.show.item_code') %></th>
+                <th><%= t('orders.show.item_name') %></th>
+                <th class="text-end"><%= t('orders.show.quantity') %></th>
+                <th class="text-end"><%= t('orders.show.unit_price') %></th>
+                <th class="text-end"><%= t('orders.show.amount') %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @order_lines.each do |line| %>
+                <tr>
+                  <td class="font-monospace"><%= line.item_code %></td>
+                  <td><%= line.item_name %></td>
+                  <td class="text-end"><%= line.quantity %></td>
+                  <td class="text-end text-muted">
+                    <%= number_to_currency(line.unit_price_snapshot, unit: "¥", precision: 0) %>
+                  </td>
+                  <td class="text-end fw-semibold">
+                    <%= number_to_currency(line.amount, unit: "¥", precision: 0) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td colspan="4" class="text-end fw-bold"><%= t('orders.show.total') %>:</td>
+                <td class="text-end fw-bold fs-5 text-primary">
+                  <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if current_user&.internal_admin? %>
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="card-title mb-1 fw-bold">
+            <i class="bi bi-gear me-2"></i><%= t('orders.show.actions') %>
+          </h5>
+          <small class="text-muted"><%= t('orders.show.actions_desc') %></small>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column gap-2">
+            <% if @order.shipping_status_confirmed? %>
+              <%= form_with url: ship_order_path(@order), method: :post, local: true do |f| %>
+                <div class="mb-3">
+                  <%= f.label :tracking_no, t('orders.show.tracking_no'), class: "form-label fw-semibold small" %>
+                  <%= f.text_field :tracking_no, class: "form-control form-control-sm", placeholder: t('orders.show.tracking_no_placeholder') %>
+                </div>
+                <%= f.submit t('orders.show.ship'), class: "btn btn-warning btn-sm w-100" %>
+              <% end %>
+            <% end %>
+
+            <% if @order.shipping_status_shipped? %>
+              <%= button_to deliver_order_path(@order), method: :post, class: "btn btn-success btn-sm w-100" do %>
+                <i class="bi bi-check-circle me-1"></i><%= t('orders.show.deliver') %>
+              <% end %>
+            <% end %>
+
+            <% if @order.can_be_cancelled? %>
+              <%= button_to cancel_order_path(@order), method: :post, 
+                  data: { confirm: t('orders.show.cancel_confirm') }, 
+                  class: "btn btn-danger btn-sm w-100" do %>
+                <i class="bi bi-x-circle me-1"></i><%= t('orders.show.cancel') %>
+              <% end %>
+            <% end %>
+
+            <% unless @order.shipping_status_confirmed? || @order.shipping_status_shipped? || @order.can_be_cancelled? %>
+              <p class="text-muted small mb-0 text-center">
+                <i class="bi bi-info-circle me-1"></i><%= t('orders.show.no_actions') %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
