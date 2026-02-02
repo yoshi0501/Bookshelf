@@ -1,80 +1,141 @@
-<div class="mb-8 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 class="text-2xl font-bold text-gray-900"><%= @user_profile.name %></h1>
-    <p class="mt-1 text-sm text-gray-500"><%= @user_profile.user.email %></p>
-  </div>
-  <div class="flex space-x-3">
-    <%= link_to "Edit", edit_admin_user_profile_path(@user_profile), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-    <%= link_to "Back to List", admin_user_profiles_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
-  </div>
-</div>
-
-<div class="bg-white shadow rounded-lg overflow-hidden mb-6">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Profile Information</h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <dl>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Name</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.name %></dd>
-      </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Email</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.user.email %></dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Phone</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user_profile.phone || "-" %></dd>
-      </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Role</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% case @user_profile.role %>
-          <% when "internal_admin" %>
-            <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">Internal Admin</span>
-          <% when "company_admin" %>
-            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Company Admin</span>
-          <% when "normal" %>
-            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Normal</span>
-          <% end %>
-        </dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-            <%= @user_profile.member_status.titleize %>
-          </span>
-        </dd>
-      </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">上司</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @user_profile.supervisor %>
-            <%= @user_profile.supervisor.name %> (<%= @user_profile.supervisor.user.email %>)
-          <% else %>
-            <span class="text-gray-400">未設定</span>
-            <span class="text-xs text-gray-500 ml-2">（未設定の場合は会社管理者に承認依頼が送信されます）</span>
-          <% end %>
-        </dd>
-      </div>
-    </dl>
-  </div>
-</div>
-
-<% if current_user.id != @user_profile.user_id && current_user.user_profile.can_approve_members? %>
-  <div class="bg-white shadow rounded-lg p-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Change Role</h3>
-    <div class="flex flex-wrap gap-2">
-      <% UserProfile.roles.keys.each do |role| %>
-        <% next if role == "internal_admin" && !current_user.internal_admin? %>
-        <%= button_to role.titleize,
-            change_role_admin_user_profile_path(@user_profile, role: role),
-            method: :post,
-            disabled: @user_profile.role == role,
-            class: "rounded-md #{@user_profile.role == role ? 'bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed" %>
+    <h1 class="h2 fw-bold mb-2"><%= @user_profile.name %></h1>
+    <p class="text-muted mb-0">
+      <i class="bi bi-envelope me-1"></i><%= @user_profile.user.email %>
+      <% if @user_profile.company %>
+        <span class="ms-3">
+          <i class="bi bi-building me-1"></i><%= @user_profile.company.name %>
+        </span>
       <% end %>
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_admin_user_profile_path(@user_profile), class: "btn btn-outline-secondary btn-sm" do %>
+      <i class="bi bi-pencil me-1"></i><%= t('user_profiles.show.edit') %>
+    <% end %>
+    <%= link_to admin_user_profiles_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('user_profiles.show.back') %>
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-info-circle me-2"></i><%= t('user_profiles.show.profile_info') %>
+        </h5>
+        <small class="text-muted"><%= t('user_profiles.show.profile_info_desc') %></small>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.name') %></label>
+            <p class="mb-0 fw-medium"><%= @user_profile.name %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.table.email') %></label>
+            <p class="mb-0">
+              <i class="bi bi-envelope me-1"></i><%= @user_profile.user.email %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.phone') %></label>
+            <p class="mb-0"><%= @user_profile.phone || "-" %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.status') %></label>
+            <p class="mb-0">
+              <% case @user_profile.member_status %>
+              <% when "active" %>
+                <span class="badge bg-success"><%= t('user_profiles.status.active') %></span>
+              <% when "pending" %>
+                <span class="badge bg-warning"><%= t('user_profiles.status.pending') %></span>
+              <% when "rejected" %>
+                <span class="badge bg-danger"><%= t('user_profiles.status.rejected') %></span>
+              <% when "unassigned" %>
+                <span class="badge bg-secondary"><%= t('user_profiles.status.unassigned') %></span>
+              <% end %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.role') %></label>
+            <p class="mb-0">
+              <% case @user_profile.role %>
+              <% when "internal_admin" %>
+                <span class="badge bg-danger"><%= t('user_profiles.roles.internal_admin') %></span>
+              <% when "company_admin" %>
+                <span class="badge bg-primary"><%= t('user_profiles.roles.company_admin') %></span>
+              <% when "normal" %>
+                <span class="badge bg-secondary"><%= t('user_profiles.roles.normal') %></span>
+              <% end %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.supervisor') %></label>
+            <p class="mb-0">
+              <% if @user_profile.supervisor %>
+                <i class="bi bi-person-badge me-1"></i><%= @user_profile.supervisor.name %>
+                <small class="text-muted">(<%= @user_profile.supervisor.user.email %>)</small>
+              <% else %>
+                <span class="text-muted"><%= t('user_profiles.show.no_supervisor') %></span>
+                <small class="text-muted d-block"><%= t('user_profiles.show.no_supervisor_desc') %></small>
+              <% end %>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-<% end %>
+
+  <div class="col-lg-4">
+    <% if @user_profile.company %>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="card-title mb-1 fw-bold">
+            <i class="bi bi-building me-2"></i><%= t('user_profiles.show.company_info') %>
+          </h5>
+          <small class="text-muted"><%= t('user_profiles.show.company_info_desc') %></small>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.company_name') %></label>
+            <p class="mb-0 fw-medium">
+              <i class="bi bi-building me-1"></i><%= @user_profile.company.name %>
+            </p>
+          </div>
+          <div class="mb-0">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.company_code') %></label>
+            <p class="mb-0 font-monospace"><%= @user_profile.company.code %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if current_user.id != @user_profile.user_id && current_user.user_profile.can_approve_members? %>
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="card-title mb-1 fw-bold">
+            <i class="bi bi-gear me-2"></i><%= t('user_profiles.show.change_role') %>
+          </h5>
+          <small class="text-muted"><%= t('user_profiles.show.change_role_desc') %></small>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column gap-2">
+            <% UserProfile.roles.keys.each do |role| %>
+              <% next if role == "internal_admin" && !current_user.internal_admin? %>
+              <%= button_to change_role_admin_user_profile_path(@user_profile, role: role),
+                  method: :post,
+                  disabled: @user_profile.role == role,
+                  class: "btn btn-sm w-100 #{@user_profile.role == role ? 'btn-secondary' : 'btn-primary'}" do %>
+                <%= t("user_profiles.roles.#{role}") %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
