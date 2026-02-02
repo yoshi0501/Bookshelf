@@ -1,48 +1,124 @@
-<div class="mb-8 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 class="text-2xl font-bold text-gray-900"><%= @customer.center_name %></h1>
-    <p class="mt-1 text-sm text-gray-500">Customer Code: <%= @customer.center_code %></p>
+    <h1 class="h2 fw-bold mb-2"><%= @customer.center_name %></h1>
+    <p class="text-muted mb-0">
+      <span class="font-monospace"><%= @customer.center_code %></span>
+      <% if @customer.company %>
+        <span class="ms-3">
+          <i class="bi bi-building me-1"></i><%= @customer.company.name %>
+        </span>
+      <% end %>
+    </p>
   </div>
-  <div class="flex space-x-3">
+  <div class="d-flex gap-2">
     <% if current_user&.internal_admin? %>
-      <%= link_to "Edit", edit_customer_path(@customer), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <%= link_to edit_customer_path(@customer), class: "btn btn-outline-secondary btn-sm" do %>
+        <i class="bi bi-pencil me-1"></i><%= t('customers.show.edit') %>
+      <% end %>
     <% end %>
-    <%= link_to "Back to List", customers_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    <%= link_to customers_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('customers.show.back') %>
+    <% end %>
   </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Customer Information</h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <dl>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Center Code</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.center_code %></dd>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-info-circle me-2"></i><%= t('customers.show.basic_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.basic_info_desc') %></small>
       </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Center Name</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.center_name %></dd>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.center_code') %></label>
+            <p class="mb-0 fw-medium font-monospace"><%= @customer.center_code %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.center_name') %></label>
+            <p class="mb-0 fw-medium"><%= @customer.center_name %></p>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.status') %></label>
+            <p class="mb-0">
+              <% if @customer.is_active %>
+                <span class="badge bg-success"><%= t('customers.status.active') %></span>
+              <% else %>
+                <span class="badge bg-secondary"><%= t('customers.status.inactive') %></span>
+              <% end %>
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Postal Code</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.postal_code %></dd>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-geo-alt me-2"></i><%= t('customers.show.address_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.address_info_desc') %></small>
       </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Address</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.full_address %></dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @customer.is_active %>
-            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
-          <% else %>
-            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Inactive</span>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.postal_code') %></label>
+            <p class="mb-0"><%= @customer.postal_code || "-" %></p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.prefecture') %></label>
+            <p class="mb-0"><%= @customer.prefecture || "-" %></p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.city') %></label>
+            <p class="mb-0"><%= @customer.city || "-" %></p>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.address1') %></label>
+            <p class="mb-0"><%= @customer.address1 || "-" %></p>
+          </div>
+          <% if @customer.address2.present? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.address2') %></label>
+              <p class="mb-0"><%= @customer.address2 %></p>
+            </div>
           <% end %>
-        </dd>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.full_address') %></label>
+            <p class="mb-0 text-muted"><%= @customer.full_address.present? ? @customer.full_address : "-" %></p>
+          </div>
+        </div>
       </div>
-    </dl>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-building me-2"></i><%= t('customers.show.company_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.company_info_desc') %></small>
+      </div>
+      <div class="card-body">
+        <% if @customer.company %>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.company') %></label>
+            <p class="mb-0 fw-medium">
+              <i class="bi bi-building me-1"></i><%= @customer.company.name %>
+            </p>
+          </div>
+          <div class="mb-0">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.company_code') %></label>
+            <p class="mb-0 font-monospace"><%= @customer.company.code %></p>
+          </div>
+        <% else %>
+          <p class="text-muted mb-0"><%= t('customers.show.no_company') %></p>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

@@ -21,9 +21,31 @@ ja:
       updated: "アカウント情報を更新しました"
       update_needs_confirmation: "アカウント情報を更新しました。確認メールを送信しましたので、メール内のリンクをクリックして変更を確認してください。"
       updated_but_not_signed_in: "アカウント情報を更新しましたが、サインインできませんでした。"
+      new:
+        title: "アカウントを作成"
+        description: "メールドメインは登録されている会社のドメインと一致する必要があります"
+        email: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "パスワード（確認）"
+        password_minimum: "文字以上"
+        sign_up: "新規登録"
+        have_account: "既にアカウントをお持ちの場合"
+        sign_in: "こちらからログイン"
     sessions:
       signed_in: "ログインしました"
       signed_out: "ログアウトしました"
+      user:
+        signed_in: "ログインしました"
+      new:
+        title: "アカウントにログイン"
+        description: "おかえりなさい！詳細を入力してください"
+        email: "メールアドレス"
+        password: "パスワード"
+        remember_me: "ログイン状態を保持"
+        forgot_password: "パスワードを忘れた場合"
+        sign_in: "ログイン"
+        no_account: "アカウントをお持ちでない場合"
+        sign_up: "無料で新規登録"
     passwords:
       send_instructions: "パスワードリセットの手順をメールで送信しました"
       updated: "パスワードを変更しました"
@@ -58,9 +80,19 @@ ja:
       description: "自社の配送センター一覧です"
       add_customer: "センター追加"
     show:
-      title: "顧客詳細"
+      title: "センター詳細"
       edit: "編集"
       back: "戻る"
+      basic_info: "基本情報"
+      basic_info_desc: "センターの基本情報を表示します"
+      address_info: "住所情報"
+      address_info_desc: "配送先住所を表示します"
+      company_info: "会社情報"
+      company_info_desc: "所属会社の情報を表示します"
+      status: "ステータス"
+      full_address: "住所（全角）"
+      company_code: "会社コード"
+      no_company: "会社が設定されていません"
     new:
       title: "新規センター登録"
       description: "新しい配送センターを登録します"
@@ -408,29 +440,6 @@ ja:
       notice: "通知"
       alert: "警告"
 
-  devise:
-    sessions:
-      new:
-        title: "アカウントにログイン"
-        description: "おかえりなさい！詳細を入力してください"
-        email: "メールアドレス"
-        password: "パスワード"
-        remember_me: "ログイン状態を保持"
-        forgot_password: "パスワードを忘れた場合"
-        sign_in: "ログイン"
-        no_account: "アカウントをお持ちでない場合"
-        sign_up: "無料で新規登録"
-    registrations:
-      new:
-        title: "アカウントを作成"
-        description: "メールドメインは登録されている会社のドメインと一致する必要があります"
-        email: "メールアドレス"
-        password: "パスワード"
-        password_confirmation: "パスワード（確認）"
-        password_minimum: "文字以上"
-        sign_up: "新規登録"
-        have_account: "既にアカウントをお持ちの場合"
-        sign_in: "こちらからログイン"
 
   activerecord:
     attributes:
