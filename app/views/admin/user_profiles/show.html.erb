@@ -48,6 +48,17 @@
           </span>
         </dd>
       </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">上司</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <% if @user_profile.supervisor %>
+            <%= @user_profile.supervisor.name %> (<%= @user_profile.supervisor.user.email %>)
+          <% else %>
+            <span class="text-gray-400">未設定</span>
+            <span class="text-xs text-gray-500 ml-2">（未設定の場合は会社管理者に承認依頼が送信されます）</span>
+          <% end %>
+        </dd>
+      </div>
     </dl>
   </div>
 </div>

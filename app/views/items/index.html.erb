@@ -1,49 +1,73 @@
-<div class="sm:flex sm:items-center mb-8">
-  <div class="sm:flex-auto">
-    <h1 class="text-2xl font-bold text-gray-900">Items</h1>
-    <p class="mt-2 text-sm text-gray-700">A list of all items (products) for your company.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('items.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('items.index.description') %></p>
   </div>
-  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-    <%= link_to "Add Item", new_item_path, class: "block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  <div>
+    <%= link_to t('items.index.add_item'), new_item_path, class: "btn btn-primary btn-sm" %>
   </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-      <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">CO2/Unit</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <% @items.each do |item| %>
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= item.item_code %></td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= item.name %></td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-            <%= number_to_currency(item.unit_price, unit: "¥", precision: 0) %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right"><%= item.co2_per_unit %></td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <% if item.is_active %>
-              <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
-            <% else %>
-              <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Inactive</span>
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="card-title mb-1 fw-bold"><%= t('items.index.title') %></h5>
+      <small class="text-muted"><%= t('items.index.description') %></small>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if @items.empty? %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+          <i class="bi bi-box text-muted fs-3"></i>
+        </div>
+        <p class="text-muted fw-medium mb-3">商品がありません</p>
+        <%= link_to new_item_path, class: "btn btn-primary" do %>
+          <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
+        <% end %>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('items.table.code') %></th>
+              <th><%= t('items.table.name') %></th>
+              <th class="text-end"><%= t('items.table.unit_price') %></th>
+              <th class="text-end"><%= t('items.table.co2_per_unit') %></th>
+              <th><%= t('items.table.status') %></th>
+              <th class="text-end"><%= t('items.table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @items.each do |item| %>
+              <tr>
+                <td class="font-monospace fw-semibold"><%= item.item_code %></td>
+                <td class="fw-medium"><%= item.name %></td>
+                <td class="text-end fw-semibold">
+                  <%= number_to_currency(item.unit_price, unit: "¥", precision: 0) %>
+                </td>
+                <td class="text-end text-muted"><%= item.co2_per_unit %> kg</td>
+                <td>
+                  <% if item.is_active %>
+                    <span class="badge bg-success"><%= t('items.status.active') %></span>
+                  <% else %>
+                    <span class="badge bg-secondary"><%= t('items.status.inactive') %></span>
+                  <% end %>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex gap-2 justify-content-end">
+                    <%= link_to t('shared.actions.view'), item_path(item), class: "btn btn-sm btn-outline-primary" %>
+                    <%= link_to t('shared.actions.edit'), edit_item_path(item), class: "btn btn-sm btn-outline-secondary" %>
+                  </div>
+                </td>
+              </tr>
             <% end %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <%= link_to "View", item_path(item), class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
-            <%= link_to "Edit", edit_item_path(item), class: "text-indigo-600 hover:text-indigo-900" %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <%= render "shared/pagination", pagy: @pagy %>

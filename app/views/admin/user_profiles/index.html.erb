@@ -1,51 +1,103 @@
-<div class="sm:flex sm:items-center mb-8">
-  <div class="sm:flex-auto">
-    <h1 class="text-2xl font-bold text-gray-900">Team Members</h1>
-    <p class="mt-2 text-sm text-gray-700">Manage active members of your company.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('user_profiles.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('user_profiles.index.description') %></p>
   </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-      <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <% @user_profiles.each do |profile| %>
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-            <%= profile.name %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <%= profile.user.email %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <% case profile.role %>
-            <% when "internal_admin" %>
-              <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">Internal Admin</span>
-            <% when "company_admin" %>
-              <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Company Admin</span>
-            <% when "normal" %>
-              <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Normal</span>
+<% if @companies.present? && @companies.size > 1 %>
+  <!-- 会社タブ（複数会社がある場合のみ表示） -->
+  <ul class="nav nav-tabs mb-4" role="tablist">
+    <% @companies.each_with_index do |company, index| %>
+      <li class="nav-item" role="presentation">
+        <%= link_to admin_user_profiles_path(company_id: company.id), 
+            class: "nav-link #{'active' if @selected_company&.id == company.id}",
+            data: { turbo: false } do %>
+          <i class="bi bi-building me-1"></i><%= company.name %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="card-title mb-1 fw-bold">
+        <% if @selected_company %>
+          <%= @selected_company.name %> - <%= t('user_profiles.index.title') %>
+        <% else %>
+          <%= t('user_profiles.index.title') %>
+        <% end %>
+      </h5>
+      <small class="text-muted"><%= t('user_profiles.index.description') %></small>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if @user_profiles.empty? %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+          <i class="bi bi-people text-muted fs-3"></i>
+        </div>
+        <p class="text-muted fw-medium mb-3">メンバーがありません</p>
+        <p class="text-muted small">
+          <% if @selected_company %>
+            <%= @selected_company.name %>にメンバーが登録されていません。
+          <% else %>
+            メンバーが登録されていません。
+          <% end %>
+        </p>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('user_profiles.table.name') %></th>
+              <th><%= t('user_profiles.table.email') %></th>
+              <th><%= t('user_profiles.table.role') %></th>
+              <th>上司</th>
+              <th><%= t('user_profiles.table.phone') %></th>
+              <th class="text-end"><%= t('user_profiles.table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @user_profiles.each do |profile| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                      <span class="text-primary fw-semibold small"><%= profile.name.first.upcase %></span>
+                    </div>
+                    <span class="fw-medium"><%= profile.name %></span>
+                  </div>
+                </td>
+                <td class="text-muted"><%= profile.user.email %></td>
+                <td>
+                  <% case profile.role %>
+                  <% when "internal_admin" %>
+                    <span class="badge bg-danger">Internal Admin</span>
+                  <% when "company_admin" %>
+                    <span class="badge bg-primary">Company Admin</span>
+                  <% when "normal" %>
+                    <span class="badge bg-secondary">Normal</span>
+                  <% end %>
+                </td>
+                <td class="text-muted"><%= profile.supervisor&.name || "-" %></td>
+                <td class="text-muted"><%= profile.phone || "-" %></td>
+                <td class="text-end">
+                  <div class="d-flex gap-2 justify-content-end">
+                    <%= link_to "View", admin_user_profile_path(profile), class: "btn btn-sm btn-outline-primary" %>
+                    <%= link_to "Edit", edit_admin_user_profile_path(profile), class: "btn btn-sm btn-outline-secondary" %>
+                  </div>
+                </td>
+              </tr>
             <% end %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <%= profile.phone || "-" %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <%= link_to "View", admin_user_profile_path(profile), class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
-            <%= link_to "Edit", edit_admin_user_profile_path(profile), class: "text-indigo-600 hover:text-indigo-900" %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <%= render "shared/pagination", pagy: @pagy %>

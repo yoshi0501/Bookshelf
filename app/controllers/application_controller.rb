@@ -71,13 +71,4 @@ class ApplicationController < ActionController::Base
   def policy_scope(scope, policy_scope_class: nil)
     super(scope, policy_scope_class: policy_scope_class)
   end
-
-  # Custom Devise location after sign in
-  def after_sign_in_path_for(resource)
-    if resource.user_profile&.pending?
-      pending_approval_path
-    else
-      stored_location_for(resource) || dashboard_path
-    end
-  end
 end

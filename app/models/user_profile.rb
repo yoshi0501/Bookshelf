@@ -10,6 +10,8 @@ class UserProfile < ApplicationRecord
   # Associations
   belongs_to :user
   belongs_to :company, optional: true
+  belongs_to :supervisor, class_name: "UserProfile", optional: true
+  has_many :subordinates, class_name: "UserProfile", foreign_key: "supervisor_id", dependent: :nullify
   has_many :approval_requests, dependent: :destroy
 
   # Validations
@@ -19,6 +21,8 @@ class UserProfile < ApplicationRecord
   validates :role, presence: true
   validates :member_status, presence: true
   validates :company_id, presence: true, unless: :unassigned?
+  validate :supervisor_must_be_same_company
+  validate :cannot_be_own_supervisor
 
   # Scopes
   scope :for_company, ->(company) { where(company: company) }
@@ -49,5 +53,44 @@ class UserProfile < ApplicationRecord
 
   def can_access_admin_dashboard?
     role_company_admin? || role_internal_admin?
+  end
+
+  # Role convenience methods (without prefix)
+  def normal?
+    role_normal?
+  end
+
+  def company_admin?
+    role_company_admin?
+  end
+
+  def internal_admin?
+    role_internal_admin?
+  end
+
+  def supervisor_user
+    supervisor&.user
+  end
+
+  def has_supervisor?
+    supervisor.present?
+  end
+
+  private
+
+  def supervisor_must_be_same_company
+    return unless supervisor_id.present? && company_id.present?
+
+    unless supervisor&.company_id == company_id
+      errors.add(:supervisor_id, "must belong to the same company")
+    end
+  end
+
+  def cannot_be_own_supervisor
+    return unless supervisor_id.present?
+
+    if supervisor_id == id
+      errors.add(:supervisor_id, "cannot be yourself")
+    end
   end
 end

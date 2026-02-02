@@ -1,72 +1,96 @@
-<div class="sm:flex sm:items-center mb-8">
-  <div class="sm:flex-auto">
-    <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
-    <p class="mt-2 text-sm text-gray-700">A list of all orders for your company.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('orders.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('orders.index.description') %></p>
   </div>
-  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex space-x-3">
-    <%= link_to "Export CSV", export_orders_path(format: :csv, order_no: params[:order_no], status: params[:status], date_from: params[:date_from], date_to: params[:date_to]), class: "block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-    <%= link_to "New Order", new_order_path, class: "block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  <div class="d-flex gap-2">
+    <%= link_to t('orders.index.export_csv'), export_orders_path(format: :csv, order_no: params[:order_no], status: params[:status], date_from: params[:date_from], date_to: params[:date_to]), class: "btn btn-outline-secondary btn-sm" %>
+    <%= link_to t('orders.index.new_order'), new_order_path, class: "btn btn-primary btn-sm" %>
   </div>
 </div>
 
-<div class="bg-white shadow rounded-lg mb-6 p-4">
-  <%= form_with url: orders_path, method: :get, class: "grid grid-cols-1 gap-4 sm:grid-cols-4" do |f| %>
-    <div>
-      <%= f.label :order_no, "Order No", class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_field :order_no, value: params[:order_no], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "Search..." %>
-    </div>
-    <div>
-      <%= f.label :status, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.select :status, Order.shipping_statuses.keys.map { |s| [s.titleize, s] }, { include_blank: "All Statuses", selected: params[:status] }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-    <div>
-      <%= f.label :date_from, "From Date", class: "block text-sm font-medium text-gray-700" %>
-      <%= f.date_field :date_from, value: params[:date_from], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-    <div>
-      <%= f.label :date_to, "To Date", class: "block text-sm font-medium text-gray-700" %>
-      <%= f.date_field :date_to, value: params[:date_to], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-    <div class="sm:col-span-4 flex justify-end space-x-3">
-      <%= link_to "Clear", orders_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-      <%= f.submit "Search", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
-    </div>
-  <% end %>
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <%= form_with url: orders_path, method: :get, class: "row g-3" do |f| %>
+      <div class="col-md-3">
+        <%= f.label :order_no, t('orders.index.order_no'), class: "form-label" %>
+        <%= f.text_field :order_no, value: params[:order_no], class: "form-control form-control-sm", placeholder: t('orders.index.search') %>
+      </div>
+      <div class="col-md-3">
+        <%= f.label :status, t('orders.index.status'), class: "form-label" %>
+        <%= f.select :status, Order.shipping_statuses.keys.map { |s| [t("orders.status.#{s}"), s] }, { include_blank: t('orders.index.all_statuses'), selected: params[:status] }, class: "form-select form-select-sm" %>
+      </div>
+      <div class="col-md-3">
+        <%= f.label :date_from, t('orders.index.date_from'), class: "form-label" %>
+        <%= f.date_field :date_from, value: params[:date_from], class: "form-control form-control-sm" %>
+      </div>
+      <div class="col-md-3">
+        <%= f.label :date_to, t('orders.index.date_to'), class: "form-label" %>
+        <%= f.date_field :date_to, value: params[:date_to], class: "form-control form-control-sm" %>
+      </div>
+      <div class="col-12 d-flex justify-content-end gap-2">
+        <%= link_to t('orders.index.clear'), orders_path, class: "btn btn-outline-secondary btn-sm" %>
+        <%= f.submit t('orders.index.search'), class: "btn btn-primary btn-sm" %>
+      </div>
+    <% end %>
+  </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-      <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order No</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <% @orders.each do |order| %>
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-            <%= link_to order.order_no, order_path(order) %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= order.order_date %></td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= order.customer.center_name %></td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <%= render "orders/status_badge", status: order.shipping_status %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-            <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <%= link_to "View", order_path(order), class: "text-indigo-600 hover:text-indigo-900" %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="card-title mb-1 fw-bold"><%= t('orders.index.title') %></h5>
+      <small class="text-muted"><%= t('orders.index.description') %></small>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if @orders.empty? %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+          <i class="bi bi-file-earmark-text text-muted fs-3"></i>
+        </div>
+        <p class="text-muted fw-medium mb-3">発注がありません</p>
+        <%= link_to new_order_path, class: "btn btn-primary" do %>
+          <i class="bi bi-plus-circle me-1"></i> 新規発注を作成
+        <% end %>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('orders.table.order_no') %></th>
+              <th><%= t('orders.table.date') %></th>
+              <th><%= t('orders.table.customer') %></th>
+              <th><%= t('orders.table.status') %></th>
+              <th class="text-end"><%= t('orders.table.amount') %></th>
+              <th class="text-end"><%= t('orders.table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @orders.each do |order| %>
+              <tr>
+                <td>
+                  <%= link_to order.order_no, order_path(order), class: "text-decoration-none fw-semibold" %>
+                </td>
+                <td class="text-muted"><%= order.order_date.strftime("%Y/%m/%d") %></td>
+                <td class="fw-medium"><%= order.customer.center_name %></td>
+                <td>
+                  <%= render "orders/status_badge", status: order.shipping_status %>
+                </td>
+                <td class="text-end fw-semibold">
+                  <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
+                </td>
+                <td class="text-end">
+                  <%= link_to t('shared.actions.view'), order_path(order), class: "btn btn-sm btn-outline-primary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <%= render "shared/pagination", pagy: @pagy %>

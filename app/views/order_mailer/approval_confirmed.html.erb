@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h2>発注が承認されました</h2>
+    <p>以下の発注が承認されました。</p>
+    
+    <div style="background-color: #e8f5e9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+      <p><strong>発注番号:</strong> <%= @order.order_no %></p>
+      <p><strong>発注日:</strong> <%= @order.order_date %></p>
+      <p><strong>顧客:</strong> <%= @order.customer.display_name %></p>
+      <p><strong>承認者:</strong> <%= @approver.name || @approver.email %></p>
+      <p><strong>合計金額:</strong> ¥<%= number_to_currency(@order.total_amount, unit: "", precision: 0) %></p>
+    </div>
+
+    <p>
+      <%= link_to "発注詳細を確認", @order_url, style: "display: inline-block; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;" %>
+    </p>
+
+    <p style="margin-top: 20px; color: #666; font-size: 12px;">
+      このメールは自動送信されています。
+    </p>
+  </body>
+</html>

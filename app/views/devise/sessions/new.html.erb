@@ -1,39 +1,45 @@
-<div>
-  <h2 class="text-center text-3xl font-bold tracking-tight text-gray-900">Sign in to your account</h2>
+<div class="card shadow-lg border-0">
+  <div class="card-body p-5">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient mb-3 shadow-sm" style="width: 64px; height: 64px;">
+        <i class="bi bi-person-circle text-white" style="font-size: 2rem;"></i>
+      </div>
+      <h2 class="card-title fw-bold mb-2"><%= t('devise.sessions.new.title') %></h2>
+      <p class="text-muted small"><%= t('devise.sessions.new.description') %></p>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "needs-validation", novalidate: true }) do |f| %>
+      <div class="mb-3">
+        <%= f.label :email, t('devise.sessions.new.email'), class: "form-label fw-semibold" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control form-control-lg", required: true %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password, t('devise.sessions.new.password'), class: "form-label fw-semibold" %>
+        <%= f.password_field :password, autocomplete: "current-password", class: "form-control form-control-lg", required: true %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+            <%= f.check_box :remember_me, class: "form-check-input" %>
+            <%= f.label :remember_me, t('devise.sessions.new.remember_me'), class: "form-check-label" %>
+          </div>
+          <%= link_to t('devise.sessions.new.forgot_password'), new_password_path(resource_name), class: "text-decoration-none small" %>
+        </div>
+      <% end %>
+
+      <div class="d-grid mb-4">
+        <%= f.submit t('devise.sessions.new.sign_in'), class: "btn btn-primary btn-lg" %>
+      </div>
+    <% end %>
+
+    <hr class="my-4">
+    <p class="text-center text-muted small mb-0">
+      <%= t('devise.sessions.new.no_account') %>
+      <%= link_to new_registration_path(resource_name), class: "text-decoration-none fw-semibold" do %>
+        <%= t('devise.sessions.new.sign_up') %>
+      <% end %>
+    </p>
+  </div>
 </div>
-
-<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "mt-8 space-y-6" }) do |f| %>
-  <div class="space-y-4 rounded-md shadow-sm">
-    <div>
-      <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-
-    <div>
-      <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.password_field :password, autocomplete: "current-password", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-  </div>
-
-  <% if devise_mapping.rememberable? %>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
-        <%= f.label :remember_me, class: "ml-2 block text-sm text-gray-900" %>
-      </div>
-
-      <div class="text-sm">
-        <%= link_to "Forgot your password?", new_password_path(resource_name), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
-      </div>
-    </div>
-  <% end %>
-
-  <div>
-    <%= f.submit "Sign in", class: "group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer" %>
-  </div>
-<% end %>
-
-<p class="mt-10 text-center text-sm text-gray-500">
-  Don't have an account?
-  <%= link_to "Sign up", new_registration_path(resource_name), class: "font-semibold leading-6 text-indigo-600 hover:text-indigo-500" %>
-</p>

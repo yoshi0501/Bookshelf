@@ -1,0 +1,13 @@
+発注が承認されました
+
+以下の発注が承認されました。
+
+発注番号: <%= @order.order_no %>
+発注日: <%= @order.order_date %>
+顧客: <%= @order.customer.display_name %>
+承認者: <%= @approver.name || @approver.email %>
+合計金額: ¥<%= number_to_currency(@order.total_amount, unit: "", precision: 0) %>
+
+発注詳細: <%= @order_url %>
+
+このメールは自動送信されています。

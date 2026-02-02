@@ -1,12 +1,53 @@
 <div class="text-center">
-  <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-    B2B Order System
+  <div class="mb-5">
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient shadow-lg mb-4" style="width: 80px; height: 80px;">
+      <i class="bi bi-file-earmark-text text-white" style="font-size: 2.5rem;"></i>
+    </div>
+  </div>
+  <h1 class="display-3 fw-bold text-primary mb-4">
+    <%= t('pages.home.title') %>
   </h1>
-  <p class="mt-6 text-lg leading-8 text-gray-600">
-    Multi-tenant order management portal for B2B partners.
+  <p class="lead text-muted mb-3">
+    <%= t('pages.home.description') %>
   </p>
-  <div class="mt-10 flex items-center justify-center gap-x-6">
-    <%= link_to "Sign In", new_user_session_path, class: "rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
-    <%= link_to "Sign Up", new_user_registration_path, class: "text-sm font-semibold leading-6 text-gray-900" %>
+  <p class="text-muted mb-5">
+    <%= t('pages.home.tagline') %>
+  </p>
+  <div class="d-flex gap-3 justify-content-center flex-wrap mb-5">
+    <%= link_to new_user_session_path, class: "btn btn-primary btn-lg px-5 shadow-sm" do %>
+      <%= t('pages.home.sign_in') %> <i class="bi bi-arrow-right ms-2"></i>
+    <% end %>
+    <%= link_to new_user_registration_path, class: "btn btn-outline-primary btn-lg px-5 shadow-sm" do %>
+      <%= t('pages.home.sign_up') %>
+    <% end %>
+  </div>
+  <div class="row g-4 mt-5">
+    <div class="col-md-4">
+      <div class="text-center">
+        <div class="d-inline-flex align-items-center justify-content-center rounded bg-primary bg-opacity-10 text-primary mb-3" style="width: 60px; height: 60px;">
+          <i class="bi bi-lightning-charge" style="font-size: 1.75rem;"></i>
+        </div>
+        <h4 class="fw-semibold mb-2"><%= t('pages.home.features.fast') %></h4>
+        <p class="text-muted small"><%= t('pages.home.features.fast_desc') %></p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center">
+        <div class="d-inline-flex align-items-center justify-content-center rounded bg-success bg-opacity-10 text-success mb-3" style="width: 60px; height: 60px;">
+          <i class="bi bi-shield-check" style="font-size: 1.75rem;"></i>
+        </div>
+        <h4 class="fw-semibold mb-2"><%= t('pages.home.features.secure') %></h4>
+        <p class="text-muted small"><%= t('pages.home.features.secure_desc') %></p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center">
+        <div class="d-inline-flex align-items-center justify-content-center rounded bg-info bg-opacity-10 text-info mb-3" style="width: 60px; height: 60px;">
+          <i class="bi bi-people" style="font-size: 1.75rem;"></i>
+        </div>
+        <h4 class="fw-semibold mb-2"><%= t('pages.home.features.multi_tenant') %></h4>
+        <p class="text-muted small"><%= t('pages.home.features.multi_tenant_desc') %></p>
+      </div>
+    </div>
   </div>
 </div>

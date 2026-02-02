@@ -1,39 +1,73 @@
-<%= form_with model: item, class: "space-y-6" do |f| %>
+<%= form_with model: item do |f| %>
   <%= render "shared/form_errors", resource: item %>
 
-  <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
-    <div class="grid grid-cols-6 gap-6">
-      <div class="col-span-6 sm:col-span-3">
-        <%= f.label :item_code, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.text_field :item_code, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-      </div>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-box me-2"></i><%= t('items.form.basic_info') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.basic_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :item_code, t('items.form.item_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :item_code, class: "form-control font-monospace" %>
+        </div>
 
-      <div class="col-span-6 sm:col-span-3">
-        <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-      </div>
-
-      <div class="col-span-6 sm:col-span-3">
-        <%= f.label :unit_price, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.number_field :unit_price, step: 0.01, min: 0, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-      </div>
-
-      <div class="col-span-6 sm:col-span-3">
-        <%= f.label :co2_per_unit, "CO2 per Unit (kg)", class: "block text-sm font-medium text-gray-700" %>
-        <%= f.number_field :co2_per_unit, step: 0.0001, min: 0, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-      </div>
-
-      <div class="col-span-6 sm:col-span-3">
-        <div class="flex items-center">
-          <%= f.check_box :is_active, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
-          <%= f.label :is_active, "Active", class: "ml-2 block text-sm text-gray-900" %>
+        <div class="col-md-6">
+          <%= f.label :name, t('items.form.name'), class: "form-label fw-semibold" %>
+          <%= f.text_field :name, class: "form-control" %>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="flex justify-end space-x-3">
-    <%= link_to "Cancel", items_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-    <%= f.submit class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-currency-yen me-2"></i><%= t('items.form.price_info') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.price_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :unit_price, t('items.form.unit_price'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <span class="input-group-text">¥</span>
+            <%= f.number_field :unit_price, step: 0.01, min: 0, class: "form-control" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :co2_per_unit, t('items.form.co2_per_unit'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <%= f.number_field :co2_per_unit, step: 0.0001, min: 0, class: "form-control" %>
+            <span class="input-group-text">kg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-toggle-on me-2"></i><%= t('items.form.status') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.status_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="form-check form-switch">
+        <%= f.check_box :is_active, class: "form-check-input", role: "switch" %>
+        <%= f.label :is_active, t('items.form.is_active'), class: "form-check-label fw-semibold" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <%= link_to t('shared.actions.cancel'), items_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
   </div>
 <% end %>

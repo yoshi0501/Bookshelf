@@ -2,19 +2,19 @@
 
 class CustomerPolicy < ApplicationPolicy
   def index?
-    active_user?
+    admin_or_company_admin? && active_user?
   end
 
   def show?
-    active_user? && same_company?
+    admin_or_company_admin? && active_user? && same_company?
   end
 
   def create?
-    active_user?
+    admin_or_company_admin? && active_user?
   end
 
   def update?
-    active_user? && same_company?
+    admin_or_company_admin? && active_user? && same_company?
   end
 
   def destroy?

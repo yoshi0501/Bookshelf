@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../../app/lib/devise_failure_app"
+
 Devise.setup do |config|
   config.mailer_sender = "noreply@example.com"
 
@@ -54,6 +56,11 @@ Devise.setup do |config|
 
   # Navigation
   config.sign_out_via = :delete
-  config.responder.error_status = :unprocessable_entity
+  config.responder.error_status = :unprocessable_content
   config.responder.redirect_status = :see_other
+
+  # Custom failure app for better error messages
+  config.warden do |manager|
+    manager.failure_app = DeviseFailureApp
+  end
 end

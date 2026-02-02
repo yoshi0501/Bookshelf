@@ -19,6 +19,7 @@ class Order < ApplicationRecord
   has_many :order_lines, dependent: :destroy
   has_many :items, through: :order_lines
   has_many :integration_logs, dependent: :destroy
+  has_one :order_approval_request, dependent: :destroy
 
   # Validations
   validates :order_no, presence: true, uniqueness: { scope: :company_id }

@@ -1,0 +1,14 @@
+発注承認依頼
+
+以下の発注について承認をお願いします。
+
+発注番号: <%= @order.order_no %>
+発注日: <%= @order.order_date %>
+顧客: <%= @order.customer.display_name %>
+発注者: <%= @order.ordered_by_user.name || @order.ordered_by_user.email %>
+合計金額: ¥<%= number_to_currency(@order.total_amount, unit: "", precision: 0) %>
+CO2合計: <%= @order.co2_total %> kg
+
+承認ページ: <%= @approval_url %>
+
+このメールは自動送信されています。

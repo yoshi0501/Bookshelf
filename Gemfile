@@ -16,7 +16,6 @@ gem 'sprockets-rails'
 gem 'importmap-rails'
 gem 'turbo-rails'
 gem 'stimulus-rails'
-gem 'tailwindcss-rails'
 
 # JSON
 gem 'jbuilder'
@@ -65,6 +64,7 @@ group :development do
   gem 'web-console'
   gem 'annotate'
   gem 'rubocop-rails', require: false
+  gem 'listen', '~> 3.3'
 end
 
 group :test do

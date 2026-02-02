@@ -31,6 +31,14 @@ Rails.application.routes.draw do
     end
   end
 
+  # Order approval requests
+  resources :order_approval_requests, only: %i[index show] do
+    member do
+      post :approve
+      post :reject
+    end
+  end
+
   # Admin namespace
   namespace :admin do
     resources :companies, except: [:destroy]

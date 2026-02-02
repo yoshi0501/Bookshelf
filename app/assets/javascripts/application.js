@@ -10,7 +10,6 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require jquery
-//= require jquery_ujs
-//= require turbolinks
+// Rails 7 uses Turbo and Stimulus by default via importmap
+// jQuery and Turbolinks are no longer needed
 //= require_tree .

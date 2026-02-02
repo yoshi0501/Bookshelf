@@ -1,108 +1,128 @@
-<div class="mb-8">
-  <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-  <p class="mt-1 text-sm text-gray-500">Welcome back, <%= current_user.name || current_user.email %></p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('dashboard.title') %></h1>
+    <p class="text-muted mb-0"><%= t('dashboard.welcome', name: current_user.name || current_user.email) %></p>
+  </div>
+  <div class="d-none d-sm-block text-end">
+    <small class="text-muted d-block"><%= t('dashboard.today') %></small>
+    <strong class="text-dark"><%= Date.current.strftime("%Y年%m月%d日") %></strong>
+  </div>
 </div>
 
-<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-  <div class="bg-white overflow-hidden shadow rounded-lg">
-    <div class="p-5">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-          </svg>
-        </div>
-        <div class="ml-5 w-0 flex-1">
-          <dl>
-            <dt class="text-sm font-medium text-gray-500 truncate">Orders This Month</dt>
-            <dd class="text-lg font-semibold text-gray-900"><%= @orders_this_month %></dd>
-          </dl>
+<div class="row g-4 mb-4">
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="d-inline-flex align-items-center justify-content-center rounded bg-primary bg-gradient shadow-sm" style="width: 48px; height: 48px;">
+              <i class="bi bi-file-earmark-text text-white fs-5"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <small class="text-muted d-block"><%= t('dashboard.orders_this_month') %></small>
+            <h3 class="fw-bold mb-0"><%= @orders_this_month %></h3>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="bg-white overflow-hidden shadow rounded-lg">
-    <div class="p-5">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="ml-5 w-0 flex-1">
-          <dl>
-            <dt class="text-sm font-medium text-gray-500 truncate">Total Amount</dt>
-            <dd class="text-lg font-semibold text-gray-900"><%= number_to_currency(@total_amount_this_month, unit: "¥", precision: 0) %></dd>
-          </dl>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="d-inline-flex align-items-center justify-content-center rounded bg-success bg-gradient shadow-sm" style="width: 48px; height: 48px;">
+              <i class="bi bi-currency-yen text-white fs-5"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <small class="text-muted d-block"><%= t('dashboard.total_amount') %></small>
+            <h3 class="fw-bold mb-0"><%= number_to_currency(@total_amount_this_month, unit: "¥", precision: 0) %></h3>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <% if @pending_approvals_count > 0 %>
-    <div class="bg-yellow-50 overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-yellow-800 truncate">Pending Approvals</dt>
-              <dd class="text-lg font-semibold text-yellow-900"><%= @pending_approvals_count %></dd>
-            </dl>
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100 bg-warning bg-opacity-10">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <div class="d-inline-flex align-items-center justify-content-center rounded bg-warning bg-gradient shadow-sm" style="width: 48px; height: 48px;">
+                <i class="bi bi-exclamation-triangle text-white fs-5"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <small class="text-warning-emphasis d-block"><%= t('dashboard.pending_approvals') %></small>
+              <h3 class="fw-bold mb-0 text-warning-emphasis"><%= @pending_approvals_count %></h3>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="bg-yellow-100 px-5 py-3">
-        <%= link_to "Review", admin_approval_requests_path, class: "text-sm font-medium text-yellow-800 hover:text-yellow-900" %>
+        <div class="card-footer bg-warning bg-opacity-25 border-0">
+          <%= link_to admin_approval_requests_path, class: "btn btn-sm btn-warning" do %>
+            <%= t('dashboard.review_now') %> <i class="bi bi-arrow-right ms-1"></i>
+          <% end %>
+        </div>
       </div>
     </div>
   <% end %>
 </div>
 
-<div class="bg-white shadow rounded-lg">
-  <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Recent Orders</h3>
-    <%= link_to "View All", orders_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="card-title mb-1 fw-bold"><%= t('dashboard.recent_orders.title') %></h5>
+      <small class="text-muted"><%= t('dashboard.recent_orders.description') %></small>
+    </div>
+    <%= link_to orders_path, class: "btn btn-sm btn-outline-primary" do %>
+      <%= t('dashboard.recent_orders.view_all') %> <i class="bi bi-arrow-right ms-1"></i>
+    <% end %>
   </div>
-  <div class="border-t border-gray-200">
+  <div class="card-body p-0">
     <% if @recent_orders.any? %>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order No</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% @recent_orders.each do |order| %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                <%= link_to order.order_no, order_path(order) %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= order.order_date %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= order.customer.center_name %></td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= render "orders/status_badge", status: order.shipping_status %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
-              </td>
+              <th><%= t('orders.table.order_no') %></th>
+              <th><%= t('orders.table.date') %></th>
+              <th><%= t('orders.table.customer') %></th>
+              <th><%= t('orders.table.status') %></th>
+              <th class="text-end"><%= t('orders.table.amount') %></th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% @recent_orders.each do |order| %>
+              <tr>
+                <td>
+                  <%= link_to order.order_no, order_path(order), class: "text-decoration-none fw-semibold" %>
+                </td>
+                <td class="text-muted"><%= order.order_date %></td>
+                <td class="fw-medium"><%= order.customer.center_name %></td>
+                <td>
+                  <%= render "orders/status_badge", status: order.shipping_status %>
+                </td>
+                <td class="text-end fw-semibold">
+                  <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     <% else %>
-      <div class="px-6 py-12 text-center text-gray-500">
-        <p>No orders yet.</p>
-        <%= link_to "Create your first order", new_order_path, class: "mt-2 inline-block text-indigo-600 hover:text-indigo-500" %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+          <i class="bi bi-file-earmark-text text-muted fs-3"></i>
+        </div>
+        <p class="text-muted fw-medium mb-3"><%= t('dashboard.recent_orders.no_orders') %></p>
+        <%= link_to new_order_path, class: "btn btn-primary" do %>
+          <i class="bi bi-plus-circle me-1"></i> <%= t('dashboard.recent_orders.create_first') %>
+        <% end %>
       </div>
     <% end %>
   </div>

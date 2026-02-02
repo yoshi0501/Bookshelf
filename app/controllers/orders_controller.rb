@@ -41,6 +41,15 @@ class OrdersController < ApplicationController
 
     if @order.save
       @order.recalculate_totals!
+      
+      # 承認依頼を作成してメール送信（通常ユーザーの場合のみ）
+      unless current_user.company_admin? || current_user.internal_admin?
+        create_approval_request_and_send_email
+      else
+        # 管理者の場合は自動承認
+        @order.update!(shipping_status: :confirmed)
+      end
+      
       redirect_to @order, notice: t("orders.created")
     else
       @order.order_lines.build if @order.order_lines.empty?
@@ -150,6 +159,27 @@ class OrdersController < ApplicationController
         end
       end
     end
+  end
+
+  def create_approval_request_and_send_email
+    # 発注者の上司を取得
+    supervisor = current_user.user_profile.supervisor_user
+    
+    # 上司が設定されていない場合は承認フローをスキップして自動承認
+    if supervisor.nil?
+      @order.update!(shipping_status: :confirmed)
+      return
+    end
+
+    # 上司が設定されている場合は承認依頼を作成してメール送信
+    approval_request = @order.build_order_approval_request(
+      company: @order.company,
+      status: :pending
+    )
+    approval_request.save!
+
+    # 上司にメール送信
+    OrderMailer.approval_request(@order, [supervisor]).deliver_later
   end
 
   def generate_csv(orders)

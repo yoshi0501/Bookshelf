@@ -1,0 +1,15 @@
+発注が却下されました
+
+以下の発注が却下されました。
+
+発注番号: <%= @order.order_no %>
+発注日: <%= @order.order_date %>
+顧客: <%= @order.customer.display_name %>
+却下者: <%= @reviewer.name || @reviewer.email %>
+<% if @comment.present? %>
+却下理由: <%= @comment %>
+<% end %>
+
+発注詳細: <%= @order_url %>
+
+このメールは自動送信されています。
