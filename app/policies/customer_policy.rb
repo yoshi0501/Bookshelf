@@ -25,6 +25,11 @@ class CustomerPolicy < ApplicationPolicy
     internal_admin?
   end
 
+  def import?
+    # CSVインポートはInternal Adminのみ
+    internal_admin?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.user_profile&.active?

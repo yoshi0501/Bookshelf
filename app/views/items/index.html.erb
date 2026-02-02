@@ -10,10 +10,31 @@
   <% end %>
 </div>
 
+<% if @companies.present? && @companies.size > 1 %>
+  <!-- 会社タブ（複数会社がある場合のみ表示） -->
+  <ul class="nav nav-tabs mb-4" role="tablist">
+    <% @companies.each_with_index do |company, index| %>
+      <li class="nav-item" role="presentation">
+        <%= link_to items_path(company_id: company.id), 
+            class: "nav-link #{'active' if @selected_company&.id == company.id}",
+            data: { turbo: false } do %>
+          <i class="bi bi-building me-1"></i><%= company.name %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
 <div class="card shadow-sm border-0">
   <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
     <div>
-      <h5 class="card-title mb-1 fw-bold"><%= t('items.index.title') %></h5>
+      <h5 class="card-title mb-1 fw-bold">
+        <% if @selected_company %>
+          <%= @selected_company.name %> - <%= t('items.index.title') %>
+        <% else %>
+          <%= t('items.index.title') %>
+        <% end %>
+      </h5>
       <small class="text-muted"><%= t('items.index.description') %></small>
     </div>
   </div>
@@ -23,10 +44,17 @@
         <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
           <i class="bi bi-box text-muted fs-3"></i>
         </div>
-        <p class="text-muted fw-medium mb-3">商品がありません</p>
+        <p class="text-muted fw-medium mb-3">販売商品がありません</p>
+        <p class="text-muted small">
+          <% if @selected_company %>
+            <%= @selected_company.name %>に販売商品が登録されていません。
+          <% else %>
+            販売商品が登録されていません。
+          <% end %>
+        </p>
         <% if current_user&.internal_admin? %>
           <%= link_to new_item_path, class: "btn btn-primary" do %>
-            <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
+            <i class="bi bi-plus-circle me-1"></i> 新規販売商品を追加
           <% end %>
         <% end %>
       </div>
