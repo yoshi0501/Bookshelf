@@ -21,7 +21,11 @@
       <div class="mb-3">
         <%= f.label :password, t('devise.registrations.new.password'), class: "form-label fw-semibold" %>
         <%= f.password_field :password, autocomplete: "new-password", class: "form-control form-control-lg", required: true %>
-        <div class="form-text"><%= @minimum_password_length %><%= t('devise.registrations.new.password_minimum') %></div>
+        <% if @minimum_password_length %>
+          <div class="form-text">
+            <i class="bi bi-info-circle me-1"></i><%= t('devise.registrations.new.password_minimum', count: @minimum_password_length) %>
+          </div>
+        <% end %>
       </div>
 
       <div class="mb-4">
@@ -30,7 +34,9 @@
       </div>
 
       <div class="d-grid mb-4">
-        <%= f.submit t('devise.registrations.new.sign_up'), class: "btn btn-primary btn-lg" %>
+        <%= button_tag type: "submit", class: "btn btn-primary btn-lg" do %>
+          <i class="bi bi-person-plus me-2"></i><%= t('devise.registrations.new.sign_up') %>
+        <% end %>
       </div>
     <% end %>
 

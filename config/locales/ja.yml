@@ -1,6 +1,43 @@
 ja:
   hello: "こんにちは"
 
+  datetime:
+    distance_in_words:
+      half_a_minute: "30秒"
+      less_than_x_seconds:
+        one: "1秒未満"
+        other: "%{count}秒未満"
+      x_seconds:
+        one: "1秒"
+        other: "%{count}秒"
+      less_than_x_minutes:
+        one: "1分未満"
+        other: "%{count}分未満"
+      x_minutes:
+        one: "1分"
+        other: "%{count}分"
+      about_x_hours:
+        one: "約1時間"
+        other: "約%{count}時間"
+      x_days:
+        one: "1日"
+        other: "%{count}日"
+      about_x_months:
+        one: "約1ヶ月"
+        other: "約%{count}ヶ月"
+      x_months:
+        one: "1ヶ月"
+        other: "%{count}ヶ月"
+      about_x_years:
+        one: "約1年"
+        other: "約%{count}年"
+      over_x_years:
+        one: "1年以上"
+        other: "%{count}年以上"
+      almost_x_years:
+        one: "ほぼ1年"
+        other: "ほぼ%{count}年"
+
   errors:
     record_not_found: "レコードが見つからないか、アクセスが拒否されました"
     messages:
@@ -16,18 +53,50 @@ ja:
       account_rejected: "アカウントが拒否されました"
       unassigned_company: "メールドメインがどの会社にも関連付けられていません"
       pending_approval: "アカウントは承認待ちです"
+      unauthenticated: "アカウント登録もしくはログインしてください"
+      not_found_in_database: "メールアドレスまたはパスワードが正しくありません。"
+      invalid: "メールアドレスまたはパスワードが正しくありません。"
+      invalid_token: "メールアドレスまたはパスワードが正しくありません。"
+      timeout: "セッションが期限切れです。再度ログインしてください。"
+      unconfirmed: "続行する前にメールアドレスを確認してください。"
+      locked: "アカウントがロックされています。"
+      user:
+        unauthenticated: "アカウント登録もしくはログインしてください"
     registrations:
       invalid_email_domain: "メールドメインが登録されている会社に関連付けられていません"
       updated: "アカウント情報を更新しました"
       update_needs_confirmation: "アカウント情報を更新しました。確認メールを送信しましたので、メール内のリンクをクリックして変更を確認してください。"
       updated_but_not_signed_in: "アカウント情報を更新しましたが、サインインできませんでした。"
+      edit:
+        title: "パスワード変更"
+        description: "アカウント情報とパスワードを変更できます"
+        account_info: "アカウント情報"
+        account_info_desc: "メールアドレス情報です"
+        email: "メールアドレス"
+        email_readonly: "メールアドレスは変更できません"
+        change_password: "パスワードを変更"
+        change_password_desc: "パスワードを変更する場合は、以下を入力してください"
+        current_password: "現在のパスワード"
+        current_password_help: "パスワードを変更するには、現在のパスワードが必要です"
+        new_password: "新しいパスワード"
+        password_confirmation: "新しいパスワード（確認）"
+        password_minimum: "%{count}文字以上"
+        password_leave_blank: "変更しない場合は空白のままにしてください"
+        update: "更新"
+        back_to_dashboard: "ダッシュボードに戻る"
+        currently_waiting_confirmation_for_email: "%{email}の確認を待っています"
+        password_requirements: "パスワード要件"
+        password_requirements_desc: "パスワード変更時の要件です"
+        requirement_length: "12文字以上128文字以下"
+        requirement_current: "現在のパスワードの入力が必要"
+        requirement_match: "新しいパスワードと確認が一致している必要がある"
       new:
         title: "アカウントを作成"
         description: "メールドメインは登録されている会社のドメインと一致する必要があります"
         email: "メールアドレス"
         password: "パスワード"
         password_confirmation: "パスワード（確認）"
-        password_minimum: "文字以上"
+        password_minimum: "%{count}文字以上"
         sign_up: "新規登録"
         have_account: "既にアカウントをお持ちの場合"
         sign_in: "こちらからログイン"
@@ -50,25 +119,20 @@ ja:
       send_instructions: "パスワードリセットの手順をメールで送信しました"
       updated: "パスワードを変更しました"
       updated_not_active: "パスワードを変更しましたが、アカウントが有効化されていないため、サインインできませんでした。"
-    edit:
-      title: "アカウント設定"
-      description: "アカウント情報とパスワードを変更できます"
-      email: "メールアドレス"
-      email_readonly: "メールアドレスは変更できません"
-      currently_waiting_confirmation_for_email: "%{email}の確認を待っています"
-      change_password: "パスワードを変更"
-      current_password: "現在のパスワード"
-      current_password_help: "パスワードを変更するには現在のパスワードが必要です"
-      new_password: "新しいパスワード"
-      password_confirmation: "新しいパスワード（確認）"
-      password_minimum: "%{count}文字以上"
-      password_leave_blank: "変更しない場合は空白のままにしてください"
-      update: "更新"
-      back_to_dashboard: "ダッシュボードに戻る"
-      cancel_my_account: "アカウントを削除"
-      cancel_my_account_confirm: "本当にアカウントを削除しますか？この操作は取り消せません。"
-      cancel_my_account_confirmed: "アカウントを削除しました。またのご利用をお待ちしております。"
-      we_need_your_current_password_to_confirm_your_changes: "変更を確認するために現在のパスワードが必要です"
+    validations:
+      password:
+        too_short: "パスワードは%{count}文字以上で入力してください"
+        too_long: "パスワードは%{count}文字以下で入力してください"
+        blank: "パスワードを入力してください"
+        confirmation: "パスワード（確認）と一致しません"
+        invalid: "パスワードの形式が正しくありません"
+      email:
+        blank: "メールアドレスを入力してください"
+        invalid: "メールアドレスの形式が正しくありません"
+        taken: "このメールアドレスは既に使用されています"
+      current_password:
+        blank: "現在のパスワードを入力してください"
+        invalid: "現在のパスワードが正しくありません"
 
   customers:
     created: "顧客が正常に作成されました"
@@ -369,6 +433,18 @@ ja:
     show:
       title: "承認リクエスト詳細"
       back: "戻る"
+      request_info: "リクエスト情報"
+      request_info_desc: "承認リクエストの詳細情報を表示します"
+      user_name: "ユーザー名"
+      email: "メールアドレス"
+      status: "ステータス"
+      requested_at: "リクエスト日時"
+      reviewed_by: "承認者"
+      reviewed_at: "承認日時"
+      comment: "コメント"
+      actions: "操作"
+      actions_desc: "承認または拒否を実行します"
+      rejection_reason_placeholder: "拒否理由（任意）"
     table:
       user: "ユーザー"
       email: "メールアドレス"
@@ -396,6 +472,11 @@ ja:
       title: "会社詳細"
       edit: "編集"
       back: "戻る"
+      status: "ステータス"
+      current_order_sequence: "現在の発注シーケンス"
+    status:
+      active: "有効"
+      inactive: "無効"
     new:
       title: "新規会社登録"
       description: "新しい会社を登録します"
@@ -545,6 +626,8 @@ ja:
 
 
   activerecord:
+    models:
+      user: "ユーザー"
     attributes:
       customer:
         center_code: "センターコード"
@@ -634,3 +717,32 @@ ja:
             current_password:
               blank: "現在のパスワードを入力してください"
               invalid: "現在のパスワードが正しくありません"
+            password_confirmation:
+              blank: "パスワード（確認）を入力してください"
+              confirmation: "パスワード（確認）と一致しません"
+      messages:
+        blank: "を入力してください"
+        present: "は入力しないでください"
+        too_short: "は%{count}文字以上で入力してください"
+        too_long: "は%{count}文字以下で入力してください"
+        taken: "は既に使用されています"
+        invalid: "の形式が正しくありません"
+        confirmation: "と一致しません"
+        required: "を入力してください"
+        not_a_number: "は数値で入力してください"
+        greater_than: "は%{count}より大きい値にしてください"
+        greater_than_or_equal_to: "は%{count}以上の値にしてください"
+        less_than: "は%{count}より小さい値にしてください"
+        less_than_or_equal_to: "は%{count}以下の値にしてください"
+        equal_to: "は%{count}にしてください"
+        other_than: "は%{count}以外の値にしてください"
+        odd: "は奇数にしてください"
+        even: "は偶数にしてください"
+        inclusion: "は一覧に含まれていません"
+        exclusion: "は利用できません"
+        in: "は%{enum}のいずれかにしてください"
+        not_in: "は%{enum}のいずれかにしてください"
+        format: "の形式が正しくありません"
+        uniqueness: "は既に使用されています"
+        acceptance: "を受諾してください"
+        record_invalid: "バリデーションに失敗しました: %{errors}"
