@@ -131,9 +131,23 @@
             </thead>
             <tbody>
               <% @order_lines.each do |line| %>
-                <tr>
-                  <td class="font-monospace"><%= line.item_code %></td>
-                  <td><%= line.item_name %></td>
+                <tr class="<%= 'table-warning' if line.item.nil? || !line.item.is_active %>">
+                  <td class="font-monospace">
+                    <% if line.item.nil? %>
+                      <span class="text-muted"><%= t('orders.show.item_deleted') %></span>
+                    <% else %>
+                      <%= line.item_code %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if line.item.nil? %>
+                      <span class="text-muted"><%= t('orders.show.item_deleted') %></span>
+                    <% elsif !line.item.is_active %>
+                      <%= line.item_name %> <span class="badge bg-secondary small"><%= t('orders.show.item_inactive') %></span>
+                    <% else %>
+                      <%= line.item_name %>
+                    <% end %>
+                  </td>
                   <td class="text-end"><%= line.quantity %></td>
                   <td class="text-end text-muted">
                     <%= number_to_currency(line.unit_price_snapshot, unit: "¥", precision: 0) %>

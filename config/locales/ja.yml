@@ -378,6 +378,8 @@ ja:
       unit_price: "単価"
       amount: "金額"
       total: "合計"
+      item_deleted: "削除された商品"
+      item_inactive: "無効"
       cancel_confirm: "この発注をキャンセルしてもよろしいですか？"
       no_actions: "現在実行可能な操作はありません"
     new:

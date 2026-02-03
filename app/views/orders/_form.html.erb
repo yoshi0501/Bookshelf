@@ -111,6 +111,12 @@
     <div class="card-body">
       <div id="order-lines">
         <%= f.fields_for :order_lines do |line_form| %>
+          <%# 削除された商品は編集可能な状態では自動的に削除マークを付ける %>
+          <% if line_form.object.item.nil? && order.can_be_edited? %>
+            <%= line_form.hidden_field :id if line_form.object.persisted? %>
+            <%= line_form.hidden_field :_destroy, value: true %>
+            <% next %>
+          <% end %>
           <div class="order-line-item" 
                data-item-id="<%= line_form.object.item_id %>"
                data-unit-price="<%= line_form.object.unit_price_snapshot || line_form.object.item&.unit_price || 0 %>">
@@ -126,7 +132,7 @@
                     </div>
                     <div>
                       <div class="fw-bold"><%= line_form.object.item&.name || t('orders.form.item_deleted') %></div>
-                      <small class="text-muted font-monospace"><%= line_form.object.item&.item_code %></small>
+                      <small class="text-muted font-monospace"><%= line_form.object.item&.item_code || t('orders.form.item_deleted') %></small>
                     </div>
                   </div>
                 </div>

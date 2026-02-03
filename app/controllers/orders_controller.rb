@@ -148,7 +148,8 @@ class OrdersController < ApplicationController
 
   def load_form_data
     @customers = policy_scope(Customer).active.order(:center_code)
-    @items = policy_scope(Item).active.ordered_by_code
+    # 発注画面では有効な商品のみを表示（is_active: true）
+    @items = policy_scope(Item).where(is_active: true).ordered_by_code
   end
 
   def order_params
