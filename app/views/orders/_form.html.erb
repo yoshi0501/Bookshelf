@@ -182,7 +182,34 @@
 
   <div class="d-flex justify-content-end gap-2">
     <%= link_to t('shared.actions.cancel'), orders_path, class: "btn btn-outline-secondary" %>
-    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+    <% if order.new_record? %>
+      <button type="button" class="btn btn-primary" id="order-submit-trigger" data-confirm-message="<%= t('orders.form.confirm_order_message', count: '__COUNT__') %>">
+        <%= t('orders.form.submit_order') %>
+      </button>
+      <%= f.submit t('orders.form.confirm_order_submit'), class: "d-none", id: "order-form-submit" %>
+    <% else %>
+      <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if order.new_record? %>
+  <div class="modal fade" id="order-confirm-modal" tabindex="-1" aria-labelledby="order-confirm-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="order-confirm-modal-label"><%= t('orders.form.submit_order') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0" id="order-confirm-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><%= t('orders.form.confirm_order_cancel') %></button>
+          <button type="button" class="btn btn-primary" id="order-confirm-submit"><%= t('orders.form.confirm_order_submit') %></button>
+        </div>
+      </div>
+    </div>
   </div>
 <% end %>
 
@@ -450,6 +477,48 @@ function toggleLineDestroy(checkbox) {
   updateTotal();
   updateEmptyMessage();
 }
+
+// 新規発注: 「発注」クリックで合計数量を表示する確認モーダル
+(function() {
+  const trigger = document.getElementById('order-submit-trigger');
+  const form = document.querySelector('form[data-turbo="false"]') || document.querySelector('form');
+  const modalEl = document.getElementById('order-confirm-modal');
+  const messageEl = document.getElementById('order-confirm-message');
+  const confirmSubmitBtn = document.getElementById('order-confirm-submit');
+  const formSubmitBtn = document.getElementById('order-form-submit');
+
+  function getTotalQuantity() {
+    let total = 0;
+    document.querySelectorAll('.order-line-item').forEach(function(line) {
+      const destroyInput = line.querySelector('input[name*="_destroy"]');
+      if (!destroyInput || destroyInput.value !== 'true') {
+        const quantityInput = line.querySelector('input[type="number"]');
+        if (quantityInput) total += parseInt(quantityInput.value || 0, 10);
+      }
+    });
+    return total;
+  }
+
+  if (trigger && modalEl && messageEl && confirmSubmitBtn && formSubmitBtn) {
+    trigger.addEventListener('click', function() {
+      const total = getTotalQuantity();
+      if (total <= 0) {
+        alert('<%= t("orders.form.no_items_selected") %>');
+        return;
+      }
+      const template = trigger.getAttribute('data-confirm-message') || '最終__COUNT__個の発注でよろしいでしょうか？';
+      messageEl.textContent = template.replace('__COUNT__', total);
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    });
+
+    confirmSubmitBtn.addEventListener('click', function() {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      formSubmitBtn.click();
+    });
+  }
+})();
 
 // 初期化時に既存の明細行をハイライトと金額を再計算
 document.addEventListener('DOMContentLoaded', function() {
