@@ -119,6 +119,20 @@ ja:
       send_instructions: "パスワードリセットの手順をメールで送信しました"
       updated: "パスワードを変更しました"
       updated_not_active: "パスワードを変更しましたが、アカウントが有効化されていないため、サインインできませんでした。"
+      new:
+        title: "パスワードをお忘れの場合"
+        description: "登録済みのメールアドレスを入力してください。リセット用のリンクをお送りします。"
+        email: "メールアドレス"
+        submit: "送信する"
+        back_to_sign_in: "ログイン画面に戻る"
+      edit:
+        title: "新しいパスワードを設定"
+        description: "新しいパスワードを入力してください。"
+        password: "新しいパスワード"
+        password_confirmation: "新しいパスワード（確認）"
+        password_minimum: "%{count}文字以上"
+        submit: "パスワードを変更する"
+        back_to_sign_in: "ログイン画面に戻る"
     validations:
       password:
         too_short: "パスワードは%{count}文字以上で入力してください"
