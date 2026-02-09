@@ -43,6 +43,7 @@ class ItemPolicy < ApplicationPolicy
         scope.all
       else
         company = user.current_company
+        return scope.none unless company
         # 自社の商品 + 自社に表示可能な商品
         scope.where(
           "(company_id = ? OR id IN (?))",

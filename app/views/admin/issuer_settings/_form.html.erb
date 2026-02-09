@@ -1,0 +1,65 @@
+<%= form_with model: [:admin, issuer_setting], url: admin_issuer_setting_path, method: :patch, class: "needs-validation", novalidate: true do |f| %>
+  <%= render "shared/form_errors", resource: issuer_setting %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-building me-2"></i><%= t('issuer_settings.form.issuer_info') %>
+      </h5>
+      <small class="text-muted"><%= t('issuer_settings.form.issuer_info_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12">
+          <%= f.label :name, t('issuer_settings.form.name'), class: "form-label fw-semibold" %>
+          <%= f.text_field :name, class: "form-control", placeholder: "マツダ株式会社" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :postal_code, t('issuer_settings.form.postal_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :postal_code, class: "form-control font-monospace", placeholder: "658-0042" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :prefecture, t('issuer_settings.form.prefecture'), class: "form-label fw-semibold" %>
+          <%= f.text_field :prefecture, class: "form-control", placeholder: "兵庫県" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :city, t('issuer_settings.form.city'), class: "form-label fw-semibold" %>
+          <%= f.text_field :city, class: "form-control", placeholder: "神戸市東灘区" %>
+        </div>
+        <div class="col-12">
+          <%= f.label :address1, t('issuer_settings.form.address1'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address1, class: "form-control", placeholder: "住吉浜町17-8" %>
+        </div>
+        <div class="col-12">
+          <%= f.label :address2, t('issuer_settings.form.address2'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address2, class: "form-control", placeholder: "ビル名・階（任意）" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :phone, t('issuer_settings.form.phone'), class: "form-label fw-semibold" %>
+          <%= f.text_field :phone, class: "form-control", placeholder: "078-851-2213" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :fax, t('issuer_settings.form.fax'), class: "form-label fw-semibold" %>
+          <%= f.text_field :fax, class: "form-control", placeholder: "078-811-5224" %>
+        </div>
+        <div class="col-12">
+          <%= f.label :registration_number, t('issuer_settings.form.registration_number'), class: "form-label fw-semibold" %>
+          <%= f.text_field :registration_number, class: "form-control font-monospace", placeholder: "T5140001025036" %>
+        </div>
+        <div class="col-12">
+          <%= f.label :bank_account_1, t('issuer_settings.form.bank_account_1'), class: "form-label fw-semibold" %>
+          <%= f.text_field :bank_account_1, class: "form-control", placeholder: "三井住友銀行 御影 当座 2004156 マツダ(カ" %>
+        </div>
+        <div class="col-12">
+          <%= f.label :bank_account_2, t('issuer_settings.form.bank_account_2'), class: "form-label fw-semibold" %>
+          <%= f.text_field :bank_account_2, class: "form-control", placeholder: "三菱UFJ銀行 神戸 当座 9027949 マツダ(カ" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mb-4">
+    <%= link_to t('shared.actions.cancel'), admin_issuer_setting_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit t('shared.actions.save'), class: "btn btn-primary btn-lg" %>
+  </div>
+<% end %>

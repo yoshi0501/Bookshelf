@@ -43,6 +43,33 @@
       </div>
     </div>
 
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-shield-check me-2"></i><%= t('devise.registrations.edit.verify_password_title') %>
+        </h5>
+        <small class="text-muted"><%= t('devise.registrations.edit.verify_password_desc') %></small>
+      </div>
+      <div class="card-body">
+        <%= form_with url: verify_password_user_path, method: :post, local: true, class: "needs-validation" do |f| %>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <%= f.label :password, t('devise.registrations.edit.verify_password_label'), class: "form-label fw-semibold" %>
+              <div class="input-group">
+                <%= f.password_field :password, class: "form-control", placeholder: t('devise.registrations.edit.verify_password_placeholder'), autocomplete: "current-password" %>
+                <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="パスワードを表示" title="パスワードを表示">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <%= f.submit t('devise.registrations.edit.verify_password_submit'), class: "btn btn-outline-primary" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <div class="card shadow-sm border-0">
       <div class="card-header bg-white border-bottom">
         <h5 class="card-title mb-1 fw-bold">
@@ -55,13 +82,23 @@
           <div class="row g-3">
             <div class="col-md-12">
               <%= f.label :current_password, t('devise.registrations.edit.current_password'), class: "form-label fw-semibold" %>
-              <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control", required: true, title: t('devise.registrations.edit.current_password'), data: { msg_required: t('activerecord.errors.models.user.attributes.current_password.blank') } %>
+              <div class="input-group">
+                <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control", required: true, title: t('devise.registrations.edit.current_password'), data: { msg_required: t('activerecord.errors.models.user.attributes.current_password.blank') } %>
+                <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="パスワードを表示" title="パスワードを表示">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
               <div class="form-text"><%= t('devise.registrations.edit.current_password_help') %></div>
             </div>
 
             <div class="col-md-6">
               <%= f.label :password, t('devise.registrations.edit.new_password'), class: "form-label fw-semibold" %>
-              <%= f.password_field :password, autocomplete: "new-password", class: "form-control", title: t('devise.registrations.edit.new_password'), minlength: @minimum_password_length || 12, data: { msg_minlength: t('devise.registrations.edit.password_minimum', count: @minimum_password_length || 12) } %>
+              <div class="input-group">
+                <%= f.password_field :password, autocomplete: "new-password", class: "form-control", title: t('devise.registrations.edit.new_password'), minlength: @minimum_password_length || 8, data: { msg_minlength: t('devise.registrations.edit.password_minimum', count: @minimum_password_length || 8) } %>
+                <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="パスワードを表示" title="パスワードを表示">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
               <% if @minimum_password_length %>
                 <div class="form-text">
                   <i class="bi bi-info-circle me-1"></i><%= t('devise.registrations.edit.password_minimum', count: @minimum_password_length) %>
@@ -74,7 +111,12 @@
 
             <div class="col-md-6">
               <%= f.label :password_confirmation, t('devise.registrations.edit.password_confirmation'), class: "form-label fw-semibold" %>
-              <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", title: t('devise.registrations.edit.password_confirmation') %>
+              <div class="input-group">
+                <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", title: t('devise.registrations.edit.password_confirmation') %>
+                <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="パスワードを表示" title="パスワードを表示">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -140,7 +182,7 @@
             const msg = field.dataset.msgRequired || 'この項目は必須です';
             field.setCustomValidity(msg);
           } else if (field.validity.tooShort) {
-            const msg = field.dataset.msgMinlength || '12文字以上で入力してください';
+            const msg = field.dataset.msgMinlength || '8文字以上で入力してください';
             field.setCustomValidity(msg);
           } else {
             field.setCustomValidity('');

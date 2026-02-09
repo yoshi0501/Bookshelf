@@ -1,11 +1,55 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div>
     <h1 class="h2 fw-bold mb-2"><%= t('dashboard.title') %></h1>
-    <p class="text-muted mb-0"><%= t('dashboard.welcome', name: current_user.name || current_user.email) %></p>
+    <p class="text-muted mb-0">
+      <%= t('dashboard.welcome', name: current_user.name || current_user.email) %>
+      <% if current_user&.internal_admin? && @selected_company %>
+        <span class="badge bg-primary ms-2"><%= @selected_company.name %></span>
+      <% end %>
+      <% if current_user&.internal_admin? && @selected_center %>
+        <span class="badge bg-secondary ms-1"><%= @selected_center.center_name %></span>
+      <% end %>
+      <% if !current_user&.internal_admin? && @selected_center %>
+        <span class="badge bg-secondary ms-2"><%= @selected_center.center_code %>: <%= @selected_center.center_name %></span>
+      <% end %>
+    </p>
   </div>
-  <div class="d-none d-sm-block text-end">
-    <small class="text-muted d-block"><%= t('dashboard.today') %></small>
-    <strong class="text-dark"><%= Date.current.strftime("%Y年%m月%d日") %></strong>
+  <div class="d-flex align-items-center gap-2 flex-wrap">
+    <% unless current_user&.internal_admin? %>
+      <%= form_with url: dashboard_path, method: :get, local: true, class: "d-flex align-items-center gap-1" do |f| %>
+        <%= f.label :center_id, t('dashboard.center_filter'), class: "form-label mb-0 small text-muted" %>
+        <%= f.select :center_id, center_options_for_dashboard(@centers), { selected: params[:center_id] }, { class: "form-select form-select-sm", style: "width: auto", onchange: "this.form.submit()", disabled: @centers.blank? } %>
+      <% end %>
+    <% end %>
+    <% if current_user&.internal_admin? %>
+      <%= form_with url: dashboard_path, method: :get, local: true, class: "d-flex align-items-center gap-1" do |f| %>
+        <%= f.hidden_field :month, value: params[:month] %>
+        <%= f.label :company_id, t('dashboard.company_filter'), class: "form-label mb-0 small text-muted" %>
+        <%= f.select :company_id, options_for_select([ [t('dashboard.all_companies'), ''] ] + @companies.map { |c| [c.name, c.id] }, params[:company_id]), {}, class: "form-select form-select-sm", style: "width: auto", onchange: "this.form.submit()" %>
+      <% end %>
+      <%= form_with url: dashboard_path, method: :get, local: true, class: "d-flex align-items-center gap-1" do |f| %>
+        <%= f.hidden_field :company_id, value: params[:company_id] %>
+        <%= f.hidden_field :month, value: params[:month] %>
+        <%= f.label :center_id, t('dashboard.center_filter'), class: "form-label mb-0 small text-muted" %>
+        <%= f.select :center_id, center_options_for_dashboard(@centers), { selected: params[:center_id] }, { class: "form-select form-select-sm", style: "width: auto", onchange: "this.form.submit()", disabled: @centers.blank? } %>
+      <% end %>
+      <div class="btn-group btn-group-sm" role="group">
+        <%= link_to t('dashboard.this_month'), dashboard_path(dashboard_filter_params(month: Date.current.strftime("%Y-%m"))), class: "btn #{@target_month == Date.current ? 'btn-primary' : 'btn-outline-primary'}" %>
+        <%= link_to t('dashboard.last_month'), dashboard_path(dashboard_filter_params(month: 1.month.ago.strftime("%Y-%m"))), class: "btn #{@target_month == 1.month.ago.to_date.beginning_of_month ? 'btn-primary' : 'btn-outline-primary'}" %>
+      </div>
+      <%= form_with url: dashboard_path, method: :get, local: true, class: "d-flex align-items-center gap-1" do |f| %>
+        <%= f.hidden_field :company_id, value: params[:company_id] %>
+        <%= f.hidden_field :center_id, value: params[:center_id] %>
+        <%= f.select :month, month_options_for_dashboard, { selected: @target_month.strftime("%Y-%m") }, class: "form-select form-select-sm", style: "width: auto", onchange: "this.form.submit()" %>
+      <% end %>
+    <% end %>
+    <div class="d-none d-sm-flex align-items-center px-3 py-2 rounded bg-light border border-opacity-25" style="border-color: rgba(0,0,0,.08) !important;">
+      <i class="bi bi-calendar3 text-muted me-2" style="font-size: 1.1rem;"></i>
+      <div>
+        <span class="small text-muted d-block lh-1"><%= t('dashboard.today') %></span>
+        <span class="fw-semibold text-dark" style="font-size: 0.95rem;"><%= format_date_with_weekday(Date.current) %></span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -20,8 +64,8 @@
             </div>
           </div>
           <div class="flex-grow-1 ms-3">
-            <small class="text-muted d-block"><%= t('dashboard.orders_this_month') %></small>
-            <h3 class="fw-bold mb-0"><%= @orders_this_month %></h3>
+            <small class="text-muted d-block"><%= t('dashboard.orders_in_month', month: @target_month.strftime("%Y年%m月")) %></small>
+            <h3 class="fw-bold mb-0"><%= @orders_in_month %></h3>
           </div>
         </div>
       </div>
@@ -38,13 +82,50 @@
             </div>
           </div>
           <div class="flex-grow-1 ms-3">
-            <small class="text-muted d-block"><%= t('dashboard.total_amount') %></small>
-            <h3 class="fw-bold mb-0"><%= number_to_currency(@total_amount_this_month, unit: "¥", precision: 0) %></h3>
+            <small class="text-muted d-block"><%= t('dashboard.total_amount_in_month', month: @target_month.strftime("%Y年%m月")) %></small>
+            <h3 class="fw-bold mb-0"><%= number_to_currency(@total_amount_in_month, unit: "¥", precision: 0) %></h3>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <% if current_user&.internal_admin? && defined?(@cost_total_in_month) %>
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <div class="d-inline-flex align-items-center justify-content-center rounded bg-secondary bg-gradient shadow-sm" style="width: 48px; height: 48px;">
+                <i class="bi bi-box-seam text-white fs-5"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <small class="text-muted d-block"><%= t('dashboard.cost_in_month', month: @target_month.strftime("%Y年%m月")) %></small>
+              <h3 class="fw-bold mb-0"><%= number_to_currency(@cost_total_in_month, unit: "¥", precision: 0) %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <div class="d-inline-flex align-items-center justify-content-center rounded <%= @profit_in_month >= 0 ? 'bg-info' : 'bg-danger' %> bg-gradient shadow-sm" style="width: 48px; height: 48px;">
+                <i class="bi bi-graph-up-arrow text-white fs-5"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <small class="text-muted d-block"><%= t('dashboard.profit_in_month', month: @target_month.strftime("%Y年%m月")) %></small>
+              <h3 class="fw-bold mb-0 <%= @profit_in_month >= 0 ? 'text-info' : 'text-danger' %>"><%= number_to_currency(@profit_in_month, unit: "¥", precision: 0) %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 
   <% if @pending_approvals_count > 0 %>
     <div class="col-md-6 col-lg-3">
@@ -71,6 +152,188 @@
     </div>
   <% end %>
 </div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom">
+    <% if current_user&.internal_admin? %>
+      <h5 class="card-title mb-1 fw-bold"><%= t('dashboard.chart.cost_profit_title') %></h5>
+      <small class="text-muted"><%= t('dashboard.chart.cost_profit_subtitle') %></small>
+    <% else %>
+      <h5 class="card-title mb-1 fw-bold"><%= t('dashboard.chart.orders_amount_title') %></h5>
+      <small class="text-muted"><%= t('dashboard.chart.orders_amount_subtitle') %></small>
+    <% end %>
+  </div>
+  <div class="card-body">
+    <div class="position-relative" style="height: 280px;">
+      <canvas id="mainChart" aria-label="<%= current_user&.internal_admin? ? t('dashboard.chart.cost_profit_title') : t('dashboard.chart.orders_amount_title') %>"></canvas>
+    </div>
+  </div>
+</div>
+
+<% if @co2_reduced_kg.to_f > 0 %>
+<div class="card shadow-sm border-0 mb-4 overflow-hidden" style="border-left: 4px solid #20c997 !important;">
+  <div class="card-body py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-4 text-center mb-3 mb-lg-0">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-15 p-4">
+          <i class="bi bi-globe2 text-success" style="font-size: 3rem;"></i>
+        </div>
+        <h4 class="fw-bold text-success mt-3 mb-1">
+          <%= @co2_reduced_kg >= 1000 ? "#{(@co2_reduced_kg / 1000).round(2)} t" : "#{@co2_reduced_kg.round(1)} kg" %>
+        </h4>
+        <small class="text-muted"><%= t('dashboard.eco_contribution.total_label') %></small>
+        <p class="small text-muted mt-1 mb-0"><%= t('dashboard.eco_contribution.subtitle', month: @target_month.strftime("%Y年%m月")) %></p>
+      </div>
+      <div class="col-lg-8">
+        <div class="row g-3">
+          <% co2_equivalents_for_display(@co2_reduced_kg).each do |eq| %>
+            <div class="col-6 col-md-3">
+              <div class="d-flex align-items-center p-3 rounded-3 h-100" style="background: linear-gradient(135deg, rgba(32, 201, 151, 0.08) 0%, rgba(32, 201, 151, 0.03) 100%);">
+                <div class="flex-shrink-0 me-2">
+                  <% icons = { trees: "bi-tree", car_km: "bi-car-front", smartphone_charges: "bi-phone", ecobags: "bi-bag" } %>
+                  <i class="bi <%= icons[eq[:key]] || 'bi-leaf' %> text-success fs-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <span class="fw-bold text-success d-block" style="font-size: 1.1rem;"><%= eq[:value] %></span>
+                  <span class="small text-muted text-break"><%= eq[:label] %></span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold"><%= t('dashboard.chart.co2_title') %></h5>
+    <small class="text-muted"><%= t('dashboard.chart.co2_subtitle') %></small>
+  </div>
+  <div class="card-body">
+    <div class="position-relative" style="height: 280px;">
+      <canvas id="co2Chart" aria-label="<%= t('dashboard.chart.co2_title') %>"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<script>
+(function() {
+  var data = <%= raw @chart_data.to_json %>;
+  var isAdmin = <%= current_user&.internal_admin? ? 'true' : 'false' %>;
+  var labels = data.map(function(d) { return d.label; });
+  var ctx = document.getElementById('mainChart');
+  if (!ctx) return;
+
+  if (isAdmin && data[0] && data[0].cost !== undefined) {
+    var cost = data.map(function(d) { return d.cost; });
+    var profit = data.map(function(d) { return d.profit; });
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: '<%= t("dashboard.chart.cost_series") %>', data: cost, borderColor: 'rgb(108, 117, 125)', backgroundColor: 'rgba(108, 117, 125, 0.1)', fill: true, tension: 0.3 },
+          { label: '<%= t("dashboard.chart.profit_series") %>', data: profit, borderColor: 'rgb(13, 202, 240)', backgroundColor: 'rgba(13, 202, 240, 0.1)', fill: true, tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { callbacks: { label: function(item) { return item.dataset.label + ': ¥' + Number(item.raw).toLocaleString(); } } }
+        },
+        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '¥' + (v >= 10000 ? (v/10000) + '万' : v); } } } }
+      }
+    });
+  } else {
+    var ordersCount = data.map(function(d) { return d.orders_count; });
+    var totalAmount = data.map(function(d) { return d.total_amount; });
+    var datasets = [
+      { type: 'bar', label: '<%= t("dashboard.chart.orders_count_series") %>', data: ordersCount, backgroundColor: 'rgba(13, 110, 253, 0.7)', borderColor: 'rgb(13, 110, 253)', borderWidth: 1, yAxisID: 'y' },
+      { type: 'line', label: '<%= t("dashboard.chart.total_amount_series") %>', data: totalAmount, borderColor: 'rgb(25, 135, 84)', backgroundColor: 'rgba(25, 135, 84, 0.1)', fill: true, tension: 0.3, yAxisID: 'y1' }
+    ];
+    new Chart(ctx, {
+      type: 'bar',
+      data: { labels: labels, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: function(item) {
+                var v = item.raw;
+                return item.dataset.label + ': ' + (item.dataset.yAxisID === 'y1' ? '¥' + Number(v).toLocaleString() : v + '<%= t("dashboard.chart.orders_count_unit") %>');
+              }
+            }
+          }
+        },
+        scales: {
+          y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: '<%= t("dashboard.chart.orders_count_series") %>' } },
+          y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return v >= 10000 ? (v/10000) + '万' : v; } } }
+        }
+      }
+    });
+  }
+})();
+</script>
+<script>
+(function() {
+  var data = <%= raw @co2_chart_data.to_json %>;
+  var labels = data.map(function(d) { return d.label; });
+  var co2 = data.map(function(d) { return d.co2; });
+  var ctx = document.getElementById('co2Chart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '<%= t("dashboard.chart.co2_series") %>',
+        data: co2,
+        borderColor: 'rgb(32, 201, 151)',
+        backgroundColor: 'rgba(32, 201, 151, 0.15)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              var v = Number(item.raw);
+              return item.dataset.label + ': ' + (v >= 1000 ? (v/1000).toFixed(2) + ' t' : v.toFixed(2) + ' kg');
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(v) {
+              return v >= 1000 ? (v/1000) + ' t' : v + ' kg';
+            }
+          }
+        }
+      }
+    }
+  });
+})();
+</script>
 
 <div class="card shadow-sm border-0">
   <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
@@ -104,7 +367,7 @@
                 <td class="text-muted"><%= order.order_date %></td>
                 <td class="fw-medium"><%= order.customer.center_name %></td>
                 <td>
-                  <%= render "orders/status_badge", status: order.shipping_status %>
+                  <%= render "orders/status_badge", status: order.shipping_status, order: order %>
                 </td>
                 <td class="text-end fw-semibold">
                   <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>

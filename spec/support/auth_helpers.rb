@@ -4,7 +4,7 @@ module AuthHelpers
   # テスト用のログインヘルパー
   # 使用例: login_as_admin または login_as(user)
   
-  def login_as(user_or_email, password: "password123456")
+  def login_as(user_or_email, password: "Password123456")
     user = if user_or_email.is_a?(String)
       User.find_by(email: user_or_email) || create_test_user(user_or_email, password: password)
     else
@@ -27,8 +27,8 @@ module AuthHelpers
     
     user = User.find_or_initialize_by(email: "admin@system.local")
     if user.new_record?
-      user.password = "password123456"
-      user.password_confirmation = "password123456"
+      user.password = "Password123456"
+      user.password_confirmation = "Password123456"
       user.confirmed_at = Time.current
       user.save!
     end
@@ -57,8 +57,8 @@ module AuthHelpers
     
     user = User.find_or_initialize_by(email: "admin@acme.com")
     if user.new_record?
-      user.password = "password123456"
-      user.password_confirmation = "password123456"
+      user.password = "Password123456"
+      user.password_confirmation = "Password123456"
       user.confirmed_at = Time.current
       user.save!
     end
@@ -87,8 +87,8 @@ module AuthHelpers
     
     user = User.find_or_initialize_by(email: "user@acme.com")
     if user.new_record?
-      user.password = "password123456"
-      user.password_confirmation = "password123456"
+      user.password = "Password123456"
+      user.password_confirmation = "Password123456"
       user.confirmed_at = Time.current
       user.save!
     end
@@ -107,7 +107,7 @@ module AuthHelpers
 
   private
 
-  def create_test_user(email, password: "password123456")
+  def create_test_user(email, password: "Password123456")
     company = Company.find_or_create_by!(code: "TEST") do |c|
       c.name = "Test Company"
       c.domains = [email.split("@").last]

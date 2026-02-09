@@ -30,6 +30,26 @@ class CustomerPolicy < ApplicationPolicy
     internal_admin?
   end
 
+  def download_invoice?
+    # 請求書ダウンロードはInternal Adminのみ
+    internal_admin?
+  end
+
+  def download_invoices_bulk?
+    # 請求書一括ダウンロードはInternal Adminのみ（会社指定で全請求先センター分をZIP）
+    internal_admin?
+  end
+
+  def download_invoices_by_center?
+    # 請求先センターに紐づくセンターごとに請求書をZIPで出す（Internal Adminのみ）
+    internal_admin?
+  end
+
+  def download_statement?
+    # 明細書ダウンロードはInternal Adminのみ（センターごとの明細）
+    internal_admin?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.user_profile&.active?

@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "approval_requests", force: :cascade do |t|
     t.bigint "user_profile_id", null: false
@@ -39,6 +67,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "postal_code"
+    t.string "prefecture"
+    t.string "city"
+    t.string "address1"
+    t.string "address2"
+    t.string "phone"
+    t.string "fax"
+    t.string "registration_number"
+    t.string "bank_account_1"
+    t.string "bank_account_2"
     t.index ["code"], name: "index_companies_on_code", unique: true
     t.index ["domains"], name: "index_companies_on_domains", using: :gin
     t.index ["is_active"], name: "index_companies_on_is_active"
@@ -56,8 +94,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "billing_center_id"
+    t.boolean "is_billing_center", default: false, null: false
+    t.index ["billing_center_id"], name: "index_customers_on_billing_center_id"
     t.index ["company_id", "center_code"], name: "index_customers_on_company_id_and_center_code", unique: true
     t.index ["company_id", "is_active"], name: "index_customers_on_company_id_and_is_active"
+    t.index ["company_id", "is_billing_center"], name: "index_customers_on_company_id_and_is_billing_center"
     t.index ["company_id"], name: "index_customers_on_company_id"
   end
 
@@ -74,6 +116,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.index ["company_id", "integration_type"], name: "index_integration_logs_on_company_id_and_integration_type"
     t.index ["company_id"], name: "index_integration_logs_on_company_id"
     t.index ["order_id"], name: "index_integration_logs_on_order_id"
+  end
+
+  create_table "issuer_settings", force: :cascade do |t|
+    t.string "name", default: "", null: false
+    t.string "postal_code"
+    t.string "prefecture"
+    t.string "city"
+    t.string "address1"
+    t.string "address2"
+    t.string "phone"
+    t.string "fax"
+    t.string "registration_number"
+    t.string "bank_account_1"
+    t.string "bank_account_2"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "item_companies", force: :cascade do |t|
@@ -95,6 +153,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "cost_price", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "shipping_cost", precision: 12, scale: 2, default: "0.0", null: false
     t.index ["company_id", "is_active"], name: "index_items_on_company_id_and_is_active"
     t.index ["company_id", "item_code"], name: "index_items_on_company_id_and_item_code", unique: true
     t.index ["company_id"], name: "index_items_on_company_id"
@@ -126,6 +186,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.decimal "co2_amount", precision: 12, scale: 4, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "cost_price_snapshot", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "shipping_cost_snapshot", precision: 12, scale: 2, default: "0.0", null: false
     t.index ["company_id"], name: "index_order_lines_on_company_id"
     t.index ["item_id"], name: "index_order_lines_on_item_id"
     t.index ["order_id", "item_id"], name: "index_order_lines_on_order_id_and_item_id"
@@ -225,10 +287,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_093616) do
     t.index ["whodunnit"], name: "index_versions_on_whodunnit"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "approval_requests", "companies"
   add_foreign_key "approval_requests", "user_profiles"
   add_foreign_key "approval_requests", "users", column: "reviewed_by_id"
   add_foreign_key "customers", "companies"
+  add_foreign_key "customers", "customers", column: "billing_center_id", on_delete: :restrict
   add_foreign_key "integration_logs", "companies"
   add_foreign_key "integration_logs", "orders"
   add_foreign_key "item_companies", "companies"

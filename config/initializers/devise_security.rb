@@ -8,12 +8,10 @@ Devise.setup do |config|
   # Deny old passwords on change
   config.deny_old_passwords = 5 # Remember last 5 passwords
 
-  # Password complexity requirements
-  # Uncomment to enforce:
-  # config.password_complexity = {
-  #   digit: 1,
-  #   lower: 1,
-  #   upper: 1,
-  #   symbol: 1
-  # }
+  # Password complexity: 英数字混在（8桁以上且つ英数字混在の要件）
+  config.password_complexity = {
+    digit: 1,
+    lower: 1,
+    upper: 1
+  }
 end

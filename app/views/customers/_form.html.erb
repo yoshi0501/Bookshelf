@@ -15,17 +15,33 @@
             <%= f.label :company_id, t('customers.form.company'), class: "form-label fw-semibold" %>
             <%= f.collection_select :company_id, @companies, :id, :name, 
                 { prompt: t('customers.form.select_company') }, 
-                { class: "form-select" } %>
+                { class: "form-select", id: "customer_company_id", onchange: "updateBillingCenters(this.value)" } %>
           </div>
         </div>
       <% end %>
       <div class="row g-3">
+        <div class="col-md-12">
+          <div class="form-check form-switch mb-3">
+            <%= f.check_box :is_billing_center, class: "form-check-input", role: "switch", id: "customer_is_billing_center", onchange: "toggleBillingCenterFields()" %>
+            <%= f.label :is_billing_center, t('customers.form.is_billing_center'), class: "form-check-label fw-semibold" %>
+            <div class="form-text"><%= t('customers.form.is_billing_center_help') %></div>
+          </div>
+        </div>
+        <div class="col-md-6" id="billing_center_field" style="<%= 'display: none;' if customer.is_billing_center? %>">
+          <%= f.label :billing_center_id, t('customers.form.billing_center'), class: "form-label fw-semibold" do %>
+            <%= t('customers.form.billing_center') %>
+            <span class="text-danger">*</span>
+          <% end %>
+          <%= f.collection_select :billing_center_id, @billing_centers || [], :last, :first, 
+              { include_blank: t('customers.form.select_billing_center') }, 
+              { class: "form-select", id: "customer_billing_center_id", required: !customer.is_billing_center? } %>
+          <div class="form-text"><%= t('customers.form.billing_center_help') %></div>
+        </div>
         <div class="col-md-6">
           <%= f.label :center_code, t('customers.form.center_code'), class: "form-label fw-semibold" %>
           <%= f.text_field :center_code, class: "form-control font-monospace" %>
         </div>
-
-        <div class="col-md-6">
+        <div class="col-md-12">
           <%= f.label :center_name, t('customers.form.center_name'), class: "form-label fw-semibold" %>
           <%= f.text_field :center_name, class: "form-control" %>
         </div>
@@ -91,3 +107,58 @@
     <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
   </div>
 <% end %>
+
+<script>
+  function updateBillingCenters(companyId) {
+    if (!companyId) {
+      const select = document.getElementById('customer_billing_center_id');
+      if (select) {
+        select.innerHTML = '<option value=""><%= j(t('customers.form.select_billing_center')) %></option>';
+      }
+      return;
+    }
+
+    fetch(`/customers.json?company_id=${companyId}&billing_centers_only=true`)
+      .then(response => response.json())
+      .then(data => {
+        const select = document.getElementById('customer_billing_center_id');
+        if (select) {
+          select.innerHTML = '<option value=""><%= j(t('customers.form.select_billing_center')) %></option>';
+          data.forEach(billingCenter => {
+            const option = document.createElement('option');
+            option.value = billingCenter.id;
+            option.textContent = billingCenter.display_name;
+            select.appendChild(option);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error loading billing centers:', error);
+      });
+  }
+
+  function toggleBillingCenterFields() {
+    const isBillingCenter = document.getElementById('customer_is_billing_center').checked;
+    const billingCenterField = document.getElementById('billing_center_field');
+    const billingCenterSelect = document.getElementById('customer_billing_center_id');
+    
+    if (isBillingCenter) {
+      billingCenterField.style.display = 'none';
+      if (billingCenterSelect) {
+        billingCenterSelect.value = '';
+        billingCenterSelect.removeAttribute('required');
+      }
+    } else {
+      billingCenterField.style.display = 'block';
+      if (billingCenterSelect) {
+        billingCenterSelect.setAttribute('required', 'required');
+      }
+    }
+  }
+
+  // ページ読み込み時に実行
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleBillingCenterFields();
+  });
+</script>
+

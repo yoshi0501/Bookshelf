@@ -40,6 +40,7 @@ class Order < ApplicationRecord
     where("order_no ILIKE ?", "%#{sanitize_sql_like(query)}%") if query.present?
   }
   scope :recent, -> { order(order_date: :desc, created_at: :desc) }
+  scope :by_ordered_by, ->(user_id) { where(ordered_by_user_id: user_id) if user_id.present? }
 
   # Callbacks
   before_validation :set_order_no, on: :create
@@ -66,6 +67,8 @@ class Order < ApplicationRecord
           item: item,
           quantity: line_attrs[:quantity],
           unit_price_snapshot: item.unit_price,
+          cost_price_snapshot: item.cost_price.to_d,
+          shipping_cost_snapshot: item.shipping_cost.to_d,
           amount: item.unit_price * line_attrs[:quantity].to_i,
           co2_amount: (item.co2_per_unit || 0) * line_attrs[:quantity].to_i
         )

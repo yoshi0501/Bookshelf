@@ -5,6 +5,7 @@ class Item < ApplicationRecord
   include Auditable
 
   # Associations
+  has_one_attached :image
   has_many :order_lines, dependent: :restrict_with_error
   has_many :item_companies, dependent: :destroy
   has_many :visible_companies, through: :item_companies, source: :company
@@ -16,6 +17,8 @@ class Item < ApplicationRecord
   validates :unit_price, presence: true,
             numericality: { greater_than_or_equal_to: 0, less_than: 10_000_000_000 }
   validates :co2_per_unit, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :cost_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :shipping_cost, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   # Scopes
   scope :active, -> { where(is_active: true) }

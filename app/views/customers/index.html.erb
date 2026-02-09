@@ -15,10 +15,10 @@
 
 <% if @companies.present? && @companies.size > 1 %>
   <!-- 会社タブ（複数会社がある場合のみ表示） -->
-  <ul class="nav nav-tabs mb-4" role="tablist">
+  <ul class="nav nav-tabs mb-3" role="tablist">
     <% @companies.each_with_index do |company, index| %>
       <li class="nav-item" role="presentation">
-        <%= link_to customers_path(company_id: company.id), 
+        <%= link_to customers_path(company_id: company.id, type: params[:type]), 
             class: "nav-link #{'active' if @selected_company&.id == company.id}",
             data: { turbo: false } do %>
           <i class="bi bi-building me-1"></i><%= company.name %>
@@ -28,18 +28,68 @@
   </ul>
 <% end %>
 
+<!-- 請求先センターと受注センターのタブ -->
+<ul class="nav nav-pills mb-4" role="tablist">
+  <li class="nav-item" role="presentation">
+    <%= link_to customers_path(company_id: @selected_company&.id, type: nil), 
+        class: "nav-link #{'active' unless @show_billing_centers}",
+        data: { turbo: false } do %>
+      <i class="bi bi-geo-alt me-1"></i><%= t('customers.index.receiving_centers') %>
+    <% end %>
+  </li>
+  <li class="nav-item" role="presentation">
+    <%= link_to customers_path(company_id: @selected_company&.id, type: 'billing_centers'), 
+        class: "nav-link #{'active' if @show_billing_centers}",
+        data: { turbo: false } do %>
+      <i class="bi bi-receipt me-1"></i><%= t('customers.index.billing_centers') %>
+    <% end %>
+  </li>
+</ul>
+
 <div class="card shadow-sm border-0">
   <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
     <div>
       <h5 class="card-title mb-1 fw-bold">
         <% if @selected_company %>
-          <%= @selected_company.name %> - <%= t('customers.index.title') %>
+          <%= @selected_company.name %> - 
+          <% if @show_billing_centers %>
+            <%= t('customers.index.billing_centers') %>
+          <% else %>
+            <%= t('customers.index.receiving_centers') %>
+          <% end %>
         <% else %>
-          <%= t('customers.index.title') %>
+          <% if @show_billing_centers %>
+            <%= t('customers.index.billing_centers') %>
+          <% else %>
+            <%= t('customers.index.receiving_centers') %>
+          <% end %>
         <% end %>
       </h5>
-      <small class="text-muted"><%= t('customers.index.description') %></small>
+      <small class="text-muted">
+        <% if @show_billing_centers %>
+          <%= t('customers.index.billing_centers_description') %>
+        <% else %>
+          <%= t('customers.index.receiving_centers_description') %>
+        <% end %>
+      </small>
     </div>
+    <% if current_user&.internal_admin? && @show_billing_centers && @selected_company %>
+      <div class="dropdown">
+        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="invoiceBulkDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-zip me-1"></i><%= t('customers.invoice_bulk.button') %>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="invoiceBulkDropdown">
+          <% (0..11).each do |i| %>
+            <% target_date = Date.current - i.months %>
+            <li>
+              <%= link_to download_invoices_bulk_customers_path(company_id: @selected_company.id, year: target_date.year, month: target_date.month), class: "dropdown-item", data: { turbo: false } do %>
+                <%= target_date.strftime('%Y年%m月') %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
   </div>
   <div class="card-body p-0">
     <% if @customers.empty? %>
@@ -66,19 +116,36 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th><%= t('customers.table.code') %></th>
-              <th><%= t('customers.table.name') %></th>
-              <th><%= t('customers.table.address') %></th>
-              <th><%= t('customers.table.status') %></th>
+              <th class="sortable-th"><%= customers_sort_link('center_code', t('customers.table.code'), @selected_company&.id) %></th>
+              <th class="sortable-th"><%= customers_sort_link('center_name', t('customers.table.name'), @selected_company&.id) %></th>
+              <th class="sortable-th"><%= customers_sort_link('prefecture', t('customers.table.address'), @selected_company&.id) %></th>
+              <% unless @show_billing_centers %>
+                <th><%= t('customers.table.billing_center') %></th>
+              <% end %>
+              <th class="sortable-th"><%= customers_sort_link('is_active', t('customers.table.status'), @selected_company&.id) %></th>
               <th class="text-end"><%= t('customers.table.actions') %></th>
             </tr>
           </thead>
           <tbody>
             <% @customers.each do |customer| %>
               <tr>
-                <td class="font-monospace fw-semibold"><%= customer.center_code %></td>
+                <td class="font-monospace fw-semibold">
+                  <%= customer.center_code %>
+                  <% if @show_billing_centers %>
+                    <span class="badge bg-primary ms-2"><i class="bi bi-receipt"></i></span>
+                  <% end %>
+                </td>
                 <td class="fw-medium"><%= customer.center_name %></td>
                 <td class="text-muted"><%= customer.full_address %></td>
+                <% unless @show_billing_centers %>
+                  <td>
+                    <% if customer.billing_center %>
+                      <i class="bi bi-receipt me-1"></i><%= customer.billing_center.display_name %>
+                    <% else %>
+                      <span class="text-danger">未設定</span>
+                    <% end %>
+                  </td>
+                <% end %>
                 <td>
                   <% if customer.is_active %>
                     <span class="badge bg-success"><%= t('customers.status.active') %></span>

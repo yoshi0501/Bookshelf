@@ -22,6 +22,22 @@
   </div>
 </div>
 
+<% if @order.order_approval_request&.status_rejected? %>
+  <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start mb-4" role="alert">
+    <i class="bi bi-x-circle-fill fs-4 me-3 mt-1"></i>
+    <div class="flex-grow-1">
+      <h6 class="alert-heading fw-semibold mb-2"><%= t('orders.show.rejected_heading') %></h6>
+      <p class="mb-1 small">
+        <%= t('orders.show.rejected_by') %>: <%= @order.order_approval_request.reviewed_by&.name || @order.order_approval_request.reviewed_by&.email %>
+        （<%= @order.order_approval_request.reviewed_at&.strftime("%Y年%m月%d日 %H:%M") %>）
+      </p>
+      <% if @order.order_approval_request.review_comment.present? %>
+        <p class="mb-0 small"><strong><%= t('orders.show.rejected_reason') %>:</strong> <%= @order.order_approval_request.review_comment %></p>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <div class="row g-4">
   <div class="col-lg-8">
     <div class="card shadow-sm border-0 mb-4">
@@ -36,7 +52,7 @@
           <div class="col-md-6">
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.status') %></label>
             <p class="mb-0">
-              <%= render "orders/status_badge", status: @order.shipping_status %>
+              <%= render "orders/status_badge", status: @order.shipping_status, order: @order %>
             </p>
           </div>
           <div class="col-md-6">

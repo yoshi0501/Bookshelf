@@ -40,6 +40,8 @@ ja:
 
   errors:
     record_not_found: "レコードが見つからないか、アクセスが拒否されました"
+    form_errors:
+      heading: "入力内容をご確認ください"
     messages:
       not_saved:
         one: "%{resource}の保存時に1件のエラーが発生しました"
@@ -49,11 +51,13 @@ ja:
     not_authorized: "この操作を実行する権限がありません"
 
   devise:
+    password_expiring_soon: "パスワードの有効期限が%{count}日後に迫っています。事前に変更してください。"
     failure:
       account_rejected: "アカウントが拒否されました"
       unassigned_company: "メールドメインがどの会社にも関連付けられていません"
       pending_approval: "アカウントは承認待ちです"
       unauthenticated: "アカウント登録もしくはログインしてください"
+      already_authenticated: "既にログインしています"
       not_found_in_database: "メールアドレスまたはパスワードが正しくありません。"
       invalid: "メールアドレスまたはパスワードが正しくありません。"
       invalid_token: "メールアドレスまたはパスワードが正しくありません。"
@@ -62,6 +66,7 @@ ja:
       locked: "アカウントがロックされています。"
       user:
         unauthenticated: "アカウント登録もしくはログインしてください"
+        already_authenticated: "既にログインしています"
     registrations:
       invalid_email_domain: "メールドメインが登録されている会社に関連付けられていません"
       updated: "アカウント情報を更新しました"
@@ -87,9 +92,18 @@ ja:
         currently_waiting_confirmation_for_email: "%{email}の確認を待っています"
         password_requirements: "パスワード要件"
         password_requirements_desc: "パスワード変更時の要件です"
-        requirement_length: "12文字以上128文字以下"
+        requirement_length: "8文字以上128文字以下"
         requirement_current: "現在のパスワードの入力が必要"
         requirement_match: "新しいパスワードと確認が一致している必要がある"
+        verify_password_title: "登録中のパスワードを確認"
+        verify_password_desc: "現在のパスワードが正しいか確認できます（パスワードは画面に表示されません）"
+        verify_password_label: "現在のパスワード"
+        verify_password_placeholder: "パスワードを入力"
+        verify_password_submit: "確認する"
+      verify_password:
+        blank: "パスワードを入力してください"
+        correct: "パスワードは正しいです"
+        incorrect: "パスワードが一致しません"
       new:
         title: "アカウントを作成"
         description: "メールドメインは登録されている会社のドメインと一致する必要があります"
@@ -103,8 +117,10 @@ ja:
     sessions:
       signed_in: "ログインしました"
       signed_out: "ログアウトしました"
+      already_signed_out: "既にログアウトしています"
       user:
         signed_in: "ログインしました"
+        already_signed_out: "既にログアウトしています"
       new:
         title: "アカウントにログイン"
         description: "おかえりなさい！詳細を入力してください"
@@ -179,6 +195,7 @@ ja:
       linked_receiving_centers_desc: "この請求先センターに紐づいている受注センターの一覧です"
       no_linked_receiving_centers: "紐づいている受注センターがありません"
       download_invoice: "請求書ダウンロード"
+      download_statement: "明細書ダウンロード"
       receiving_centers_orders: "受注センター別の受注一覧"
       receiving_centers_orders_desc: "各受注センターが受注した発注の一覧です"
       total_orders: "受注件数"
@@ -190,6 +207,7 @@ ja:
       no_orders: "指定された期間に発注データがありません"
       title: "請求書"
       billing_to: "請求先"
+      target_center: "対象"
       company_code_label: "会社コード"
       period_label: "請求期間"
       period_format: "%{year}年%{month}月"
@@ -229,6 +247,37 @@ ja:
       footer_text: "以上、ご請求申し上げます。"
       issued_date_label: "発行日"
       issued_date_format: "%{date}"
+    invoice_by_center:
+      button: "センター別で請求書（ZIP）"
+      no_receiving_centers: "この請求先に紐づく受注センターがありません"
+    invoice_bulk:
+      button: "請求書一括ダウンロード"
+      invalid_company: "指定された会社が見つかりません"
+      no_billing_centers: "この会社に請求先センターがありません"
+      no_orders: "指定された期間に発注データがありません（全センターで0件です）"
+    statement:
+      title: "明細書"
+      target_center: "対象センター"
+      target_billing_center: "請求先"
+      period: "対象期間"
+      subtotal: "小計"
+      year: "年"
+      month: "月"
+      total_ex_tax: "合計（税抜）"
+      tax: "消費税"
+      total_with_tax: "合計（税込）"
+      no_orders: "指定された期間に発注データがありません"
+      table:
+        order_date: "発注日"
+        order_no: "発注番号"
+        company: "会社"
+        item_name: "品名"
+        quantity: "数量"
+        unit: "単位"
+        unit_price: "単価"
+        amount: "金額"
+        tax: "消費税"
+        remarks: "備考"
     new:
       title: "新規センター登録"
       description: "新しい配送センターを登録します"
@@ -394,20 +443,31 @@ ja:
       basic_info: "基本情報"
       basic_info_desc: "商品の基本情報を入力してください"
       price_info: "価格・環境情報"
-      price_info_desc: "商品の価格とCO2排出量を入力してください"
+      price_info_desc: "商品の価格とCO2削減量を入力してください"
       visible_companies: "販売先会社"
       visible_companies_desc: "この販売商品を販売する会社を選択してください"
       visible_companies_help: "販売元会社は自動的に選択されます。他の会社にも販売する場合はチェックを入れてください。"
       status: "ステータス"
       status_desc: "販売商品の有効/無効を設定します"
       basic_info_desc: "販売商品の基本情報を入力してください"
-      price_info_desc: "販売商品の価格とCO2排出量を入力してください"
+      price_info_desc: "販売商品の価格とCO2削減量を入力してください"
       company: "販売元会社"
       select_company: "販売元会社を選択してください"
       item_code: "商品コード"
       name: "商品名"
       unit_price: "単価"
       co2_per_unit: "CO2/単位"
+      cost_price: "原価"
+      cost_price_help: "損益計算用（管理者ダッシュボードで表示）"
+      shipping_cost: "送料"
+      shipping_cost_help: "1単位あたりの送料（損益計算用）"
+      image: "商品画像"
+      image_desc: "商品の画像を登録・変更できます"
+      current_image: "現在の画像"
+      remove_image: "画像を削除する"
+      change_image: "画像を変更"
+      upload_image: "画像を選択"
+      image_help: "JPEG、PNG、GIFなど（任意）"
       is_active: "有効"
     import:
       title: "CSV一括登録"
@@ -481,10 +541,16 @@ ja:
       date_from: "開始日"
       date_to: "終了日"
       all_statuses: "すべてのステータス"
+      scope: "表示"
+      scope_all: "すべての発注"
+      scope_my_orders: "自分の発注のみ"
     show:
       title: "発注詳細"
       edit: "編集"
       back: "戻る"
+      rejected_heading: "この発注は却下されました"
+      rejected_by: "却下者"
+      rejected_reason: "却下理由"
       ship: "出荷済みにする"
       deliver: "配送済みにする"
       cancel: "キャンセル"
@@ -500,7 +566,7 @@ ja:
       order_date: "発注日"
       ordered_by: "発注者"
       total_amount: "合計金額"
-      co2_total: "CO2合計"
+      co2_total: "CO2削減量"
       customer: "センター"
       ship_to: "配送先"
       tracking_no: "追跡番号"
@@ -558,6 +624,8 @@ ja:
       actions: "操作"
     status:
       draft: "下書き"
+      pending_approval: "承認待ち"
+      rejected: "却下"
       confirmed: "発注済み"
       shipped: "出荷済み"
       delivered: "配送済み"
@@ -747,7 +815,51 @@ ja:
     today: "今日"
     orders_this_month: "今月の発注数"
     total_amount: "合計金額"
+    orders_in_month: "%{month}の発注数"
+    total_amount_in_month: "%{month}の合計金額"
+    cost_this_month: "今月の原価・送料"
+    profit_this_month: "今月の損益"
+    cost_in_month: "%{month}の原価・送料"
+    profit_in_month: "%{month}の損益"
+    this_month: "今月"
+    last_month: "先月"
+    company_filter: "表示会社"
+    all_companies: "全社"
+    center_filter: "表示センター"
+    all_centers: "すべてのセンター"
     pending_approvals: "承認待ち"
+    chart:
+      cost_profit_title: "原価・損益の推移"
+      cost_profit_subtitle: "当期年度（4月〜翌3月）の月別原価と損益"
+      cost_series: "原価"
+      profit_series: "損益"
+      orders_amount_title: "発注数・合計金額の推移"
+      orders_amount_subtitle: "当期年度（4月〜翌3月）の月別発注数と合計金額"
+      orders_count_series: "発注数"
+      total_amount_series: "合計金額"
+      orders_count_unit: "件"
+      group_by: "表示"
+      group_month: "月別"
+      group_center: "センター別"
+      sort_by: "並び替え"
+      sort_month: "月順"
+      sort_center: "センター順"
+      sort_orders_count: "発注数順"
+      sort_total_amount: "合計金額順"
+      order_asc: "昇順"
+      order_desc: "降順"
+      co2_title: "CO2削減量の推移"
+      co2_subtitle: "当期年度（4月〜翌3月）の月別CO2削減量（発注ベース）"
+      co2_series: "CO2削減量"
+    eco_contribution:
+      title: "地球への貢献"
+      subtitle: "%{month}のCO2削減で、こんな効果が！"
+      total_label: "CO2削減量"
+      equivalents:
+        trees: "植林した木"
+        car_km: "車で走らなかった距離"
+        smartphone_charges: "スマホ充電を節約"
+        ecobags: "レジ袋を断った枚数"
     review_now: "今すぐ確認"
     recent_orders:
       title: "最近の発注"
@@ -811,6 +923,8 @@ ja:
     models:
       user: "ユーザー"
       billing_center: "請求先センター"
+      # Customer モデルはビジネス上「センター」（請求先センター・受注センター）を表す
+      customer: "センター"
     attributes:
       customer:
         center_code: "センターコード"
@@ -830,19 +944,19 @@ ja:
       order:
         order_no: "発注番号"
         order_date: "発注日"
-        customer_id: "顧客"
+        customer_id: "受注センター"
         shipping_status: "配送ステータス"
         ship_date: "出荷日"
         tracking_no: "追跡番号"
         delivered_date: "配送日"
         total_amount: "合計金額"
-        co2_total: "CO2合計"
+        co2_total: "CO2削減量"
       order_line:
         item_id: "商品"
         quantity: "数量"
         unit_price_snapshot: "単価（スナップショット）"
         amount: "金額"
-        co2_amount: "CO2金額"
+        co2_amount: "CO2削減量"
       company:
         code: "会社コード"
         name: "会社名"
@@ -860,7 +974,7 @@ ja:
         password_confirmation: "パスワード（確認）"
         current_password: "現在のパスワード"
     models:
-      customer: "顧客"
+      customer: "センター"
       item: "商品"
       order: "発注"
       order_line: "発注明細"
@@ -886,7 +1000,7 @@ ja:
             order_date:
               blank: "発注日を入力してください"
             customer_id:
-              blank: "顧客を選択してください"
+              blank: "受注センターを選択してください"
         user:
           attributes:
             email:
@@ -897,6 +1011,8 @@ ja:
               blank: "パスワードを入力してください"
               too_short: "パスワードは%{count}文字以上で入力してください"
               confirmation: "パスワード（確認）と一致しません"
+              same_as_email: "メールアドレスと同一のパスワードは使用できません"
+              too_common: "単純な文字列や推測されやすいパスワードは使用できません"
             current_password:
               blank: "現在のパスワードを入力してください"
               invalid: "現在のパスワードが正しくありません"

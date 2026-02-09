@@ -8,8 +8,11 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
   before_action :check_member_status
+  before_action :warn_password_expiring_soon
   before_action :set_paper_trail_whodunnit
   before_action :set_paper_trail_request_info
+  before_action :set_pending_order_approvals_count
+  before_action :set_pending_approval_requests_count
 
   after_action :verify_authorized, except: :index, unless: :skip_pundit?
   after_action :verify_policy_scoped, only: :index, unless: :skip_pundit?
@@ -55,6 +58,47 @@ class ApplicationController < ActionController::Base
 
   def skip_pundit?
     devise_controller? || params[:controller] == "pages"
+  end
+
+  # パスワード有効期限の約2週間前から変更を促す
+  def warn_password_expiring_soon
+    return unless user_signed_in?
+    return if devise_controller?
+    return if controller_path == "users/registrations" && action_name == "edit"
+    return unless current_user.respond_to?(:password_changed_at) && current_user.password_changed_at.present?
+
+    expiry = current_user.password_changed_at + 90.days
+    return if Time.current >= expiry # 期限切れは devise-security が処理
+    return if (expiry - Time.current) > 14.days # 14日以内のときだけ促す
+
+    days_left = ((expiry - Time.current) / 1.day).ceil
+    flash.now[:warning] = t("devise.password_expiring_soon", count: days_left)
+  end
+
+  # 発注承認メニューを見れるユーザー向けに、承認待ち件数をヘッダー用にセット
+  def set_pending_order_approvals_count
+    return unless user_signed_in?
+    return if devise_controller?
+    return unless current_user.user_profile&.active?
+    return unless current_user.user_profile&.can_access_admin_dashboard? || current_user.user_profile&.subordinates&.any?
+
+    scope = Pundit.policy_scope(current_user, OrderApprovalRequest)
+    @pending_order_approvals_count = scope.status_pending.count
+  rescue
+    @pending_order_approvals_count = 0
+  end
+
+  # 承認リクエスト（ユーザー登録承認）メニューを見れるユーザー向けに、承認待ち件数をヘッダー用にセット
+  def set_pending_approval_requests_count
+    return unless user_signed_in?
+    return if devise_controller?
+    return unless current_user.user_profile&.active?
+    return unless current_user.user_profile&.can_access_admin_dashboard?
+
+    scope = Pundit.policy_scope(current_user, ApprovalRequest)
+    @pending_approval_requests_count = scope.status_pending.count
+  rescue
+    @pending_approval_requests_count = 0
   end
 
   def set_paper_trail_request_info

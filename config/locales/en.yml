@@ -3,6 +3,8 @@ en:
 
   errors:
     record_not_found: "Record not found or access denied"
+    form_errors:
+      heading: "Please check the following"
     messages:
       not_saved:
         one: "1 error prohibited this %{resource} from being saved"
@@ -12,12 +14,17 @@ en:
     not_authorized: "You are not authorized to perform this action"
 
   devise:
+    password_expiring_soon: "Your password will expire in %{count} days. Please change it in advance."
     failure:
       account_rejected: "Your account has been rejected"
       unassigned_company: "Your email domain is not associated with any company"
       pending_approval: "Your account is pending approval"
     registrations:
       invalid_email_domain: "Your email domain is not associated with any registered company"
+      verify_password:
+        blank: "Please enter your password"
+        correct: "Your password is correct"
+        incorrect: "Password does not match"
 
   customers:
     created: "Customer was successfully created"
@@ -30,8 +37,76 @@ en:
     updated: "Item was successfully updated"
     deactivated: "Item was deactivated"
     deactivate_failed: "Could not deactivate item"
+    form:
+      cost_price: "Cost price"
+      cost_price_help: "For P&L (visible on admin dashboard)"
+      shipping_cost: "Shipping cost"
+      shipping_cost_help: "Per unit shipping (for P&L)"
+      image: "Product image"
+      image_desc: "Upload or change the product image"
+      current_image: "Current image"
+      remove_image: "Remove image"
+      change_image: "Change image"
+      upload_image: "Select image"
+      image_help: "JPEG, PNG, GIF, etc. (optional)"
+
+  dashboard:
+    cost_this_month: "Cost this month"
+    profit_this_month: "Profit this month"
+    orders_in_month: "Orders in %{month}"
+    total_amount_in_month: "Total amount in %{month}"
+    cost_in_month: "Cost in %{month}"
+    profit_in_month: "Profit in %{month}"
+    this_month: "This month"
+    last_month: "Last month"
+    company_filter: "Company"
+    all_companies: "All companies"
+    center_filter: "Center"
+    all_centers: "All centers"
+    chart:
+      revenue_title: "Revenue & profit trend"
+      revenue_subtitle: "Monthly revenue for the last 12 months (admins see cost & profit)"
+      cost_profit_title: "Cost & profit trend"
+      cost_profit_subtitle: "Monthly cost and profit, current fiscal year (Apr–Mar)"
+      cost_series: "Cost"
+      profit_series: "Profit"
+      orders_amount_title: "Orders & total amount trend"
+      orders_amount_subtitle: "Monthly order count and total amount, current fiscal year (Apr–Mar)"
+      orders_count_series: "Order count"
+      total_amount_series: "Total amount"
+      orders_count_unit: " orders"
+      group_by: "View"
+      group_month: "By month"
+      group_center: "By center"
+      sort_by: "Sort by"
+      sort_month: "Month"
+      sort_center: "Center"
+      sort_orders_count: "Order count"
+      sort_total_amount: "Total amount"
+      order_asc: "Ascending"
+      order_desc: "Descending"
+      co2_title: "CO2 reduction trend"
+      co2_subtitle: "Monthly CO2 reduction (order-based), current fiscal year (Apr–Mar)"
+      co2_series: "CO2 reduction"
+    eco_contribution:
+      title: "Your impact on Earth"
+      subtitle: "This month's CO2 reduction equals:"
+      total_label: "CO2 reduced"
+      equivalents:
+        trees: "Trees planted"
+        car_km: "Car distance not driven"
+        smartphone_charges: "Smartphone charges saved"
+        ecobags: "Plastic bags refused"
 
   orders:
+    show:
+      rejected_heading: "This order was rejected"
+      rejected_by: "Rejected by"
+      rejected_reason: "Reason"
+    index:
+      scope: "View"
+      scope_all: "All orders"
+      scope_my_orders: "My orders only"
     created: "Order was successfully created"
     updated: "Order was successfully updated"
     cancelled: "Order was cancelled"
@@ -40,6 +115,14 @@ en:
     ship_failed: "Could not mark order as shipped"
     delivered: "Order marked as delivered"
     deliver_failed: "Could not mark order as delivered"
+    status:
+      draft: "Draft"
+      pending_approval: "Pending approval"
+      rejected: "Rejected"
+      confirmed: "Confirmed"
+      shipped: "Shipped"
+      delivered: "Delivered"
+      cancelled: "Cancelled"
 
   approval_requests:
     approved: "User has been approved"

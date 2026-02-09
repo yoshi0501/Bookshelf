@@ -86,6 +86,13 @@
   </div>
 
   <div class="col-lg-4">
+    <% if @item.image.attached? %>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center p-3">
+          <%= image_tag @item.image, class: "img-fluid rounded", style: "max-height: 240px; object-fit: contain;" %>
+        </div>
+      </div>
+    <% end %>
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-header bg-white border-bottom">
         <h5 class="card-title mb-1 fw-bold">

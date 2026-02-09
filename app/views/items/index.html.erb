@@ -64,6 +64,7 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
+              <th style="width: 64px;"></th>
               <th><%= t('items.table.code') %></th>
               <th><%= t('items.table.name') %></th>
               <th class="text-end"><%= t('items.table.unit_price') %></th>
@@ -75,6 +76,17 @@
           <tbody>
             <% @items.each do |item| %>
               <tr>
+                <td class="align-middle">
+                  <% if item.image.attached? %>
+                    <%= link_to item_path(item) do %>
+                      <%= image_tag item.image, class: "rounded", style: "width: 48px; height: 48px; object-fit: contain; background: #f8f9fa;" %>
+                    <% end %>
+                  <% else %>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded bg-light text-muted" style="width: 48px; height: 48px;">
+                      <i class="bi bi-image"></i>
+                    </span>
+                  <% end %>
+                </td>
                 <td class="font-monospace fw-semibold"><%= item.item_code %></td>
                 <td class="fw-medium"><%= item.name %></td>
                 <td class="text-end fw-semibold">

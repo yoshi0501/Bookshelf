@@ -14,48 +14,67 @@
             <i class="bi bi-house-door me-1"></i> <%= t('shared.navbar.dashboard') %>
           <% end %>
         </li>
-        <% if current_user&.internal_admin? || current_user&.company_admin? %>
+        <% unless current_user&.normal? %>
+          <% if current_user&.internal_admin? || current_user&.company_admin? %>
+            <li class="nav-item">
+              <%= link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.customers') %>
+              <% end %>
+            </li>
+          <% end %>
           <li class="nav-item">
-            <%= link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.customers') %>
+            <%= link_to items_path, class: "nav-link #{controller_name == 'items' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.items') %>
             <% end %>
           </li>
         <% end %>
-        <li class="nav-item">
-          <%= link_to items_path, class: "nav-link #{controller_name == 'items' ? 'active fw-semibold' : ''}" do %>
-            <%= t('shared.navbar.items') %>
-          <% end %>
-        </li>
         <li class="nav-item">
           <%= link_to orders_path, class: "nav-link #{controller_name == 'orders' ? 'active fw-semibold' : ''}" do %>
             <%= t('shared.navbar.orders') %>
           <% end %>
         </li>
-        <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
-          <li class="nav-item">
-            <%= link_to order_approval_requests_path, class: "nav-link #{controller_name == 'order_approval_requests' ? 'active fw-semibold' : ''}" do %>
-              発注承認
-            <% end %>
-          </li>
-        <% end %>
-        <% if current_user&.user_profile&.can_access_admin_dashboard? %>
-          <li class="nav-item">
-            <%= link_to admin_approval_requests_path, class: "nav-link #{controller_name == 'approval_requests' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.approvals') %>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to admin_user_profiles_path, class: "nav-link #{controller_name == 'user_profiles' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.members') %>
-            <% end %>
-          </li>
-        <% end %>
-        <% if current_user&.internal_admin? %>
-          <li class="nav-item">
-            <%= link_to admin_companies_path, class: "nav-link #{controller_name == 'companies' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.companies') %>
-            <% end %>
-          </li>
+        <% unless current_user&.normal? %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
+            <li class="nav-item">
+              <% pending_count = @pending_order_approvals_count.to_i %>
+              <%= link_to order_approval_requests_path, class: "nav-link d-inline-flex align-items-center gap-1 #{controller_name == 'order_approval_requests' ? 'active fw-semibold' : ''} #{pending_count > 0 ? 'text-warning' : ''}" do %>
+                発注承認
+                <% if pending_count > 0 %>
+                  <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.7rem;"><%= pending_count %>件待ち</span>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+            <li class="nav-item">
+              <% pending_approvals = @pending_approval_requests_count.to_i %>
+              <%= link_to admin_approval_requests_path, class: "nav-link d-inline-flex align-items-center gap-1 #{controller_name == 'approval_requests' ? 'active fw-semibold' : ''} #{pending_approvals > 0 ? 'text-warning' : ''}" do %>
+                <%= t('shared.navbar.approvals') %>
+                <% if pending_approvals > 0 %>
+                  <span class="badge bg-warning text-dark rounded-pill ms-1" style="font-size: 0.7rem;"><%= pending_approvals %>件待ち</span>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+            <li class="nav-item">
+              <%= link_to admin_user_profiles_path, class: "nav-link #{controller_name == 'user_profiles' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.members') %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.internal_admin? %>
+            <li class="nav-item">
+              <%= link_to admin_issuer_setting_path, class: "nav-link #{controller_name == 'issuer_settings' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.issuer_setting') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to admin_companies_path, class: "nav-link #{controller_name == 'companies' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.companies') %>
+              <% end %>
+            </li>
+          <% end %>
         <% end %>
       </ul>
       <div class="d-flex align-items-center gap-3">

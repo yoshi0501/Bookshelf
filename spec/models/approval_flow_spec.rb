@@ -17,8 +17,8 @@ RSpec.describe "Approval flow", type: :model do
     it "creates user_profile with pending status when email domain matches" do
       user = User.create!(
         email: "newuser@test-company.com",
-        password: "password123456",
-        password_confirmation: "password123456"
+        password: "Password123456",
+        password_confirmation: "Password123456"
       )
 
       expect(user.user_profile).to be_present
@@ -29,8 +29,8 @@ RSpec.describe "Approval flow", type: :model do
     it "creates approval_request for pending user" do
       user = User.create!(
         email: "newuser2@test-company.com",
-        password: "password123456",
-        password_confirmation: "password123456"
+        password: "Password123456",
+        password_confirmation: "Password123456"
       )
 
       approval_request = ApprovalRequest.find_by(user_profile: user.user_profile)
@@ -44,8 +44,8 @@ RSpec.describe "Approval flow", type: :model do
     it "creates user_profile with unassigned status when email domain does not match" do
       user = User.create!(
         email: "newuser@unknown-domain.com",
-        password: "password123456",
-        password_confirmation: "password123456"
+        password: "Password123456",
+        password_confirmation: "Password123456"
       )
 
       expect(user.user_profile).to be_present
@@ -56,8 +56,8 @@ RSpec.describe "Approval flow", type: :model do
     it "does not create approval_request for unassigned user" do
       user = User.create!(
         email: "newuser@unknown-domain.com",
-        password: "password123456",
-        password_confirmation: "password123456"
+        password: "Password123456",
+        password_confirmation: "Password123456"
       )
 
       approval_request = ApprovalRequest.find_by(user_profile: user.user_profile)

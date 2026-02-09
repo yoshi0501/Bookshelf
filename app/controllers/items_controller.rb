@@ -64,6 +64,9 @@ class ItemsController < ApplicationController
     @companies = Company.active.order(:name)
     authorize @item
 
+    if params.dig(:item, :remove_image) == "1"
+      @item.image.purge
+    end
     if @item.update(item_params)
       # 内部管理者のみが商品の表示会社を設定可能
       update_visible_companies(@item, params[:item][:visible_company_ids])
@@ -123,7 +126,8 @@ class ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(
-      :company_id, :item_code, :name, :unit_price, :co2_per_unit, :is_active
+      :company_id, :item_code, :name, :unit_price, :co2_per_unit,
+      :cost_price, :shipping_cost, :is_active, :image, :remove_image
     )
   end
 
@@ -239,10 +243,17 @@ class ItemsController < ApplicationController
               item_code: item_code
             )
 
+            cost_price_str = row["cost_price"]&.strip
+            shipping_cost_str = row["shipping_cost"]&.strip
+            cost_price = cost_price_str.present? ? cost_price_str.to_f : nil
+            shipping_cost = shipping_cost_str.present? ? shipping_cost_str.to_f : nil
+
             item.assign_attributes(
               name: name,
               unit_price: unit_price,
               co2_per_unit: co2_per_unit,
+              cost_price: cost_price,
+              shipping_cost: shipping_cost,
               is_active: is_active
             )
 

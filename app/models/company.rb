@@ -38,6 +38,11 @@ class Company < ApplicationRecord
     nil
   end
 
+  # 請求書用：住所を1行で返す
+  def full_address
+    [postal_code, prefecture, city, address1, address2].compact_blank.join(" ")
+  end
+
   # Instance methods
   def generate_next_order_no!
     # Use row-level lock to prevent race condition
