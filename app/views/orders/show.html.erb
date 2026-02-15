@@ -112,7 +112,14 @@
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.tracking_no') %></label>
-            <p class="mb-0 font-monospace"><%= @order.tracking_no || "-" %></p>
+            <p class="mb-0 font-monospace">
+              <% if @order.tracking_no.present? %>
+                <% url = tracking_url_for(@order.shipping_carrier, @order.tracking_no) %>
+                <%= url.present? ? link_to(@order.tracking_no, url, target: "_blank", rel: "noopener") : @order.tracking_no %>
+              <% else %>
+                -
+              <% end %>
+            </p>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('orders.show.ship_date') %></label>

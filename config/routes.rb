@@ -39,6 +39,16 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :manufacturers
+
+  # 発送依頼（メーカー別）。PDF を先に定義して /pdf を manufacturer_id と誤マッチさせない
+  get "shipping_requests", to: "shipping_requests#index", as: :shipping_requests
+  get "shipping_requests/:manufacturer_id/pdf", to: "shipping_requests#pdf", as: :shipping_request_pdf
+  patch "shipping_requests/:manufacturer_id/register_shipment", to: "shipping_requests#register_shipment", as: :register_shipping_request_shipment
+  post "shipping_requests/:manufacturer_id/register_shipment_import", to: "shipping_requests#register_shipment_import", as: :register_shipping_request_shipment_import
+  get "shipping_requests/:manufacturer_id/shipment_template", to: "shipping_requests#shipment_template", as: :shipment_template_shipping_request
+  get "shipping_requests/:manufacturer_id", to: "shipping_requests#show", as: :shipping_request
+
   resources :orders do
     member do
       post :ship
@@ -62,6 +72,8 @@ Rails.application.routes.draw do
   namespace :admin do
     resource :issuer_setting, only: %i[show edit update], path: "issuer"
     resources :companies, except: [:destroy]
+    resources :company_payments, only: %i[index show new create edit update destroy]
+    resources :access_logs, only: %i[index]
 
     resources :approval_requests, only: %i[index show] do
       member do

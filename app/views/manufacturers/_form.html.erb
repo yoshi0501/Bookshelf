@@ -1,0 +1,80 @@
+<%= form_with model: manufacturer do |f| %>
+  <%= render "shared/form_errors", resource: manufacturer %>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold"><%= t('manufacturers.show.basic_info') %></h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :code, t('manufacturers.form.code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :code, class: "form-control font-monospace" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :name, t('manufacturers.form.name'), class: "form-label fw-semibold" %>
+          <%= f.text_field :name, class: "form-control" %>
+        </div>
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <%= f.check_box :is_active, class: "form-check-input" %>
+            <%= f.label :is_active, t('manufacturers.form.is_active'), class: "form-check-label" %>
+          </div>
+        </div>
+        <div class="col-12">
+          <%= label_tag "manufacturer_domains", t('manufacturers.form.domains'), class: "form-label fw-semibold" %>
+          <%= text_area_tag "manufacturer[domains][]", manufacturer.domains.is_a?(Array) ? manufacturer.domains.join("\n") : "", rows: 3, class: "form-control font-monospace", placeholder: "example.com", id: "manufacturer_domains" %>
+          <div class="form-text"><%= t('manufacturers.form.domains_help') %></div>
+        </div>
+        <div class="col-12">
+          <%= f.label :payment_terms, t('manufacturers.form.payment_terms'), class: "form-label fw-semibold" %>
+          <%= f.text_field :payment_terms, class: "form-control", placeholder: t('manufacturers.form.payment_terms_placeholder') %>
+          <div class="form-text"><%= t('manufacturers.form.payment_terms_help') %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold"><%= t('manufacturers.show.contact') %></h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= f.label :email, t('manufacturers.form.email'), class: "form-label fw-semibold" %>
+          <%= f.email_field :email, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :phone, t('manufacturers.form.phone'), class: "form-label fw-semibold" %>
+          <%= f.text_field :phone, class: "form-control" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :postal_code, t('manufacturers.form.postal_code'), class: "form-label fw-semibold" %>
+          <%= f.text_field :postal_code, class: "form-control" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :prefecture, t('manufacturers.form.prefecture'), class: "form-label fw-semibold" %>
+          <%= f.text_field :prefecture, class: "form-control" %>
+        </div>
+        <div class="col-md-4">
+          <%= f.label :city, t('manufacturers.form.city'), class: "form-label fw-semibold" %>
+          <%= f.text_field :city, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :address1, t('manufacturers.form.address1'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address1, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :address2, t('manufacturers.form.address2'), class: "form-label fw-semibold" %>
+          <%= f.text_field :address2, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= f.submit (manufacturer.persisted? ? t('shared.actions.update') : t('shared.actions.create')), class: "btn btn-primary" %>
+    <%= link_to t('shared.actions.cancel'), manufacturer.persisted? ? manufacturer_path(manufacturer) : manufacturers_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

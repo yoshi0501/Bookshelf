@@ -1,0 +1,194 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('shipping_requests.show.title') %></h1>
+    <p class="text-muted mb-0"><%= t('shipping_requests.show.subtitle', name: @manufacturer.name) %></p>
+    <p class="text-muted small mb-0 mt-1"><%= @date_from %> 〜 <%= @date_to %></p>
+    <p class="small mt-2 mb-0">
+      <%= link_to t('shipping_requests.index.this_month'), shipping_request_path(@manufacturer, month: Date.current.strftime("%Y-%m")), class: "btn btn-outline-secondary btn-sm me-1" %>
+      <%= link_to t('shipping_requests.index.last_month'), shipping_request_path(@manufacturer, month: 1.month.ago.strftime("%Y-%m")), class: "btn btn-outline-secondary btn-sm me-2" %>
+      <%= form_with url: shipping_request_path(@manufacturer), method: :get, local: true, class: "d-inline" do %>
+        <%= month_field_tag :month, @date_from.to_s[0..6], class: "form-control form-control-sm d-inline-block", style: "width: 8rem" %>
+        <%= submit_tag t('shipping_requests.index.filter'), class: "btn btn-outline-primary btn-sm ms-1" %>
+      <% end %>
+    </p>
+    <% if manufacturer_user? %>
+      <p class="text-muted small mt-2 mb-0">当メーカー宛ての発注分です。一覧で確認し、出荷登録またはCSVで一括登録してください。</p>
+    <% end %>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to shipping_request_pdf_path(@manufacturer, date_from: @date_from, date_to: @date_to), class: "btn btn-primary btn-sm", target: "_blank" do %>
+      <i class="bi bi-file-pdf me-1"></i><%= t('shipping_requests.show.download_pdf') %>
+    <% end %>
+    <% unless manufacturer_user? %>
+      <%= link_to shipping_requests_path(date_from: @date_from, date_to: @date_to), class: "btn btn-outline-primary btn-sm" do %>
+        <i class="bi bi-arrow-left me-1"></i><%= t('shipping_requests.show.back') %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<% if manufacturer_user? %>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+      <h6 class="card-title mb-2"><%= t('shipping_requests.import.title') %></h6>
+      <%= form_with url: register_shipping_request_shipment_import_path(@manufacturer), method: :post, local: true, multipart: true, class: "row g-2 align-items-end" do %>
+        <%= hidden_field_tag :month, @date_from.to_s[0..6] %>
+        <div class="col-auto">
+          <label class="form-label small mb-0"><%= t('shipping_requests.import.csv_file') %></label>
+          <%= file_field_tag :csv_file, accept: ".csv", class: "form-control form-control-sm", required: true %>
+        </div>
+        <div class="col-auto">
+          <%= submit_tag t('shipping_requests.import.submit'), class: "btn btn-outline-primary btn-sm" %>
+        </div>
+        <div class="col-auto">
+          <%= link_to t('shipping_requests.import.download_template'), shipment_template_shipping_request_path(@manufacturer, month: @date_from.to_s[0..6]), class: "btn btn-outline-secondary btn-sm" %>
+        </div>
+      <% end %>
+      <p class="small text-muted mb-0 mt-2"><%= t('shipping_requests.import.format_hint') %></p>
+      <% if flash[:import_errors].present? %>
+        <ul class="small text-danger mb-0 mt-2">
+          <% flash[:import_errors].first(10).each do |err| %>
+            <li><%= t('shipping_requests.import.row_error', row: err[:row], message: err[:message]) %></li>
+          <% end %>
+          <% if flash[:import_errors].size > 10 %>
+            <li>…他 <%= flash[:import_errors].size - 10 %> 件</li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @lines_by_order.blank? %>
+  <div class="alert alert-light border text-center py-4">
+    <p class="text-muted mb-0"><%= t('shipping_requests.show.no_lines') %></p>
+  </div>
+<% else %>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('shipping_requests.show.order_no') %></th>
+              <th><%= t('shipping_requests.show.order_date') %></th>
+              <th><%= t('shipping_requests.show.customer_name') %></th>
+              <th class="text-end"><%= manufacturer_user? ? t('shipping_requests.show.cost_total') : t('shipping_requests.show.total_amount') %></th>
+              <th><%= t('shipping_requests.show.fulfillment_status') %></th>
+              <th><%= t('shipping_requests.show.ship_address') %></th>
+              <th class="text-end"><%= t('shipping_requests.show.lines_count') %></th>
+              <th><%= t('shipping_requests.show.delivery_status') %></th>
+              <% if manufacturer_user? %><th class="text-end"><span class="visually-hidden">操作</span></th><% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% @lines_by_order.each do |order, lines| %>
+              <tr>
+                <td class="fw-bold font-monospace"><%= order.order_no %></td>
+                <td><%= order.order_date.strftime("%Y/%m/%d") %></td>
+                <td><%= order.ship_center_name.presence || [order.ship_prefecture, order.ship_city].compact_blank.join(" ") %></td>
+                <td class="text-end">
+                  <% if manufacturer_user? %>
+                    <%= number_to_currency(lines.sum { |l| ((l.cost_price_snapshot || 0).to_d + (l.shipping_cost_snapshot || 0).to_d) * l.quantity }, unit: "¥", precision: 0) %>
+                  <% else %>
+                    <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
+                  <% end %>
+                </td>
+                <td><%= render "orders/status_badge", status: order.shipping_status, order: order %></td>
+                <td class="small"><%= [order.ship_postal_code, order.ship_prefecture, order.ship_city, order.ship_address1].compact_blank.join(" ").truncate(36) %></td>
+                <td class="text-end">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#detail-order-<%= order.id %>" aria-expanded="false">
+                    <i class="bi bi-chevron-down me-1"></i><%= t('shipping_requests.show.lines_toggle') %>（<%= lines.size %>品目）
+                  </button>
+                </td>
+                <td class="small">
+                  <% trackings = lines.map { |l| l.respond_to?(:tracking_no) && l.tracking_no.presence || order.tracking_no.presence }.compact_blank.uniq %>
+                  <% if trackings.any? %>
+                    <% if trackings.size == 1 %>
+                      <% ref_line = lines.find { |l| (l.respond_to?(:tracking_no) && l.tracking_no.presence || order.tracking_no.presence) == trackings.first } %>
+                      <% carrier = ref_line&.respond_to?(:shipping_carrier) && ref_line.shipping_carrier.presence || order.respond_to?(:shipping_carrier) && order.shipping_carrier.presence %>
+                      <% date = ref_line&.respond_to?(:ship_date) && ref_line.ship_date.presence || order.ship_date %>
+                      <% url = tracking_url_for(carrier, trackings.first) %>
+                      <%= safe_join([carrier, url.present? ? link_to(trackings.first, url, target: "_blank", rel: "noopener", class: "font-monospace") : trackings.first, date&.strftime("%Y/%m/%d")].compact_blank, " · ") %>
+                    <% else %>
+                      <%= trackings.size %>件の追跡（明細で確認）
+                    <% end %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+                <% if manufacturer_user? %>
+                  <td class="text-end">
+                    <% if order.shipping_status_confirmed? %>
+                      <%= form_with url: register_shipping_request_shipment_path(@manufacturer), method: :patch, local: true, class: "d-inline" do %>
+                        <%= hidden_field_tag :order_id, order.id %>
+                        <%= hidden_field_tag :month, @date_from.to_s[0..6] %>
+                        <%= text_field_tag :shipping_carrier, nil, class: "form-control form-control-sm d-inline-block", placeholder: t('shipping_requests.show.shipping_carrier_placeholder'), style: "width: 7rem", required: true %>
+                        <%= text_field_tag :tracking_no, nil, class: "form-control form-control-sm d-inline-block ms-1", placeholder: t('shipping_requests.show.tracking_no_placeholder'), style: "width: 9rem", required: true %>
+                        <%= date_field_tag :ship_date, Date.current, class: "form-control form-control-sm d-inline-block ms-1", style: "width: 8rem" %>
+                        <%= submit_tag t('shipping_requests.show.register_shipment'), class: "btn btn-primary btn-sm ms-1" %>
+                      <% end %>
+                    <% else %>
+                      <span class="text-muted small"><%= t('shipping_requests.show.registered') %></span>
+                    <% end %>
+                  </td>
+                <% end %>
+              </tr>
+              <tr class="detail-row">
+                <td colspan="<%= manufacturer_user? ? 9 : 8 %>" class="p-0 border-0 bg-light">
+                  <div id="detail-order-<%= order.id %>" class="collapse">
+                    <div class="p-3">
+                      <table class="table table-sm table-bordered mb-0 bg-white">
+                        <thead class="table-light">
+                          <tr>
+                            <th><%= t('shipping_requests.show.item_code') %></th>
+                            <th><%= t('shipping_requests.show.item_name') %></th>
+                            <th class="text-end"><%= t('shipping_requests.show.quantity') %></th>
+                            <th><%= t('shipping_requests.show.shipping_carrier') %></th>
+                            <th><%= t('shipping_requests.show.tracking_no') %></th>
+                            <th><%= t('shipping_requests.show.ship_date') %></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% lines.each do |line| %>
+                            <tr>
+                              <td class="font-monospace"><%= line.item&.item_code %></td>
+                              <td><%= line.item&.name %></td>
+                              <td class="text-end"><%= line.quantity %></td>
+                              <td class="small"><%= line.respond_to?(:shipping_carrier) && line.shipping_carrier.presence || order.respond_to?(:shipping_carrier) && order.shipping_carrier.presence || "—" %></td>
+                              <td class="small">
+                                <% tn = line.respond_to?(:tracking_no) && line.tracking_no.presence || order.tracking_no.presence %>
+                                <% carrier = line.respond_to?(:shipping_carrier) && line.shipping_carrier.presence || order.respond_to?(:shipping_carrier) && order.shipping_carrier.presence %>
+                                <% if tn.present? %>
+                                  <% url = tracking_url_for(carrier, tn) %>
+                                  <%= url.present? ? link_to(tn, url, target: "_blank", rel: "noopener", class: "font-monospace") : content_tag(:span, tn, class: "font-monospace") %>
+                                <% else %>
+                                  —
+                                <% end %>
+                              </td>
+                              <td class="small"><%= (line.respond_to?(:ship_date) && line.ship_date.present? ? line.ship_date : order.ship_date).then { |d| d&.strftime("%Y/%m/%d") } || "—" %></td>
+                            </tr>
+                          <% end %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <% unless manufacturer_user? %>
+                <tr class="table-light">
+                  <td colspan="8" class="py-2 small">
+                    <%= link_to order_path(order), class: "text-decoration-none" do %><i class="bi bi-box-arrow-up-right me-1"></i>発注詳細<% end %>
+                    <span class="text-muted ms-2"><%= [order.ship_postal_code, order.ship_prefecture, order.ship_city, order.ship_address1].compact_blank.join(" ") %></span>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="small text-muted mt-2 mb-0"><%= t('shipping_requests.show.lines_detail_hint') %></p>
+<% end %>

@@ -95,12 +95,14 @@ class Order < ApplicationRecord
     !shipping_status_delivered? && !shipping_status_cancelled?
   end
 
-  def ship!(tracking_no, ship_date = Date.current)
-    update!(
+  def ship!(tracking_no, ship_date = Date.current, shipping_carrier: nil)
+    attrs = {
       shipping_status: :shipped,
-      tracking_no: tracking_no,
+      tracking_no: tracking_no.to_s.presence,
       ship_date: ship_date
-    )
+    }
+    attrs[:shipping_carrier] = shipping_carrier.to_s.presence if self.class.column_names.include?("shipping_carrier")
+    update!(attrs)
   end
 
   def deliver!(delivered_date = Date.current)

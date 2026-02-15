@@ -3,7 +3,11 @@
     <h1 class="h2 fw-bold mb-2"><%= @user_profile.name %></h1>
     <p class="text-muted mb-0">
       <i class="bi bi-envelope me-1"></i><%= @user_profile.user.email %>
-      <% if @user_profile.company %>
+      <% if @user_profile.manufacturer_user? %>
+        <span class="ms-3">
+          <i class="bi bi-truck me-1"></i>メーカー: <%= @user_profile.manufacturer.name %>
+        </span>
+      <% elsif @user_profile.company %>
         <span class="ms-3">
           <i class="bi bi-building me-1"></i><%= @user_profile.company.name %>
         </span>
@@ -45,6 +49,12 @@
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.phone') %></label>
             <p class="mb-0"><%= @user_profile.phone || "-" %></p>
           </div>
+          <% if @user_profile.payment_terms.present? %>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.payment_terms') %></label>
+              <p class="mb-0"><%= @user_profile.payment_terms %></p>
+            </div>
+          <% end %>
           <div class="col-md-6">
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.status') %></label>
             <p class="mb-0">
@@ -63,13 +73,17 @@
           <div class="col-md-6">
             <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.form.role') %></label>
             <p class="mb-0">
-              <% case @user_profile.role %>
-              <% when "internal_admin" %>
-                <span class="badge bg-danger"><%= t('user_profiles.roles.internal_admin') %></span>
-              <% when "company_admin" %>
-                <span class="badge bg-primary"><%= t('user_profiles.roles.company_admin') %></span>
-              <% when "normal" %>
-                <span class="badge bg-secondary"><%= t('user_profiles.roles.normal') %></span>
+              <% if @user_profile.manufacturer_user? %>
+                <span class="badge bg-info">メーカー</span>
+              <% else %>
+                <% case @user_profile.role %>
+                <% when "internal_admin" %>
+                  <span class="badge bg-danger"><%= t('user_profiles.roles.internal_admin') %></span>
+                <% when "company_admin" %>
+                  <span class="badge bg-primary"><%= t('user_profiles.roles.company_admin') %></span>
+                <% when "normal" %>
+                  <span class="badge bg-secondary"><%= t('user_profiles.roles.normal') %></span>
+                <% end %>
               <% end %>
             </p>
           </div>
@@ -91,7 +105,20 @@
   </div>
 
   <div class="col-lg-4">
-    <% if @user_profile.company %>
+    <% if @user_profile.manufacturer_user? && @user_profile.manufacturer %>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="card-title mb-1 fw-bold">
+            <i class="bi bi-truck me-2"></i>メーカー
+          </h5>
+          <small class="text-muted">発送依頼用ログインで表示されるメーカーです</small>
+        </div>
+        <div class="card-body">
+          <p class="mb-1 fw-medium"><%= @user_profile.manufacturer.display_name %></p>
+          <p class="mb-0 small text-muted"><%= @user_profile.manufacturer.respond_to?(:company) && @user_profile.manufacturer.company.present? ? @user_profile.manufacturer.company.name : "プラットフォーム共通" %></p>
+        </div>
+      </div>
+    <% elsif @user_profile.company %>
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white border-bottom">
           <h5 class="card-title mb-1 fw-bold">

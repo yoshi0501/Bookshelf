@@ -1,14 +1,33 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
   <div class="container-fluid">
-    <%= link_to dashboard_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
-      <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
-      <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+    <% if manufacturer_user? %>
+      <%= link_to shipping_requests_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+        <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
+        <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+      <% end %>
+    <% else %>
+      <%= link_to dashboard_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+        <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
+        <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+      <% end %>
     <% end %>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
+        <% if manufacturer_user? %>
+          <li class="nav-item">
+            <%= link_to dashboard_path, class: "nav-link #{controller_name == 'dashboard' ? 'active fw-semibold' : ''}" do %>
+              <i class="bi bi-house-door me-1"></i><%= t('shared.navbar.dashboard') %>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to shipping_requests_path, class: "nav-link #{controller_name == 'shipping_requests' ? 'active fw-semibold' : ''}" do %>
+              <i class="bi bi-truck me-1"></i>発送依頼
+            <% end %>
+          </li>
+        <% else %>
         <li class="nav-item">
           <%= link_to dashboard_path, class: "nav-link #{request.path == dashboard_path ? 'active fw-semibold' : ''}" do %>
             <i class="bi bi-house-door me-1"></i> <%= t('shared.navbar.dashboard') %>
@@ -27,12 +46,24 @@
               <%= t('shared.navbar.items') %>
             <% end %>
           </li>
+          <li class="nav-item">
+            <%= link_to manufacturers_path, class: "nav-link #{controller_name == 'manufacturers' ? 'active fw-semibold' : ''}" do %>
+              メーカー
+            <% end %>
+          </li>
         <% end %>
         <li class="nav-item">
           <%= link_to orders_path, class: "nav-link #{controller_name == 'orders' ? 'active fw-semibold' : ''}" do %>
             <%= t('shared.navbar.orders') %>
           <% end %>
         </li>
+        <% unless current_user&.normal? %>
+          <li class="nav-item">
+            <%= link_to shipping_requests_path, class: "nav-link #{controller_name == 'shipping_requests' ? 'active fw-semibold' : ''}" do %>
+              発送依頼
+            <% end %>
+          </li>
+        <% end %>
         <% unless current_user&.normal? %>
           <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
             <li class="nav-item">
@@ -74,7 +105,18 @@
                 <%= t('shared.navbar.companies') %>
               <% end %>
             </li>
+            <li class="nav-item">
+              <%= link_to admin_company_payments_path, class: "nav-link #{controller_name == 'company_payments' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.company_payments') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to admin_access_logs_path, class: "nav-link #{controller_name == 'access_logs' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.access_logs') %>
+              <% end %>
+            </li>
           <% end %>
+        <% end %>
         <% end %>
       </ul>
       <div class="d-flex align-items-center gap-3">
@@ -83,6 +125,8 @@
             <div class="rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
               <% if current_user&.internal_admin? %>
                 <span class="text-white small fw-bold">A</span>
+              <% elsif manufacturer_user? %>
+                <span class="text-white small fw-bold">M</span>
               <% else %>
                 <span class="text-white small fw-bold"><%= current_company&.name&.first&.upcase %></span>
               <% end %>
@@ -90,6 +134,8 @@
             <div class="d-flex flex-column text-start">
               <% if current_user&.internal_admin? %>
                 <small class="fw-semibold text-dark">システム管理者</small>
+              <% elsif manufacturer_user? %>
+                <small class="fw-semibold text-dark">メーカー: <%= current_manufacturer&.name %></small>
               <% else %>
                 <small class="fw-semibold text-dark"><%= current_company&.name %></small>
               <% end %>

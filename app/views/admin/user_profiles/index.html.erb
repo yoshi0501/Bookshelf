@@ -5,13 +5,24 @@
   </div>
 </div>
 
-<% if @companies.present? && @companies.size > 1 %>
-  <!-- 会社タブ（複数会社がある場合のみ表示） -->
+<% if @companies.present? && (@companies.size > 1 || current_user&.internal_admin?) %>
   <ul class="nav nav-tabs mb-4" role="tablist">
-    <% @companies.each_with_index do |company, index| %>
+    <% if current_user&.internal_admin? %>
       <li class="nav-item" role="presentation">
-        <%= link_to admin_user_profiles_path(company_id: company.id), 
-            class: "nav-link #{'active' if @selected_company&.id == company.id}",
+        <%= link_to admin_user_profiles_path(company_id: "unassigned"), class: "nav-link #{'active' if @show_unassigned}", data: { turbo: false } do %>
+          <i class="bi bi-person-x me-1"></i>未割り当て
+        <% end %>
+      </li>
+      <li class="nav-item" role="presentation">
+        <%= link_to admin_user_profiles_path(company_id: "manufacturers"), class: "nav-link #{'active' if @show_manufacturers}", data: { turbo: false } do %>
+          <i class="bi bi-truck me-1"></i>メーカーアカウント
+        <% end %>
+      </li>
+    <% end %>
+    <% @companies.each do |company| %>
+      <li class="nav-item" role="presentation">
+        <%= link_to admin_user_profiles_path(company_id: company.id),
+            class: "nav-link #{'active' if @selected_company&.id == company.id && !@show_unassigned && !@show_manufacturers}",
             data: { turbo: false } do %>
           <i class="bi bi-building me-1"></i><%= company.name %>
         <% end %>
@@ -24,13 +35,17 @@
   <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
     <div>
       <h5 class="card-title mb-1 fw-bold">
-        <% if @selected_company %>
+        <% if @show_unassigned %>
+          未割り当て - <%= t('user_profiles.index.title') %>
+        <% elsif @show_manufacturers %>
+          メーカーアカウント - <%= t('user_profiles.index.title') %>
+        <% elsif @selected_company %>
           <%= @selected_company.name %> - <%= t('user_profiles.index.title') %>
         <% else %>
           <%= t('user_profiles.index.title') %>
         <% end %>
       </h5>
-      <small class="text-muted"><%= t('user_profiles.index.description') %></small>
+      <small class="text-muted"><%= @show_unassigned ? "メーカーアカウントに割り当て可能なユーザー" : @show_manufacturers ? "プラットフォーム共通のメーカーに紐づくアカウント" : t('user_profiles.index.description') %></small>
     </div>
   </div>
   <div class="card-body p-0">
@@ -41,7 +56,11 @@
         </div>
         <p class="text-muted fw-medium mb-3">メンバーがありません</p>
         <p class="text-muted small">
-          <% if @selected_company %>
+          <% if @show_unassigned %>
+            未割り当てのユーザーはいません。
+          <% elsif @show_manufacturers %>
+            メーカーアカウントはありません。
+          <% elsif @selected_company %>
             <%= @selected_company.name %>にメンバーが登録されていません。
           <% else %>
             メンバーが登録されていません。
@@ -74,13 +93,17 @@
                 </td>
                 <td class="text-muted"><%= profile.user.email %></td>
                 <td>
-                  <% case profile.role %>
-                  <% when "internal_admin" %>
-                    <span class="badge bg-danger">Internal Admin</span>
-                  <% when "company_admin" %>
-                    <span class="badge bg-primary">Company Admin</span>
-                  <% when "normal" %>
-                    <span class="badge bg-secondary">Normal</span>
+                  <% if profile.manufacturer_user? %>
+                    <span class="badge bg-info">メーカー</span>
+                  <% else %>
+                    <% case profile.role %>
+                    <% when "internal_admin" %>
+                      <span class="badge bg-danger">Internal Admin</span>
+                    <% when "company_admin" %>
+                      <span class="badge bg-primary">Company Admin</span>
+                    <% when "normal" %>
+                      <span class="badge bg-secondary">Normal</span>
+                    <% end %>
                   <% end %>
                 </td>
                 <td class="text-muted"><%= profile.supervisor&.name || "-" %></td>

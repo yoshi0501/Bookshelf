@@ -56,7 +56,69 @@
               <% end %>
             </p>
           </div>
+          <% if @company.payment_terms.present? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('companies.form.payment_terms') %></label>
+              <p class="mb-0"><%= @company.payment_terms %></p>
+            </div>
+          <% end %>
         </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-cash-coin me-2"></i><%= t('company_payments.index.title') %>
+        </h5>
+        <%= link_to new_admin_company_payment_path(company_id: @company.id), class: "btn btn-sm btn-primary" do %>
+          <i class="bi bi-plus me-1"></i><%= t('company_payments.new.submit') %>
+        <% end %>
+      </div>
+      <div class="card-body">
+        <% payments = @company.company_payments.by_period_desc.limit(12) %>
+        <% if payments.any? %>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th><%= t('company_payments.table.period') %></th>
+                  <th><%= t('company_payments.table.due_date') %></th>
+                  <th><%= t('company_payments.table.amount') %></th>
+                  <th><%= t('company_payments.table.status') %></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payments.each do |cp| %>
+                  <tr class="<%= 'table-warning' if cp.overdue? %>">
+                    <td><%= cp.period_label %></td>
+                    <td><%= cp.due_date&.strftime('%Y-%m-%d') || '-' %></td>
+                    <td><%= number_to_currency(cp.display_amount, unit: '¥', format: '%u%n') %></td>
+                    <td>
+                      <% if cp.paid? %>
+                        <span class="badge bg-success"><%= t('company_payments.status.paid') %> <%= cp.paid_at.strftime('%Y-%m-%d') %></span>
+                      <% elsif cp.overdue? %>
+                        <span class="badge bg-danger"><%= t('company_payments.status.overdue') %></span>
+                      <% else %>
+                        <span class="badge bg-secondary"><%= t('company_payments.status.unpaid') %></span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <%= link_to t('shared.actions.edit'), edit_admin_company_payment_path(cp), class: "btn btn-sm btn-outline-secondary" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <%= link_to t('company_payments.index.view_all'), admin_company_payments_path(filter: 'unpaid'), class: "btn btn-sm btn-link mt-2" %>
+        <% else %>
+          <p class="text-muted mb-0"><%= t('company_payments.index.no_payments') %></p>
+          <%= link_to new_admin_company_payment_path(company_id: @company.id), class: "btn btn-sm btn-primary mt-2" do %>
+            <i class="bi bi-plus me-1"></i><%= t('company_payments.new.submit') %>
+          <% end %>
+        <% end %>
       </div>
     </div>
 

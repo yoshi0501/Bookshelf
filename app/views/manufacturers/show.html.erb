@@ -1,0 +1,95 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= @manufacturer.name %></h1>
+    <p class="text-muted mb-0"><span class="font-monospace"><%= @manufacturer.code %></span></p>
+  </div>
+  <div class="d-flex gap-2">
+    <% if current_user&.internal_admin? %>
+      <%= link_to edit_manufacturer_path(@manufacturer), class: "btn btn-outline-secondary btn-sm" do %>
+        <i class="bi bi-pencil me-1"></i><%= t('manufacturers.show.edit') %>
+      <% end %>
+    <% end %>
+    <%= link_to manufacturers_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('manufacturers.show.back') %>
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold"><%= t('manufacturers.show.basic_info') %></h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.code') %></label>
+            <p class="mb-0 font-monospace"><%= @manufacturer.code %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.name') %></label>
+            <p class="mb-0"><%= @manufacturer.name %></p>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.is_active') %></label>
+            <p class="mb-0">
+              <%= @manufacturer.is_active? ? tag.span(t('manufacturers.form.is_active'), class: 'badge bg-success') : tag.span('無効', class: 'badge bg-secondary') %>
+            </p>
+          </div>
+          <% if @manufacturer.domains.is_a?(Array) && @manufacturer.domains.any? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.domains') %></label>
+              <p class="mb-0 font-monospace small"><%= @manufacturer.domains.join(", ") %></p>
+            </div>
+          <% end %>
+          <% if @manufacturer.payment_terms.present? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.payment_terms') %></label>
+              <p class="mb-0"><%= @manufacturer.payment_terms %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold"><%= t('manufacturers.show.contact') %></h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.email') %></label>
+            <p class="mb-0"><%= @manufacturer.email.presence || "-" %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('manufacturers.form.phone') %></label>
+            <p class="mb-0"><%= @manufacturer.phone.presence || "-" %></p>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold text-muted small mb-1">住所</label>
+            <p class="mb-0">
+              <%= [@manufacturer.postal_code, @manufacturer.prefecture, @manufacturer.city, @manufacturer.address1, @manufacturer.address2].compact_blank.join(" ") %>
+              <%= "-" if [@manufacturer.postal_code, @manufacturer.prefecture, @manufacturer.city, @manufacturer.address1, @manufacturer.address2].all?(&:blank?) %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold"><%= t('manufacturers.show.items_count') %></h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-2 fw-medium"><%= @manufacturer.items.count %> 件</p>
+        <% if @manufacturer.items.any? %>
+          <%= link_to shipping_request_path(@manufacturer), class: "btn btn-outline-primary btn-sm" do %>
+            <i class="bi bi-truck me-1"></i>発送依頼を見る
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

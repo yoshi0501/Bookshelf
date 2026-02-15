@@ -38,17 +38,20 @@ class ItemsController < ApplicationController
   def new
     @item = Item.new
     @companies = Company.active.order(:name) # 内部管理者が会社を選択
+    load_manufacturers_for_item(@item)
     authorize @item
   end
 
   def edit
     @companies = Company.active.order(:name) # 内部管理者が会社を選択
+    load_manufacturers_for_item(@item)
     authorize @item
   end
 
   def create
     @item = Item.new(item_params)
     @companies = Company.active.order(:name)
+    load_manufacturers_for_item(@item)
     authorize @item
 
     if @item.save
@@ -62,6 +65,7 @@ class ItemsController < ApplicationController
 
   def update
     @companies = Company.active.order(:name)
+    load_manufacturers_for_item(@item)
     authorize @item
 
     if params.dig(:item, :remove_image) == "1"
@@ -126,9 +130,21 @@ class ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(
-      :company_id, :item_code, :name, :unit_price, :co2_per_unit,
+      :company_id, :manufacturer_id, :item_code, :name, :unit_price, :co2_per_unit,
       :cost_price, :shipping_cost, :is_active, :image, :remove_image
     )
+  end
+
+  def load_manufacturers_for_item(item)
+    company = if item.company_id.present?
+      Company.find_by(id: item.company_id)
+    elsif params.dig(:item, :company_id).present?
+      Company.find_by(id: params[:item][:company_id])
+    else
+      @companies&.first
+    end
+    # メーカーはプラットフォーム共通マスタ（会社に属さない）
+    @manufacturers = company ? Manufacturer.active.ordered_by_code : Manufacturer.none
   end
 
   def update_visible_companies(item, company_ids)
@@ -142,7 +158,7 @@ class ItemsController < ApplicationController
     company_ids.reject(&:blank?).each do |company_id|
       company = Company.find_by(id: company_id)
       next unless company
-      # 販売元会社は自動的に選択されるので、販売元以外のみ追加
+      # 登録会社は自動的に選択されるので、登録元以外のみ追加
       next if company.id == item.company_id
 
       ItemCompany.create!(item: item, company: company)
@@ -258,20 +274,20 @@ class ItemsController < ApplicationController
             )
 
             if item.save
-              # 販売先会社の設定（オプション）
+              # 表示先会社の設定（オプション）
               if visible_company_codes_str.present?
                 visible_company_codes = visible_company_codes_str.split(",").map(&:strip)
                 # 既存の関連を削除
                 item.item_companies.destroy_all
                 
-                # 販売元会社は自動的に追加
+                # 登録会社は自動的に追加
                 ItemCompany.find_or_create_by(item: item, company: company)
                 
-                # 販売先会社を追加
+                # 表示先会社を追加
                 visible_company_codes.each do |code|
                   visible_company = Company.find_by(code: code)
                   next unless visible_company
-                  # 販売元会社は既に追加済みなのでスキップ
+                  # 登録会社は既に追加済みなのでスキップ
                   next if visible_company.id == company.id
                   
                   ItemCompany.find_or_create_by(item: item, company: visible_company)

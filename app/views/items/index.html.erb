@@ -45,17 +45,17 @@
         <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
           <i class="bi bi-box text-muted fs-3"></i>
         </div>
-        <p class="text-muted fw-medium mb-3">販売商品がありません</p>
+        <p class="text-muted fw-medium mb-3">商品がありません</p>
         <p class="text-muted small">
           <% if @selected_company %>
-            <%= @selected_company.name %>に販売商品が登録されていません。
+            <%= @selected_company.name %>に商品が登録されていません。
           <% else %>
-            販売商品が登録されていません。
+            商品が登録されていません。
           <% end %>
         </p>
         <% if current_user&.internal_admin? %>
           <%= link_to new_item_path, class: "btn btn-primary" do %>
-            <i class="bi bi-plus-circle me-1"></i> 新規販売商品を追加
+            <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
           <% end %>
         <% end %>
       </div>

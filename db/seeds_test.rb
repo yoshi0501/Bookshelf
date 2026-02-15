@@ -22,6 +22,14 @@ company_b = Company.find_or_create_by!(code: "BETA") do |c|
   c.is_active = true
 end
 
+puts "Creating test manufacturers..."
+
+manufacturer_a = Manufacturer.find_or_create_by!(code: "ACME-M01") do |m|
+  m.name = "Acme Maker"
+  m.email = "ship@acme.com"
+  m.is_active = true
+end
+
 puts "Creating test users..."
 
 # Internal Admin
@@ -88,10 +96,28 @@ company_b_admin.create_user_profile!(
   member_status: :active
 )
 
+# Manufacturer login (Acme) - 発送依頼のみ表示
+maker_acme = User.find_or_initialize_by(email: "maker@acme.com")
+if maker_acme.new_record?
+  maker_acme.password = "Password123456"
+  maker_acme.password_confirmation = "Password123456"
+  maker_acme.confirmed_at = Time.current
+  maker_acme.save!
+end
+maker_acme.user_profile&.destroy
+maker_acme.create_user_profile!(
+  company: nil,
+  manufacturer: manufacturer_a,
+  name: "Acme Maker User",
+  role: :normal,
+  member_status: :active
+)
+
 puts "Test seed completed!"
 puts ""
 puts "Test Accounts (password: Password123456):"
 puts "  Internal Admin: admin@system.local"
 puts "  Company A Admin: admin@acme.com"
 puts "  Company A User: user@acme.com"
+puts "  Company A メーカー（発送依頼用）: maker@acme.com"
 puts "  Company B Admin: admin@beta-ind.com"

@@ -102,7 +102,7 @@ class OrdersController < ApplicationController
   def ship
     authorize @order
 
-    if @order.ship!(params[:tracking_no], params[:ship_date] || Date.current)
+    if @order.ship!(params[:tracking_no], params[:ship_date] || Date.current, shipping_carrier: params[:shipping_carrier])
       redirect_to @order, notice: t("orders.shipped")
     else
       redirect_to @order, alert: t("orders.ship_failed")
@@ -173,7 +173,7 @@ class OrdersController < ApplicationController
   def order_params
     params.require(:order).permit(
       :order_date, :customer_id, :shipping_status,
-      :ship_date, :tracking_no, :delivered_date,
+      :ship_date, :tracking_no, :delivered_date, :shipping_carrier,
       order_lines_attributes: %i[id item_id quantity _destroy]
     ).tap do |permitted|
       # Ensure company_id is set for nested order_lines

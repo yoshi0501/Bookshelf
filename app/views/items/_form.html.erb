@@ -15,12 +15,22 @@
           <%= f.collection_select :company_id, @companies, :id, :name, 
               { prompt: t('items.form.select_company') }, 
               { class: "form-select" } %>
+          <small class="form-text text-muted"><%= t('items.form.company_help') %></small>
         </div>
 
         <div class="col-md-6">
           <%= f.label :item_code, t('items.form.item_code'), class: "form-label fw-semibold" %>
           <%= f.text_field :item_code, class: "form-control font-monospace" %>
         </div>
+
+        <% if @manufacturers %>
+          <div class="col-md-6">
+            <%= f.label :manufacturer_id, t('items.form.manufacturer'), class: "form-label fw-semibold" %>
+            <%= f.collection_select :manufacturer_id, @manufacturers, :id, :display_name,
+                { include_blank: t('items.form.no_manufacturer') },
+                { class: "form-select" } %>
+          </div>
+        <% end %>
       </div>
       <div class="row g-3 mt-2">
         <div class="col-md-12">
@@ -115,29 +125,26 @@
         <% company_id = item.company_id %>
         <% if company_id.present? %>
           <%= hidden_field_tag "item[visible_company_ids][]", company_id %>
+          <% reg_company = @companies.find { |c| c.id == company_id } %>
+          <% if reg_company %>
+            <p class="text-muted small mb-3">
+              <span class="fw-medium"><%= t('items.form.visible_companies_registered') %></span>
+              <%= reg_company.name %>（<%= reg_company.code %>）
+            </p>
+          <% end %>
         <% end %>
         <div class="row g-2">
           <% @companies.each do |company| %>
-            <% is_seller_company = company.id == item.company_id %>
+            <% next if company.id == company_id %>
             <div class="col-md-6">
               <div class="form-check">
-                <% if is_seller_company %>
-                  <%= check_box_tag "item[visible_company_ids][]", company.id, true,
-                      class: "form-check-input", 
-                      id: "item_visible_company_#{company.id}",
-                      disabled: true %>
-                <% else %>
-                  <%= check_box_tag "item[visible_company_ids][]", company.id, 
-                      (item.persisted? && item.visible_companies.include?(company)),
-                      class: "form-check-input", 
-                      id: "item_visible_company_#{company.id}" %>
-                <% end %>
+                <%= check_box_tag "item[visible_company_ids][]", company.id, 
+                    (item.persisted? && item.visible_companies.include?(company)),
+                    class: "form-check-input", 
+                    id: "item_visible_company_#{company.id}" %>
                 <%= label_tag "item[visible_company_ids][]", company.name, 
                     class: "form-check-label", 
                     for: "item_visible_company_#{company.id}" %>
-                <% if is_seller_company %>
-                  <small class="text-muted ms-2">（販売元）</small>
-                <% end %>
               </div>
             </div>
           <% end %>

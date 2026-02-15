@@ -2,6 +2,17 @@
 
 class DashboardController < ApplicationController
   def index
+    # メーカーユーザー: 自社の売上ダッシュボードを表示（Pundit の policy_scope 検証を通すため1回呼ぶ）
+    if current_user&.manufacturer_user?
+      policy_scope(Order)
+      unless current_manufacturer
+        redirect_to root_path, alert: "メーカーが設定されていません。管理者に連絡してください。" and return
+      end
+      load_manufacturer_dashboard
+      skip_authorization
+      render :manufacturer and return
+    end
+
     # システム管理者向け: 会社・センターで絞り込み
     if current_user&.internal_admin?
       @companies = Company.active.order(:name)
@@ -21,7 +32,7 @@ class DashboardController < ApplicationController
 
     scope = order_scope
     @recent_orders = scope.includes(:order_approval_request).recent.limit(10)
-    @pending_approvals_count = if current_user.user_profile.can_approve_members?
+    @pending_approvals_count = if current_user&.user_profile&.can_approve_members?
       policy_scope(ApprovalRequest).status_pending.count
     else
       0
@@ -34,6 +45,24 @@ class DashboardController < ApplicationController
     orders_in_month_scope = scope.where(order_date: @target_month_range)
     @orders_in_month = orders_in_month_scope.count
     @total_amount_in_month = orders_in_month_scope.sum(:total_amount)
+
+    # 表示月のメーカー別売上（明細金額の合計をメーカーで集計）
+    order_ids_in_month = orders_in_month_scope.select(:id)
+    @sales_by_manufacturer = OrderLine
+      .joins(:order, item: :manufacturer)
+      .where(order_id: order_ids_in_month)
+      .where.not(items: { manufacturer_id: nil })
+      .group("manufacturers.id", "manufacturers.code", "manufacturers.name")
+      .select("manufacturers.id AS manufacturer_id, manufacturers.code AS manufacturer_code, manufacturers.name AS manufacturer_name, SUM(order_lines.amount) AS total_amount")
+      .order("total_amount DESC")
+      .map { |r| { manufacturer_id: r.manufacturer_id, code: r.manufacturer_code, name: r.manufacturer_name, total_amount: r.total_amount.to_d } }
+    # メーカー未設定の明細
+    unassigned = OrderLine
+      .joins(:order, :item)
+      .where(order_id: order_ids_in_month)
+      .where(items: { manufacturer_id: nil })
+      .sum(:amount)
+    @sales_by_manufacturer << { manufacturer_id: nil, code: nil, name: t("dashboard.sales_by_manufacturer.no_manufacturer"), total_amount: unassigned } if unassigned.to_d > 0
 
     # システム管理者向け: 指定月の原価・損益
     if current_user&.internal_admin?
@@ -106,6 +135,7 @@ class DashboardController < ApplicationController
           .sum("(COALESCE(cost_price_snapshot, 0) + COALESCE(shipping_cost_snapshot, 0)) * quantity")
         {
           label: month_start.strftime("%Y年%m月"),
+          revenue: revenue,
           cost: cost,
           profit: revenue - cost
         }
@@ -143,6 +173,31 @@ class DashboardController < ApplicationController
         label: month_start.strftime("%Y年%m月"),
         co2: co2_kg.to_f
       }
+    end
+  end
+
+  # メーカー用: 自社の原価合計（当メーカー品の原価・送料スナップショット合計。システム会社が登録するアイテム原価ベース）
+  def load_manufacturer_dashboard
+    @manufacturer = current_manufacturer
+    return unless @manufacturer
+
+    base = OrderLine
+      .joins(:order, :item)
+      .where(items: { manufacturer_id: @manufacturer.id })
+
+    cost_sql = "(COALESCE(order_lines.cost_price_snapshot, 0) + COALESCE(order_lines.shipping_cost_snapshot, 0)) * order_lines.quantity"
+    this_month_range = Date.current.beginning_of_month..Date.current.end_of_month
+    last_month_range = 1.month.ago.beginning_of_month..1.month.ago.end_of_month
+
+    @manufacturer_sales_this_month = base.where(orders: { order_date: this_month_range }).sum(cost_sql)
+    @manufacturer_sales_last_month = base.where(orders: { order_date: last_month_range }).sum(cost_sql)
+
+    # 過去12ヶ月の月別原価合計（直近12ヶ月）
+    @manufacturer_chart_data = 11.downto(0).map do |i|
+      month_start = (Date.current - i.months).beginning_of_month
+      range = month_start..month_start.end_of_month
+      total = base.where(orders: { order_date: range }).sum(cost_sql)
+      { label: month_start.strftime("%Y年%m月"), total_amount: total }
     end
   end
 end

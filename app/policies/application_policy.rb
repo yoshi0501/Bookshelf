@@ -84,9 +84,13 @@ class ApplicationPolicy
     internal_admin? || company_admin?
   end
 
-  # CRITICAL: Check if record belongs to user's company
+  # CRITICAL: Check if record belongs to user's company (or user is that manufacturer)
   def same_company?
     return true if internal_admin?
+    # メーカーユーザーが自分のメーカーを参照する場合
+    if user_profile&.manufacturer_user? && record.is_a?(Manufacturer)
+      return record.id == user_profile.manufacturer_id
+    end
     return false unless user_company_id && record.respond_to?(:company_id)
 
     record.company_id == user_company_id

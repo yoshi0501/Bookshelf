@@ -33,12 +33,27 @@
         </div>
 
         <div class="col-md-6">
+          <%= f.label :payment_terms, t('user_profiles.form.payment_terms'), class: "form-label fw-semibold" %>
+          <%= f.text_field :payment_terms, class: "form-control", placeholder: t('user_profiles.form.payment_terms_placeholder') %>
+          <div class="form-text"><%= t('user_profiles.form.payment_terms_help') %></div>
+        </div>
+
+        <div class="col-md-6">
           <%= f.label :supervisor_id, t('user_profiles.form.supervisor'), class: "form-label fw-semibold" %>
           <%= f.collection_select :supervisor_id, @supervisor_options, :last, :first, 
               { include_blank: t('user_profiles.form.select_supervisor') }, 
               { class: "form-select" } %>
           <div class="form-text"><%= t('user_profiles.form.supervisor_help') %></div>
         </div>
+        <% if current_user.internal_admin? && @manufacturers.present? %>
+          <div class="col-md-12">
+            <%= f.label :manufacturer_id, "メーカー（発送依頼用ログイン）", class: "form-label fw-semibold" %>
+            <%= f.collection_select :manufacturer_id, @manufacturers, :id, :display_name,
+                { include_blank: "メーカーアカウントにしない" },
+                { class: "form-select" } %>
+            <div class="form-text">設定すると、このユーザーは当該メーカーとしてログインし発送依頼のみ表示します。</div>
+          </div>
+        <% end %>
       </div>
 
       <div class="mt-4 d-flex justify-content-end gap-2">

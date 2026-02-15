@@ -23,6 +23,7 @@ if ENV["RESET"] == "1"
   Item.delete_all
   Customer.delete_all
   UserProfile.delete_all
+  Manufacturer.delete_all if ActiveRecord::Base.connection.table_exists?("manufacturers")
   User.delete_all
   Company.delete_all
   IssuerSetting.delete_all
@@ -60,7 +61,8 @@ internal_admin = User.find_or_initialize_by(email: "admin@system.example.com")
 internal_admin.assign_attributes(
   password: SEED_PASSWORD,
   password_confirmation: SEED_PASSWORD,
-  confirmed_at: Time.current
+  confirmed_at: Time.current,
+  password_changed_at: Time.current
 )
 internal_admin.save!
 internal_admin.user_profile&.destroy
@@ -103,17 +105,39 @@ companies.each_with_index do |company, company_index|
   puts "  Created 5 centers for #{company.name}"
 end
 
+# メーカーはプラットフォーム共通マスタ（会社に属さず、1メーカーが複数会社に供給）
+platform_manufacturers = []
+if ActiveRecord::Base.connection.table_exists?("manufacturers")
+  puts "Creating manufacturers (platform-wide, 4 makers)..."
+  %w[M01 M02 M03 M04].each do |code|
+    m = Manufacturer.find_or_create_by!(code: code) do |mc|
+      mc.name = "共通メーカー#{code}"
+      mc.email = "ship-#{code.downcase}@platform.example.com"
+      mc.phone = "03-1234-#{code[-1]}000"
+      mc.is_active = true
+    end
+    platform_manufacturers << m
+  end
+  puts "  Created #{platform_manufacturers.size} platform manufacturers"
+else
+  puts "Skipping manufacturers (manufacturers table not found). Run: bin/rails db:migrate"
+end
+
 puts "Creating items (5 items per company)..."
 
 companies.each do |company|
+  # 複数会社の商品が同じメーカー（M01,M02等）を参照しうる
+  manufacturers = platform_manufacturers
   5.times do |i|
     item_code = "#{company.code}-ITM-%03d" % (i + 1)
+    manufacturer = manufacturers[i % manufacturers.size] if manufacturers.any?
     Item.find_or_create_by!(company: company, item_code: item_code) do |item|
       item.name = "#{company.name} 商品#{i + 1}"
       item.unit_price = (1000 + (i * 500) + rand(0..500))
       item.co2_per_unit = (0.5 + (i * 0.2) + rand(0.0..0.3)).round(2)
       item.cost_price = (item.unit_price * (0.5 + rand(0.0..0.3))).round(0)
       item.shipping_cost = rand(0..200)
+      item.manufacturer_id = manufacturer&.id
       item.is_active = true
     end
   end
@@ -131,7 +155,8 @@ companies.each_with_index do |company, idx|
   admin_user.assign_attributes(
     password: SEED_PASSWORD,
     password_confirmation: SEED_PASSWORD,
-    confirmed_at: Time.current
+    confirmed_at: Time.current,
+    password_changed_at: Time.current
   )
   admin_user.save!
   admin_user.user_profile&.destroy
@@ -150,7 +175,8 @@ companies.each_with_index do |company, idx|
     user.assign_attributes(
       password: SEED_PASSWORD,
       password_confirmation: SEED_PASSWORD,
-      confirmed_at: Time.current
+      confirmed_at: Time.current,
+      password_changed_at: Time.current
     )
     user.save!
     user.user_profile&.destroy
@@ -162,15 +188,66 @@ companies.each_with_index do |company, idx|
     )
     company_users[company.id] << user
   end
+
+end
+
+# メーカーアカウント（プラットフォーム共通・会社に属さない）— 作成後パスワードを Encryptor で固定してログインを保証
+if !ActiveRecord::Base.connection.table_exists?("manufacturers")
+  puts "※ メーカーアカウントはスキップ（manufacturers テーブルがありません。bin/rails db:migrate を実行してください）"
+elsif !UserProfile.column_names.include?("manufacturer_id")
+  puts "※ メーカーアカウントはスキップ（user_profiles.manufacturer_id がありません。bin/rails db:migrate を実行してください）"
+elsif platform_manufacturers.empty?
+  puts "※ メーカーアカウントはスキップ（メーカーが0件です。上記で manufacturers を作成してください）"
+end
+if UserProfile.column_names.include?("manufacturer_id") && platform_manufacturers.any?
+  puts "Creating manufacturer logins (maker-m01〜m04@platform.example.com)..."
+  platform_manufacturers.each do |manufacturer|
+    safe_code = manufacturer.code.downcase.gsub(/[^a-z0-9]/, "-")
+    maker_email = "maker-#{safe_code}@platform.example.com"
+    maker_user = User.find_or_initialize_by(email: maker_email)
+    maker_user.assign_attributes(
+      password: SEED_PASSWORD,
+      password_confirmation: SEED_PASSWORD,
+      confirmed_at: Time.current,
+      password_changed_at: Time.current,
+      failed_attempts: 0,
+      locked_at: nil,
+      unlock_token: nil
+    )
+    maker_user.save!
+    maker_user.user_profile&.destroy
+    maker_user.create_user_profile!(
+      company: nil,
+      manufacturer: manufacturer,
+      name: "#{manufacturer.name} 担当",
+      role: :normal,
+      member_status: :active
+    )
+    # ログイン確実化: Encryptor でパスワードを直接設定（コールバックに依存しない）
+    enc = Devise::Encryptor.digest(User, SEED_PASSWORD)
+    maker_user.update_columns(
+      encrypted_password: enc,
+      confirmed_at: Time.current,
+      password_changed_at: Time.current,
+      failed_attempts: 0,
+      locked_at: nil,
+      unlock_token: nil,
+      updated_at: Time.current
+    )
+    maker_user.reload
+    puts "  Created manufacturer login: #{maker_email} (#{manufacturer.name}) — パスワード: #{SEED_PASSWORD}"
+  end
 end
 
 total_company_users = companies.sum { |c| company_users[c.id]&.size || 0 }
-puts "  Created #{total_company_users} company users (+ 1 internal admin = #{total_company_users + 1} total)"
+maker_count = UserProfile.column_names.include?("manufacturer_id") ? platform_manufacturers.size : 0
+puts "  Created #{total_company_users} company users#{maker_count.positive? ? " + #{maker_count} manufacturer users" : ""} (+ 1 internal admin)"
 
-puts "Creating orders (~30 orders in January #{SEED_YEAR})..."
+puts "Creating orders (~30 orders in January #{SEED_YEAR}, 発送依頼ページ用に confirmed/shipped を含む)..."
 
 companies.each do |company|
   receiving_centers = Customer.where(company: company, is_billing_center: false).to_a
+  # 発送依頼に表示されるよう、メーカー紐づき商品を優先（items は既に manufacturer_id 付きで作成済み）
   items = Item.where(company: company).to_a
   next if receiving_centers.empty? || items.empty?
 
@@ -180,12 +257,14 @@ companies.each do |company|
     order_user = company_users[company.id]&.sample
     next unless order_user
 
+    # 発送依頼一覧に表示されるステータス（confirmed=確認済み, shipped=出荷済み）。delivered は発送依頼対象外
+    status = %i[confirmed shipped shipped].sample
     order = Order.create!(
       company: company,
       customer: customer,
       ordered_by_user: order_user,
       order_date: order_date,
-      shipping_status: %i[shipped delivered].sample,
+      shipping_status: status,
       ship_postal_code: customer.postal_code,
       ship_prefecture: customer.prefecture,
       ship_city: customer.city,
@@ -193,7 +272,8 @@ companies.each do |company|
       ship_center_name: customer.center_name
     )
 
-    rand(1..3).times do
+    # 明細はメーカー紐づき商品を含む（items の多くは manufacturer_id あり）
+    rand(1..4).times do
       item = items.sample
       qty = rand(1..10)
       OrderLine.create!(
@@ -210,7 +290,106 @@ companies.each do |company|
     end
     order.recalculate_totals!
   end
-  puts "  Created 6 orders for #{company.name} (January #{SEED_YEAR})"
+  puts "  Created 6 orders for #{company.name} (January #{SEED_YEAR}, 発送依頼対象: confirmed/shipped)"
+end
+
+# 発送依頼が1件も入らない場合に備え、テスト用に必ず1件以上は発送依頼対象の注文を作る
+if platform_manufacturers.any?
+  items_with_maker = Item.joins(:company).where.not(manufacturer_id: nil).to_a
+  if items_with_maker.any?
+    companies_with_centers = companies.select do |c|
+      Customer.where(company: c, is_billing_center: false).exists? && company_users[c.id]&.any?
+    end
+    if companies_with_centers.any?
+      shipping_request_count_before = Order.where(shipping_status: %i[confirmed shipped]).joins(order_lines: :item).where.not(items: { manufacturer_id: nil }).distinct.count
+      if shipping_request_count_before < 1
+        company = companies_with_centers.first
+        receiving_centers = Customer.where(company: company, is_billing_center: false).to_a
+        order_user = company_users[company.id]&.first
+        company_items_with_maker = items_with_maker.select { |it| it.company_id == company.id }
+
+        unless receiving_centers.empty? || order_user.nil? || company_items_with_maker.empty?
+          puts "Creating 発送依頼テスト用 orders (発送依頼が0件のため最低1件を追加)..."
+          2.times do |i|
+          customer = receiving_centers[i % receiving_centers.size]
+          order = Order.create!(
+            company: company,
+            customer: customer,
+            ordered_by_user: order_user,
+            order_date: SEED_JANUARY.to_a.sample,
+            shipping_status: %i[confirmed shipped][i],
+            ship_postal_code: customer.postal_code,
+            ship_prefecture: customer.prefecture,
+            ship_city: customer.city,
+            ship_address1: customer.address1,
+            ship_center_name: customer.center_name
+          )
+          [company_items_with_maker.first, company_items_with_maker.second].compact.uniq.each do |item|
+            qty = rand(2..5)
+            OrderLine.create!(
+              company: company,
+              order: order,
+              item: item,
+              quantity: qty,
+              unit_price_snapshot: item.unit_price,
+              cost_price_snapshot: item.cost_price.to_d,
+              shipping_cost_snapshot: item.shipping_cost.to_d,
+              amount: item.unit_price * qty,
+              co2_amount: (item.co2_per_unit || 0) * qty
+            )
+          end
+          order.recalculate_totals!
+          puts "  発送依頼テスト用 order #{order.order_no} created (status: #{order.shipping_status})"
+        end
+        end
+      end
+    end
+  end
+
+  # M01 に紐づく発送依頼が必ず1件以上あるようにする（maker-m01@platform.example.com でテストできる）
+  m01 = Manufacturer.find_by(code: "M01")
+  if m01
+    m01_order_ids = OrderLine.joins(:item).where(items: { manufacturer_id: m01.id }).distinct.pluck(:order_id)
+    m01_shipping_count = Order.where(id: m01_order_ids).where(shipping_status: %i[confirmed shipped]).where(order_date: SEED_JANUARY).count
+    if m01_shipping_count < 1
+      company = companies.first
+      receiving_centers = Customer.where(company: company, is_billing_center: false).to_a
+      order_user = company_users[company.id]&.first
+      m01_items = Item.where(company: company, manufacturer_id: m01.id).to_a
+      if receiving_centers.any? && order_user && m01_items.any?
+        puts "Creating M01 発送依頼テスト用 order..."
+        customer = receiving_centers.first
+        order = Order.create!(
+          company: company,
+          customer: customer,
+          ordered_by_user: order_user,
+          order_date: Date.current, # 当月で表示されるように
+          shipping_status: :confirmed,
+          ship_postal_code: customer.postal_code,
+          ship_prefecture: customer.prefecture,
+          ship_city: customer.city,
+          ship_address1: customer.address1,
+          ship_center_name: customer.center_name
+        )
+        m01_items.first(2).each do |item|
+          qty = rand(2..5)
+          OrderLine.create!(
+            company: company,
+            order: order,
+            item: item,
+            quantity: qty,
+            unit_price_snapshot: item.unit_price,
+            cost_price_snapshot: item.cost_price.to_d,
+            shipping_cost_snapshot: item.shipping_cost.to_d,
+            amount: item.unit_price * qty,
+            co2_amount: (item.co2_per_unit || 0) * qty
+          )
+        end
+        order.recalculate_totals!
+        puts "  M01 発送依頼用 order #{order.order_no} created (maker-m01@platform.example.com で表示されます)"
+      end
+    end
+  end
 end
 
 puts ""
@@ -218,9 +397,11 @@ puts "Seed completed!"
 puts ""
 puts "Summary:"
 puts "  Companies: #{Company.count}"
+puts "  Manufacturers: #{ActiveRecord::Base.connection.table_exists?('manufacturers') ? Manufacturer.count : 0}"
 puts "  Customers (Centers): #{Customer.count} (Billing: #{Customer.billing_centers.count}, Receiving: #{Customer.receiving_centers.count})"
 puts "  Items: #{Item.count}"
 puts "  Orders: #{Order.count} (in January #{SEED_YEAR}: #{Order.where(order_date: SEED_JANUARY).count})"
+puts "  発送依頼対象（confirmed/shipped）: #{Order.where(shipping_status: %i[confirmed shipped]).count}"
 puts "  Users: #{User.count}"
 puts ""
 puts "========== ログイン情報（共通パスワード: #{SEED_PASSWORD}） =========="
@@ -236,4 +417,13 @@ companies.each do |company|
   puts "  ユーザー ID: user1@#{domain}  パスワード: #{SEED_PASSWORD}"
   puts ""
 end
+if platform_manufacturers.any?
+  puts "【メーカーアカウント（プラットフォーム共通）】"
+  platform_manufacturers.each do |m|
+    safe_code = m.code.downcase.gsub(/[^a-z0-9]/, "-")
+    puts "  メーカー（#{m.name}） ID: maker-#{safe_code}@platform.example.com  パスワード: #{SEED_PASSWORD}"
+  end
+  puts "※1メーカーで複数会社の発送依頼を参照できます。"
+end
+puts "※メーカーアカウントは user_profiles に manufacturer_id カラムがある場合のみ作成されます（bin/rails db:migrate 実行後、RESET=1 で再 seed）" unless UserProfile.column_names.include?("manufacturer_id")
 puts "=================================================================================="

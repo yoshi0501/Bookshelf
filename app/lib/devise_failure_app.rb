@@ -31,6 +31,8 @@ class DeviseFailureApp < Devise::FailureApp
       I18n.t("devise.failure.account_rejected", default: default || "アカウントが拒否されました。")
     when :unassigned_company
       I18n.t("devise.failure.unassigned_company", default: default || "メールドメインがどの会社にも関連付けられていません。")
+    when :inactive
+      I18n.t("devise.failure.inactive", default: default || "アカウントが有効ではありません。管理者に連絡してください。")
     else
       super(default)
     end

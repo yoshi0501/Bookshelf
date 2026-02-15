@@ -153,6 +153,42 @@
   <% end %>
 </div>
 
+<% if @sales_by_manufacturer.present? %>
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold"><%= t('dashboard.sales_by_manufacturer.title') %></h5>
+    <small class="text-muted"><%= t('dashboard.sales_by_manufacturer.subtitle', month: @target_month.strftime("%Y年%m月")) %></small>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th><%= t('dashboard.sales_by_manufacturer.manufacturer') %></th>
+            <th class="text-end"><%= t('dashboard.sales_by_manufacturer.amount') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @sales_by_manufacturer.each do |row| %>
+            <tr>
+              <td>
+                <% if row[:manufacturer_id] %>
+                  <span class="fw-medium"><%= row[:name] %></span>
+                  <span class="text-muted small ms-1">(<%= row[:code] %>)</span>
+                <% else %>
+                  <span class="text-muted"><%= row[:name] %></span>
+                <% end %>
+              </td>
+              <td class="text-end fw-semibold"><%= number_to_currency(row[:total_amount], unit: "¥", precision: 0) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<% end %>
+
 <div class="card shadow-sm border-0 mb-4">
   <div class="card-header bg-white border-bottom">
     <% if current_user&.internal_admin? %>
@@ -229,6 +265,7 @@
   if (!ctx) return;
 
   if (isAdmin && data[0] && data[0].cost !== undefined) {
+    var revenue = data.map(function(d) { return d.revenue; });
     var cost = data.map(function(d) { return d.cost; });
     var profit = data.map(function(d) { return d.profit; });
     new Chart(ctx, {
@@ -236,6 +273,7 @@
       data: {
         labels: labels,
         datasets: [
+          { label: '<%= t("dashboard.chart.revenue_series") %>', data: revenue, borderColor: 'rgb(25, 135, 84)', backgroundColor: 'rgba(25, 135, 84, 0.1)', fill: true, tension: 0.3 },
           { label: '<%= t("dashboard.chart.cost_series") %>', data: cost, borderColor: 'rgb(108, 117, 125)', backgroundColor: 'rgba(108, 117, 125, 0.1)', fill: true, tension: 0.3 },
           { label: '<%= t("dashboard.chart.profit_series") %>', data: profit, borderColor: 'rgb(13, 202, 240)', backgroundColor: 'rgba(13, 202, 240, 0.1)', fill: true, tension: 0.3 }
         ]

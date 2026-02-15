@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_20_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "access_logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "user_name", default: "", null: false
+    t.string "user_email"
+    t.bigint "company_id"
+    t.string "controller_path", null: false
+    t.string "action_name", null: false
+    t.string "request_path", null: false
+    t.string "request_method", limit: 10, null: false
+    t.string "ip_address"
+    t.string "user_agent", limit: 500
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "created_at"], name: "index_access_logs_on_company_id_and_created_at"
+    t.index ["company_id"], name: "index_access_logs_on_company_id"
+    t.index ["created_at"], name: "index_access_logs_on_created_at"
+    t.index ["user_id", "created_at"], name: "index_access_logs_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_access_logs_on_user_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -77,9 +97,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.string "registration_number"
     t.string "bank_account_1"
     t.string "bank_account_2"
+    t.string "payment_terms"
     t.index ["code"], name: "index_companies_on_code", unique: true
     t.index ["domains"], name: "index_companies_on_domains", using: :gin
     t.index ["is_active"], name: "index_companies_on_is_active"
+  end
+
+  create_table "company_payments", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.integer "year", null: false
+    t.integer "month", null: false
+    t.date "due_date"
+    t.date "paid_at"
+    t.decimal "amount", precision: 14, scale: 2
+    t.string "memo"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "year", "month"], name: "index_company_payments_on_company_id_and_year_and_month", unique: true
+    t.index ["company_id"], name: "index_company_payments_on_company_id"
+    t.index ["paid_at"], name: "index_company_payments_on_paid_at"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -155,9 +191,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.datetime "updated_at", null: false
     t.decimal "cost_price", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "shipping_cost", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "manufacturer_id"
     t.index ["company_id", "is_active"], name: "index_items_on_company_id_and_is_active"
     t.index ["company_id", "item_code"], name: "index_items_on_company_id_and_item_code", unique: true
     t.index ["company_id"], name: "index_items_on_company_id"
+    t.index ["manufacturer_id"], name: "index_items_on_manufacturer_id"
+  end
+
+  create_table "manufacturers", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "name", null: false
+    t.string "email"
+    t.string "phone"
+    t.string "postal_code"
+    t.string "prefecture"
+    t.string "city"
+    t.string "address1"
+    t.string "address2"
+    t.boolean "is_active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "domains", default: [], null: false
+    t.string "payment_terms"
+    t.index ["code"], name: "index_manufacturers_on_code", unique: true
+    t.index ["domains"], name: "index_manufacturers_on_domains", using: :gin
   end
 
   create_table "order_approval_requests", force: :cascade do |t|
@@ -188,6 +245,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.datetime "updated_at", null: false
     t.decimal "cost_price_snapshot", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "shipping_cost_snapshot", precision: 12, scale: 2, default: "0.0", null: false
+    t.string "shipping_carrier", limit: 255
+    t.string "tracking_no"
+    t.date "ship_date"
     t.index ["company_id"], name: "index_order_lines_on_company_id"
     t.index ["item_id"], name: "index_order_lines_on_item_id"
     t.index ["order_id", "item_id"], name: "index_order_lines_on_order_id_and_item_id"
@@ -214,6 +274,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.decimal "co2_total", precision: 12, scale: 4, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "shipping_carrier", limit: 255
     t.index ["company_id", "order_date"], name: "index_orders_on_company_id_and_order_date"
     t.index ["company_id", "order_no"], name: "index_orders_on_company_id_and_order_no", unique: true
     t.index ["company_id", "shipping_status"], name: "index_orders_on_company_id_and_shipping_status"
@@ -234,9 +295,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "supervisor_id"
+    t.bigint "manufacturer_id"
+    t.string "payment_terms"
     t.index ["company_id", "member_status"], name: "index_user_profiles_on_company_id_and_member_status"
     t.index ["company_id", "role"], name: "index_user_profiles_on_company_id_and_role"
     t.index ["company_id"], name: "index_user_profiles_on_company_id"
+    t.index ["manufacturer_id"], name: "index_user_profiles_on_manufacturer_id"
     t.index ["supervisor_id"], name: "index_user_profiles_on_supervisor_id"
     t.index ["user_id"], name: "index_user_profiles_on_user_id", unique: true
   end
@@ -287,11 +351,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
     t.index ["whodunnit"], name: "index_versions_on_whodunnit"
   end
 
+  add_foreign_key "access_logs", "companies"
+  add_foreign_key "access_logs", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "approval_requests", "companies"
   add_foreign_key "approval_requests", "user_profiles"
   add_foreign_key "approval_requests", "users", column: "reviewed_by_id"
+  add_foreign_key "company_payments", "companies"
   add_foreign_key "customers", "companies"
   add_foreign_key "customers", "customers", column: "billing_center_id", on_delete: :restrict
   add_foreign_key "integration_logs", "companies"
@@ -299,6 +366,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
   add_foreign_key "item_companies", "companies"
   add_foreign_key "item_companies", "items"
   add_foreign_key "items", "companies"
+  add_foreign_key "items", "manufacturers"
   add_foreign_key "order_approval_requests", "companies"
   add_foreign_key "order_approval_requests", "orders"
   add_foreign_key "order_approval_requests", "users", column: "reviewed_by_id"
@@ -309,6 +377,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_05_092242) do
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "users", column: "ordered_by_user_id"
   add_foreign_key "user_profiles", "companies"
+  add_foreign_key "user_profiles", "manufacturers"
   add_foreign_key "user_profiles", "user_profiles", column: "supervisor_id"
   add_foreign_key "user_profiles", "users"
 end

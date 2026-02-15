@@ -1,0 +1,53 @@
+<%= form_with model: [:admin, company_payment], local: true do |f| %>
+  <%= render "shared/form_errors", resource: company_payment %>
+
+  <% if company_payment.new_record? && @companies.present? %>
+    <div class="mb-3">
+      <%= f.label :company_id, t('company_payments.form.company'), class: "form-label fw-semibold" %>
+      <%= f.collection_select :company_id, @companies, :id, :name, { include_blank: t('company_payments.form.select_company') }, { class: "form-select", required: true } %>
+    </div>
+  <% elsif company_payment.persisted? %>
+    <div class="mb-3">
+      <label class="form-label fw-semibold text-muted"><%= t('company_payments.form.company') %></label>
+      <p class="mb-0 fw-medium"><%= company_payment.company.name %></p>
+    </div>
+  <% end %>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <%= f.label :year, t('company_payments.form.year'), class: "form-label fw-semibold" %>
+      <%= f.number_field :year, class: "form-control", min: 2000, max: 2100, required: true %>
+    </div>
+    <div class="col-md-4">
+      <%= f.label :month, t('company_payments.form.month'), class: "form-label fw-semibold" %>
+      <%= f.number_field :month, class: "form-control", min: 1, max: 12, required: true %>
+    </div>
+    <div class="col-md-4">
+      <%= f.label :due_date, t('company_payments.table.due_date'), class: "form-label fw-semibold" %>
+      <%= f.date_field :due_date, class: "form-control" %>
+      <div class="form-text"><%= t('company_payments.form.due_date_help') %></div>
+    </div>
+    <div class="col-md-6">
+      <%= f.label :amount, t('company_payments.table.amount'), class: "form-label fw-semibold" %>
+      <%= f.number_field :amount, class: "form-control", step: 0.01, min: 0, placeholder: t('company_payments.form.amount_placeholder') %>
+      <div class="form-text"><%= t('company_payments.form.amount_help') %></div>
+    </div>
+    <div class="col-md-6">
+      <%= f.label :paid_at, t('company_payments.form.paid_at'), class: "form-label fw-semibold" %>
+      <%= f.date_field :paid_at, class: "form-control" %>
+      <div class="form-text"><%= t('company_payments.form.paid_at_help') %></div>
+    </div>
+    <div class="col-12">
+      <%= f.label :memo, t('company_payments.form.memo'), class: "form-label fw-semibold" %>
+      <%= f.text_area :memo, class: "form-control", rows: 2 %>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <%= f.submit company_payment.persisted? ? t('shared.actions.update') : t('company_payments.new.submit'), class: "btn btn-primary" %>
+    <%= link_to t('shared.actions.cancel'), company_payment.persisted? ? admin_company_payment_path(company_payment) : admin_company_payments_path, class: "btn btn-outline-secondary" %>
+    <% if company_payment.persisted? %>
+      <%= button_to t('shared.actions.destroy'), admin_company_payment_path(company_payment), method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: t('company_payments.destroy_confirm') } } %>
+    <% end %>
+  </div>
+<% end %>

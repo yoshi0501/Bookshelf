@@ -43,8 +43,8 @@ module Users
       email = params.dig(:user, :email)
       return if email.blank?
 
-      company = Company.find_by_email_domain(email)
-      return if company.present?
+      return if Company.find_by_email_domain(email).present?
+      return if Manufacturer.find_by_email_domain(email).present?
 
       flash[:alert] = t("devise.registrations.invalid_email_domain")
       redirect_to new_user_registration_path

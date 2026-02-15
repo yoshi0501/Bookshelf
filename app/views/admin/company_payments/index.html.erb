@@ -1,0 +1,92 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('company_payments.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('company_payments.index.description') %></p>
+  </div>
+  <div>
+    <%= link_to new_admin_company_payment_path, class: "btn btn-primary btn-sm" do %>
+      <i class="bi bi-plus me-1"></i><%= t('company_payments.new.submit') %>
+    <% end %>
+  </div>
+</div>
+
+<% overdue_count = policy_scope(CompanyPayment).overdue.count %>
+<% if overdue_count > 0 %>
+  <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+    <div>
+      <strong><%= t('company_payments.index.overdue_alert_title') %></strong>
+      <%= t('company_payments.index.overdue_alert_count', count: overdue_count) %>
+      <%= link_to t('company_payments.index.filter_overdue'), admin_company_payments_path(filter: 'overdue'), class: "alert-link ms-1" %>
+    </div>
+  </div>
+<% end %>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body py-2">
+    <div class="d-flex gap-2 flex-wrap">
+      <%= link_to t('company_payments.index.filter_all'), admin_company_payments_path, class: "btn btn-sm #{@filter.blank? ? 'btn-primary' : 'btn-outline-primary'}" %>
+      <%= link_to t('company_payments.index.filter_unpaid'), admin_company_payments_path(filter: 'unpaid'), class: "btn btn-sm #{@filter == 'unpaid' ? 'btn-warning' : 'btn-outline-warning'}" %>
+      <%= link_to t('company_payments.index.filter_overdue'), admin_company_payments_path(filter: 'overdue'), class: "btn btn-sm #{@filter == 'overdue' ? 'btn-danger' : 'btn-outline-danger'}" %>
+      <%= link_to t('company_payments.index.filter_paid'), admin_company_payments_path(filter: 'paid'), class: "btn btn-sm #{@filter == 'paid' ? 'btn-success' : 'btn-outline-success'}" %>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+    <% if @company_payments.empty? %>
+      <div class="text-center py-5">
+        <p class="text-muted mb-0"><%= t('company_payments.index.no_payments') %></p>
+        <%= link_to new_admin_company_payment_path, class: "btn btn-primary mt-3" do %>
+          <i class="bi bi-plus me-1"></i><%= t('company_payments.new.submit') %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('company_payments.table.company') %></th>
+              <th><%= t('company_payments.table.period') %></th>
+              <th><%= t('company_payments.table.due_date') %></th>
+              <th class="text-end"><%= t('company_payments.table.amount') %></th>
+              <th><%= t('company_payments.table.status') %></th>
+              <th class="text-end"><%= t('companies.table.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @company_payments.each do |cp| %>
+              <tr class="<%= 'table-warning' if cp.overdue? %>">
+                <td>
+                  <%= link_to cp.company.name, admin_company_path(cp.company), class: "fw-medium" %>
+                  <% if cp.company.payment_terms.present? %>
+                    <br><small class="text-muted"><%= cp.company.payment_terms %></small>
+                  <% end %>
+                </td>
+                <td><%= cp.period_label %></td>
+                <td><%= cp.due_date&.strftime('%Y-%m-%d') || '-' %></td>
+                <td class="text-end"><%= number_to_currency(cp.display_amount, unit: '¥', format: '%u%n') %></td>
+                <td>
+                  <% if cp.paid? %>
+                    <span class="badge bg-success"><%= t('company_payments.status.paid') %> <%= cp.paid_at.strftime('%Y-%m-%d') %></span>
+                  <% elsif cp.overdue? %>
+                    <span class="badge bg-danger"><%= t('company_payments.status.overdue') %></span>
+                  <% else %>
+                    <span class="badge bg-secondary"><%= t('company_payments.status.unpaid') %></span>
+                  <% end %>
+                </td>
+                <td class="text-end">
+                  <%= link_to t('shared.actions.edit'), edit_admin_company_payment_path(cp), class: "btn btn-sm btn-outline-secondary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-center py-3">
+        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+      </div>
+    <% end %>
+  </div>
+</div>

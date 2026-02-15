@@ -13,21 +13,43 @@
         @companies = [current_company].compact
       end
 
-      # 選択された会社（パラメータから、またはデフォルトで最初の会社）
-      selected_company_id = params[:company_id]&.to_i
-      if selected_company_id && @companies.map(&:id).include?(selected_company_id)
-        @selected_company = Company.find(selected_company_id)
+      # 選択された会社（unassigned / manufacturers / 会社ID、内部管理者のみ複数タブ）
+      selected_company_id = params[:company_id].to_s
+      if selected_company_id == "unassigned" && current_user.internal_admin?
+        @selected_company = nil
+        @show_unassigned = true
+        @show_manufacturers = false
+      elsif selected_company_id == "manufacturers" && current_user.internal_admin?
+        @selected_company = nil
+        @show_unassigned = false
+        @show_manufacturers = true
+      elsif selected_company_id.present? && @companies.map(&:id).include?(selected_company_id.to_i)
+        @selected_company = Company.find(selected_company_id.to_i)
+        @show_unassigned = false
+        @show_manufacturers = false
       else
         @selected_company = @companies.first
+        @show_unassigned = false
+        @show_manufacturers = false
       end
 
-      # 選択された会社のメンバーを取得
-      if @selected_company
+      # メンバー一覧（未割り当て / メーカーアカウント / 会社別）
+      if @show_unassigned
         user_profiles_scope = policy_scope(UserProfile)
-          .includes(:user, :company, :supervisor)
-          .active_members
-          .for_company(@selected_company)
+          .includes(:user, :company, :manufacturer)
+          .where(member_status: :unassigned)
           .order(:name)
+      elsif @show_manufacturers
+        user_profiles_scope = policy_scope(UserProfile)
+          .includes(:user, :company, :manufacturer)
+          .manufacturer_accounts
+          .order(:name)
+      elsif @selected_company
+        base = policy_scope(UserProfile).includes(:user, :company, :manufacturer, :supervisor).active_members
+        user_profiles_scope = current_user.internal_admin? ?
+          base.for_company_including_manufacturers(@selected_company) :
+          base.for_company(@selected_company)
+        user_profiles_scope = user_profiles_scope.order(:name)
       else
         user_profiles_scope = policy_scope(UserProfile).none
       end
@@ -41,14 +63,26 @@
 
     def edit
       authorize @user_profile
+      @manufacturers = current_user.internal_admin? ? Manufacturer.ordered_by_code : []
     end
 
     def update
       authorize @user_profile
 
-      if @user_profile.update(user_profile_params)
+      attrs = user_profile_params.to_h
+      # メーカーを割り当てた場合は会社に属さず（プラットフォーム共通）、有効化してログイン可能に
+      if attrs["manufacturer_id"].present?
+        attrs["company_id"] = nil
+        attrs["member_status"] = "active" if @user_profile.member_status != "active"
+      elsif attrs["manufacturer_id"].to_s == ""
+        # メーカーを外した場合は company_id はそのまま
+      end
+
+      if @user_profile.update(attrs)
         redirect_to admin_user_profile_path(@user_profile), notice: t("user_profiles.updated")
       else
+        @manufacturers = current_user.internal_admin? ? Manufacturer.ordered_by_code : []
+        load_supervisor_options
         render :edit, status: :unprocessable_entity
       end
     end
@@ -123,7 +157,9 @@
     end
 
     def user_profile_params
-      params.require(:user_profile).permit(:name, :phone, :supervisor_id)
+      permitted = %i[name phone supervisor_id payment_terms]
+      permitted += %i[manufacturer_id company_id] if current_user.internal_admin?
+      params.require(:user_profile).permit(permitted)
     end
   end
 end

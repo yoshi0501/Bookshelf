@@ -5,6 +5,7 @@ class Item < ApplicationRecord
   include Auditable
 
   # Associations
+  belongs_to :manufacturer, optional: true
   has_one_attached :image
   has_many :order_lines, dependent: :restrict_with_error
   has_many :item_companies, dependent: :destroy
@@ -33,4 +34,6 @@ class Item < ApplicationRecord
   def formatted_price
     ActionController::Base.helpers.number_to_currency(unit_price, unit: "¥", precision: 0)
   end
+
+  private
 end

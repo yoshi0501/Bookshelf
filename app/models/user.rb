@@ -21,9 +21,13 @@ class User < ApplicationRecord
 
   # Delegations
   delegate :role, :member_status, :name, :phone, to: :user_profile, allow_nil: true
-  delegate :normal?, :company_admin?, :internal_admin?, to: :user_profile, allow_nil: true, prefix: false
+  delegate :normal?, :company_admin?, :internal_admin?, :manufacturer_user?, to: :user_profile, allow_nil: true, prefix: false
 
   # Instance methods
+  def current_manufacturer
+    user_profile&.manufacturer
+  end
+
   def active_for_authentication?
     super && user_profile&.active?
   end
@@ -33,12 +37,15 @@ class User < ApplicationRecord
       :pending_approval
     elsif user_profile&.rejected?
       :account_rejected
+    elsif user_profile.nil? || user_profile&.unassigned?
+      :unassigned_company
     else
       super
     end
   end
 
   def current_company
+    # メーカーはプラットフォーム共通のため会社に属さない。会社ユーザーのみ company を返す
     user_profile&.company
   end
 
@@ -49,11 +56,16 @@ class User < ApplicationRecord
   private
 
   def create_user_profile_from_domain
+    # メーカーアカウント（seed: maker-*@platform.example.com）は seed でプロファイルを明示作成するためスキップ
+    return if email.to_s.match?(/\Amaker-[a-z0-9-]+@platform\.example\.com\z/i)
+
     company = Company.find_by_email_domain(email)
+    manufacturer = company.blank? ? Manufacturer.find_by_email_domain(email) : nil
 
     profile = build_user_profile(
       name: email.split("@").first,
-      company: company
+      company: company,
+      manufacturer_id: manufacturer&.id
     )
 
     if company
@@ -65,6 +77,9 @@ class User < ApplicationRecord
         company: company,
         status: :pending
       )
+    elsif manufacturer
+      profile.member_status = :active
+      profile.save!
     else
       profile.member_status = :unassigned
       profile.save!

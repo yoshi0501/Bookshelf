@@ -104,4 +104,36 @@ module ApplicationHelper
       "bg-blue-50 text-blue-800"
     end
   end
+
+  # 運送会社名と追跡番号から追跡URLを返す（trackings.jp 経由）。該当しなければ nil。
+  # 伝票番号は数字のみ使用（ハイフン等は除去）。
+  def tracking_url_for(carrier_name, tracking_no)
+    return nil if tracking_no.blank?
+    id = tracking_carrier_id(carrier_name.to_s.strip)
+    return nil if id.blank?
+    number = tracking_no.to_s.gsub(/\D/, "")
+    return nil if number.blank?
+    "https://trackings.jp/toi/#{ERB::Util.url_encode(id)}/#{ERB::Util.url_encode(number)}"
+  end
+
+  # 運送会社名（自由入力）を trackings.jp の運送会社IDに変換
+  def tracking_carrier_id(carrier_name)
+    return nil if carrier_name.blank?
+    key = carrier_name.tr("Ａ-Ｚａ-ｚ", "A-Za-z").downcase
+    key_ja = carrier_name
+    [
+      ["yamato", %w[ヤマト 黒猫 宅急便 クール]],
+      ["sagawa", %w[佐川]],
+      ["yupack", %w[ゆうパック 日本郵便 郵便 yuupack]],
+      ["fukutsu", %w[福山通運 福山]],
+      ["seino", %w[西濃]],
+      ["nittsu", %w[日通 日本通運]],
+      ["tonami", %w[トナミ]],
+      ["meitetsuunyu", %w[名鉄運輸 名鉄]],
+      ["kintetsu", %w[近鉄]]
+    ].each do |id, keywords|
+      return id if keywords.any? { |k| key.include?(k) || key_ja.include?(k) }
+    end
+    nil
+  end
 end

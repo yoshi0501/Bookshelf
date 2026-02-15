@@ -1,5 +1,26 @@
 # テスト環境でのログイン方法
 
+## 開発環境（`rails db:seed` 後）のログイン情報
+
+**共通パスワード: `SeedPass1`**
+
+| 種別 | メール（ID） | パスワード |
+|------|--------------|------------|
+| **システム管理者** | `admin@system.example.com` | `SeedPass1` |
+| **会社管理者**（サンプル会社1） | `admin@company1.example.com` | `SeedPass1` |
+| **一般ユーザー**（サンプル会社1） | `user1@company1.example.com` 〜 `user5@company1.example.com` | `SeedPass1` |
+| **会社管理者**（サンプル会社2） | `admin@company2.example.com` | `SeedPass1` |
+| **一般ユーザー**（サンプル会社2） | `user1@company2.example.com` 〜 `user5@company2.example.com` | `SeedPass1` |
+| **メーカー M01** | `maker-m01@platform.example.com` | `SeedPass1` |
+| **メーカー M02** | `maker-m02@platform.example.com` | `SeedPass1` |
+| **メーカー M03** | `maker-m03@platform.example.com` | `SeedPass1` |
+| **メーカー M04** | `maker-m04@platform.example.com` | `SeedPass1` |
+
+- 会社3〜5も同様に `admin@company3.example.com` / `user1@company4.example.com` などの形式です。
+- メーカーでログインすると「ダッシュボード」（自社売上）と「発送依頼」が利用できます。
+
+---
+
 ## テスト環境でログインする方法
 
 ### 1. テスト用シードデータを投入（オプション）

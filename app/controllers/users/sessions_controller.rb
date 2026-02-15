@@ -17,6 +17,8 @@ module Users
         sign_out resource
         flash[:alert] = t("devise.failure.unassigned_company")
         new_user_session_path
+      elsif resource.respond_to?(:manufacturer_user?) && resource.manufacturer_user?
+        stored_location_for(resource).presence || shipping_requests_path
       else
         stored_location_for(resource) || dashboard_path
       end

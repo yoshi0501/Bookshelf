@@ -1,0 +1,83 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('access_logs.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('access_logs.index.description') %></p>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body py-3">
+    <%= form_with url: admin_access_logs_path, method: :get, class: "row g-2 align-items-end" do |f| %>
+      <div class="col-auto">
+        <label class="form-label small text-muted mb-0"><%= t('access_logs.index.filter_user') %></label>
+        <%= text_field_tag :q, params[:q], class: "form-control form-control-sm", placeholder: t('access_logs.index.filter_user_placeholder'), style: "width: 180px" %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small text-muted mb-0"><%= t('access_logs.index.filter_path') %></label>
+        <%= text_field_tag :path, params[:path], class: "form-control form-control-sm", placeholder: t('access_logs.index.filter_path_placeholder'), style: "width: 200px" %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small text-muted mb-0"><%= t('access_logs.index.filter_from') %></label>
+        <%= date_field_tag :from, params[:from], class: "form-control form-control-sm", style: "width: 140px" %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small text-muted mb-0"><%= t('access_logs.index.filter_to') %></label>
+        <%= date_field_tag :to, params[:to], class: "form-control form-control-sm", style: "width: 140px" %>
+      </div>
+      <div class="col-auto">
+        <%= submit_tag t('shared.actions.search'), class: "btn btn-sm btn-primary" %>
+        <%= link_to t('access_logs.index.reset'), admin_access_logs_path, class: "btn btn-sm btn-outline-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+    <% if @access_logs.empty? %>
+      <div class="text-center py-5">
+        <p class="text-muted mb-0"><%= t('access_logs.index.no_logs') %></p>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('access_logs.table.datetime') %></th>
+              <th><%= t('access_logs.table.user') %></th>
+              <th><%= t('access_logs.table.company') %></th>
+              <th><%= t('access_logs.table.action') %></th>
+              <th><%= t('access_logs.table.path') %></th>
+              <th><%= t('access_logs.table.ip') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @access_logs.each do |log| %>
+              <tr>
+                <td class="text-nowrap small"><%= log.created_at&.strftime('%Y-%m-%d %H:%M:%S') %></td>
+                <td>
+                  <span class="fw-medium"><%= log.user_name %></span>
+                  <% if log.user_email.present? %>
+                    <br><small class="text-muted"><%= log.user_email %></small>
+                  <% end %>
+                </td>
+                <td class="small"><%= log.company&.name || "-" %></td>
+                <td>
+                  <span class="badge bg-secondary"><%= log.request_method %></span>
+                  <span class="small"><%= log.action_label %></span>
+                </td>
+                <td class="small font-monospace text-break" style="max-width: 280px"><%= truncate(log.request_path, length: 60) %></td>
+                <td class="small text-muted"><%= log.ip_address %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-center py-3">
+        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<p class="text-muted small mt-3 mb-0"><%= t('access_logs.index.retention_note') %></p>

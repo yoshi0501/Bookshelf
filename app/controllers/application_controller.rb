@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
   before_action :check_member_status
+  before_action :restrict_manufacturer_user_to_shipping_requests
   before_action :warn_password_expiring_soon
   before_action :set_paper_trail_whodunnit
   before_action :set_paper_trail_request_info
@@ -16,16 +17,25 @@ class ApplicationController < ActionController::Base
 
   after_action :verify_authorized, except: :index, unless: :skip_pundit?
   after_action :verify_policy_scoped, only: :index, unless: :skip_pundit?
+  after_action :log_critical_access, unless: :skip_access_log?
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
-  helper_method :current_company
+  helper_method :current_company, :current_manufacturer, :manufacturer_user?
 
   private
 
   def current_company
     current_user&.current_company
+  end
+
+  def current_manufacturer
+    current_user&.current_manufacturer
+  end
+
+  def manufacturer_user?
+    current_user&.manufacturer_user?
   end
 
   def check_member_status
@@ -58,6 +68,28 @@ class ApplicationController < ActionController::Base
 
   def skip_pundit?
     devise_controller? || params[:controller] == "pages"
+  end
+
+  def skip_access_log?
+    devise_controller? || params[:controller] == "pages"
+  end
+
+  def log_critical_access
+    return unless user_signed_in?
+
+    AccessLogger.log!(self)
+  end
+
+  # メーカーユーザーは発送依頼以外のメニューにアクセスさせない
+  def restrict_manufacturer_user_to_shipping_requests
+    return unless current_user&.manufacturer_user?
+    return if controller_name == "shipping_requests"
+    return if controller_name == "dashboard" # メーカー用ダッシュボード（自社売上）を許可
+    return if controller_path.start_with?("devise/") || controller_path == "users/registrations"
+    return if controller_path == "users/sessions" # ログイン・ログアウトは許可
+    return if controller_path.start_with?("admin/") == false && controller_name == "pages"
+
+    redirect_to shipping_requests_path, alert: t("pundit.not_authorized")
   end
 
   # パスワード有効期限の約2週間前から変更を促す
