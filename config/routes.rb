@@ -30,6 +30,8 @@ Rails.application.routes.draw do
       get :import
       post :import
       get :download_invoices_bulk
+      get :import_assignments
+      post :import_assignments
     end
   end
   resources :items do

@@ -14,6 +14,10 @@ class UserProfile < ApplicationRecord
   belongs_to :supervisor, class_name: "UserProfile", optional: true
   has_many :subordinates, class_name: "UserProfile", foreign_key: "supervisor_id", dependent: :nullify
   has_many :approval_requests, dependent: :destroy
+  # 所属請求センター（異動時はここを更新）。請求センターのみ指定可
+  belongs_to :billing_center, class_name: "Customer", optional: true
+  # 承認者として紐づいている請求センター（1人1センター想定、異動時はCustomer側を更新）
+  has_many :centers_as_approver, class_name: "Customer", foreign_key: :approver_user_profile_id, dependent: :nullify
 
   # Validations
   validates :user_id, presence: true, uniqueness: true
@@ -26,6 +30,7 @@ class UserProfile < ApplicationRecord
   validate :manufacturer_belongs_to_company_if_both_present
   validate :supervisor_must_be_same_company
   validate :cannot_be_own_supervisor
+  validate :billing_center_must_be_billing_and_same_company, if: :billing_center_id?
 
   # Scopes
   scope :for_company, ->(company) { where(company: company) }
@@ -126,6 +131,20 @@ class UserProfile < ApplicationRecord
 
     if supervisor_id == id
       errors.add(:supervisor_id, "cannot be yourself")
+    end
+  end
+
+  def billing_center_must_be_billing_and_same_company
+    return unless billing_center_id.present?
+
+    center = billing_center
+    return unless center
+
+    unless center.is_billing_center?
+      errors.add(:billing_center_id, "must be a billing center")
+    end
+    if company_id.present? && center.company_id != company_id
+      errors.add(:billing_center_id, "must belong to the same company")
     end
   end
 end

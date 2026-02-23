@@ -122,6 +122,19 @@
               </p>
             </div>
           <% end %>
+          <% if @customer.is_billing_center? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.approver') %></label>
+              <p class="mb-0">
+                <% if @customer.approver_user_profile %>
+                  <span class="badge bg-success me-1"><%= t('user_profiles.roles.approver') %></span>
+                  <%= @customer.approver_user_profile.name %> (<%= @customer.approver_user_profile.user&.email %>)
+                <% else %>
+                  <span class="text-muted">-</span>
+                <% end %>
+              </p>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

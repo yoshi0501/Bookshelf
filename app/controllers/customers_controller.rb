@@ -344,7 +344,55 @@ class CustomersController < ApplicationController
     end
   end
 
+  def import_assignments
+    authorize Customer, :import?
+
+    if request.get?
+      load_companies_for_import_assignments
+      render :import_assignments
+      return
+    end
+
+    company_id = params[:company_id]&.to_i
+    csv_file = params[:csv_file]
+    unless company_id.present? && csv_file.present?
+      load_companies_for_import_assignments
+      flash.now[:alert] = t("customers.import_assignments.missing_params")
+      render :import_assignments, status: :unprocessable_entity
+      return
+    end
+
+    company = Company.find_by(id: company_id)
+    unless company && (current_user.internal_admin? || current_company&.id == company.id)
+      load_companies_for_import_assignments
+      flash.now[:alert] = t("customers.import_assignments.invalid_company")
+      render :import_assignments, status: :unprocessable_entity
+      return
+    end
+
+    importer = CenterAssignmentCsvImporter.new(company)
+    success = importer.run(csv_file.read)
+    if success
+      redirect_to customers_path(company_id: company.id, type: "billing_centers"),
+        notice: t("customers.import_assignments.success", centers: importer.updated_centers, members: importer.updated_members)
+    else
+      load_companies_for_import_assignments
+      @import_errors = importer.errors
+      flash.now[:alert] = importer.errors.first(3).join(" ")
+      render :import_assignments, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def load_companies_for_import_assignments
+    if current_user.internal_admin?
+      @companies = Company.active.order(:code)
+    else
+      @companies = [current_company].compact
+    end
+    @selected_company_id = params[:company_id]&.to_i
+  end
 
   SORTABLE_COLUMNS = %w[center_code center_name prefecture city is_active].freeze
 
@@ -376,15 +424,24 @@ class CustomersController < ApplicationController
         .active
         .order(:center_code)
         .map { |c| [c.display_name, c.id] }
+      # 承認者候補（承認者・会社管理者・内部管理者ロール）
+      @approver_candidates = UserProfile
+        .for_company(target_company)
+        .where(role: %i[approver company_admin internal_admin])
+        .active_members
+        .includes(:user)
+        .order(:name)
+        .map { |p| ["#{p.name} (#{p.user&.email})", p.id] }
     else
       @billing_centers = []
+      @approver_candidates = []
     end
   end
 
   def customer_params
     params.require(:customer).permit(
       :company_id, :billing_center_id, :is_billing_center, :center_code, :center_name, :postal_code, :prefecture,
-      :city, :address1, :address2, :is_active
+      :city, :address1, :address2, :is_active, :approver_user_profile_id
     )
   end
 
