@@ -10,6 +10,10 @@ class Customer < ApplicationRecord
   belongs_to :billing_center, class_name: "Customer", foreign_key: :billing_center_id, optional: true
   has_many :customers, class_name: "Customer", foreign_key: :billing_center_id, dependent: :restrict_with_error
   has_many :orders, dependent: :restrict_with_error
+  # 請求センターに紐づく承認者（1センター1承認者。異動時はこの1件を更新）
+  belongs_to :approver_user_profile, class_name: "UserProfile", optional: true
+  # この請求センターに所属するメンバー（UserProfile.billing_center_id）
+  has_many :member_profiles, class_name: "UserProfile", foreign_key: :billing_center_id, dependent: :nullify
 
   # Validations
   validates :center_code, presence: true, length: { maximum: 50 },
@@ -25,6 +29,8 @@ class Customer < ApplicationRecord
   validate :billing_center_must_be_billing_center
   validate :cannot_be_own_billing_center
   validate :receiving_center_must_have_billing_center
+  validate :approver_must_be_same_company_and_approver_role, if: :approver_user_profile_id?
+  validate :approver_only_on_billing_center
 
   # Scopes
   scope :active, -> { where(is_active: true) }
@@ -89,6 +95,27 @@ class Customer < ApplicationRecord
 
     if billing_center_id.blank?
       errors.add(:billing_center_id, "must be present for receiving centers")
+    end
+  end
+
+  def approver_only_on_billing_center
+    return unless approver_user_profile_id.present?
+    return if is_billing_center?
+
+    errors.add(:approver_user_profile_id, "can only be set on billing centers")
+  end
+
+  def approver_must_be_same_company_and_approver_role
+    return unless approver_user_profile_id.present?
+
+    approver = approver_user_profile
+    return unless approver
+
+    if company_id.present? && approver.company_id != company_id
+      errors.add(:approver_user_profile_id, "must belong to the same company")
+    end
+    unless approver.role_approver? || approver.role_company_admin? || approver.role_internal_admin?
+      errors.add(:approver_user_profile_id, "must have approver, company_admin, or internal_admin role")
     end
   end
 end

@@ -45,6 +45,15 @@
               { class: "form-select" } %>
           <div class="form-text"><%= t('user_profiles.form.supervisor_help') %></div>
         </div>
+        <% if @billing_center_options&.any? %>
+          <div class="col-md-6">
+            <%= f.label :billing_center_id, t('user_profiles.form.billing_center'), class: "form-label fw-semibold" %>
+            <%= f.collection_select :billing_center_id, @billing_center_options, :last, :first,
+                { include_blank: t('user_profiles.form.select_billing_center') },
+                { class: "form-select" } %>
+            <div class="form-text"><%= t('user_profiles.form.billing_center_help') %></div>
+          </div>
+        <% end %>
         <% if current_user.internal_admin? && @manufacturers.present? %>
           <div class="col-md-12">
             <%= f.label :manufacturer_id, "メーカー（発送依頼用ログイン）", class: "form-label fw-semibold" %>

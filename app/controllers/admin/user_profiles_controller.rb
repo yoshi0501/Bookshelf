@@ -4,6 +4,7 @@
   class UserProfilesController < ApplicationController
     before_action :set_user_profile, only: %i[show edit update change_role]
     before_action :load_supervisor_options, only: %i[edit update]
+    before_action :load_billing_center_options, only: %i[edit update]
 
     def index
       # 会社一覧を取得（Internal Adminは全社、Company Adminは自社のみ）
@@ -156,8 +157,22 @@
       @supervisor_options ||= []
     end
 
+    def load_billing_center_options
+      target_company = @user_profile&.company
+      if target_company
+        @billing_center_options = Customer
+          .for_company(target_company)
+          .billing_centers
+          .active
+          .order(:center_code)
+          .map { |c| [c.display_name, c.id] }
+      else
+        @billing_center_options = []
+      end
+    end
+
     def user_profile_params
-      permitted = %i[name phone supervisor_id payment_terms]
+      permitted = %i[name phone supervisor_id payment_terms billing_center_id]
       permitted += %i[manufacturer_id company_id] if current_user.internal_admin?
       params.require(:user_profile).permit(permitted)
     end
