@@ -62,10 +62,7 @@
                   <% end %>
                 </td>
                 <td class="small"><%= log.company&.name || "-" %></td>
-                <td>
-                  <span class="badge bg-secondary"><%= log.request_method %></span>
-                  <span class="small"><%= log.action_label %></span>
-                </td>
+                <td class="small"><%= log.action_with_target %></td>
                 <td class="small font-monospace text-break" style="max-width: 280px"><%= truncate(log.request_path, length: 60) %></td>
                 <td class="small text-muted"><%= log.ip_address %></td>
               </tr>

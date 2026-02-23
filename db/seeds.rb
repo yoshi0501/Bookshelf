@@ -393,6 +393,89 @@ if platform_manufacturers.any?
   end
 end
 
+# アクセスログのサンプル（確認用）
+if ActiveRecord::Base.connection.table_exists?("access_logs")
+  begin
+    puts "Creating access logs (sample for verification)..."
+    base_time = Time.current - 3.days
+    order = Order.first
+    order2 = Order.second
+    customer1 = Customer.first
+    customer2 = Customer.second
+    item = Item.first
+    manufacturer = ActiveRecord::Base.connection.table_exists?("manufacturers") ? Manufacturer.first : nil
+    company = Company.first
+    profile = UserProfile.where.not(role: :internal_admin).first
+
+    admin_user = internal_admin
+    company_admin = company ? (company_users[company.id]&.first) : nil
+
+    # 必須データがない場合はスキップ
+    unless admin_user && company
+      puts "  Skipped (admin_user or company missing)"
+    else
+      # target_summary あり/なし両方。OrderApprovalRequest 等に依存しない
+      entries = [
+        ["orders", "create", "/orders", "POST", order ? "発注 #{order.order_no}" : nil],
+        ["orders", "update", "/orders/#{order&.id}", "PATCH", order ? "発注 #{order.order_no}" : nil],
+        ["orders", "ship", "/orders/#{order&.id}/ship", "PATCH", order ? "発注 #{order.order_no}" : nil],
+        ["orders", "deliver", "/orders/#{order2&.id}", "PATCH", order2 ? "発注 #{order2.order_no}" : nil],
+        ["orders", "cancel", "/orders/#{order&.id}/cancel", "PATCH", order ? "発注 #{order.order_no}" : nil],
+        ["orders", "export", "/orders/export", "GET", nil],
+        ["order_approval_requests", "approve", "/order_approval_requests/1/approve", "PATCH", order ? "発注 #{order.order_no}" : nil],
+        ["order_approval_requests", "reject", "/order_approval_requests/1/reject", "PATCH", order ? "発注 #{order.order_no}" : nil],
+        ["customers", "create", "/customers", "POST", nil],
+        ["customers", "update", "/customers/#{customer1&.id}", "PATCH", customer1 ? "センター #{customer1.center_name} (#{customer1.center_code})" : nil],
+        ["customers", "destroy", "/customers/#{customer2&.id}", "PATCH", customer2 ? "センター #{customer2.center_name} (#{customer2.center_code})" : nil],
+        ["customers", "download_invoice", "/customers/#{customer1&.id}/download_invoice", "GET", customer1 ? "センター #{customer1.center_name} (#{customer1.center_code})" : nil],
+        ["customers", "import", "/customers/import", "POST", nil],
+        ["items", "create", "/items", "POST", nil],
+        ["items", "update", "/items/#{item&.id}", "PATCH", item ? "商品 #{item.item_code} (#{item.name})" : nil],
+        ["items", "destroy", "/items/#{item&.id}", "PATCH", item ? "商品 #{item.item_code} (#{item.name})" : nil],
+        ["items", "import", "/items/import", "POST", nil],
+        ["manufacturers", "create", "/manufacturers", "POST", nil],
+        ["manufacturers", "update", "/manufacturers/#{manufacturer&.id}", "PATCH", manufacturer ? "メーカー #{manufacturer.name} (#{manufacturer.code})" : nil],
+        ["manufacturers", "destroy", "/manufacturers/#{manufacturer&.id}", "DELETE", manufacturer ? "メーカー #{manufacturer.name} (#{manufacturer.code})" : nil],
+        ["shipping_requests", "register_shipment", "/shipping_requests/register_shipment", "POST", nil],
+        ["admin/companies", "create", "/admin/companies", "POST", nil],
+        ["admin/companies", "update", "/admin/companies/#{company&.id}", "PATCH", company ? "会社 #{company.name}" : nil],
+        ["admin/company_payments", "create", "/admin/company_payments", "POST", nil],
+        ["admin/company_payments", "update", "/admin/company_payments/1", "PATCH", company ? "入金 #{company.name} 2026年1月" : nil],
+        ["admin/approval_requests", "approve", "/admin/approval_requests/1/approve", "PATCH", profile ? "メンバー #{profile.name} (#{profile.user&.email})" : nil],
+        ["admin/approval_requests", "reject", "/admin/approval_requests/1/reject", "PATCH", profile ? "メンバー #{profile.name} (#{profile.user&.email})" : nil],
+        ["admin/user_profiles", "update", "/admin/user_profiles/#{profile&.id}", "PATCH", profile ? "ユーザー #{profile.name} (#{profile.user&.email})" : nil],
+        ["admin/user_profiles", "change_role", "/admin/user_profiles/#{profile&.id}/change_role", "PATCH", profile ? "ユーザー #{profile.name} (#{profile.user&.email})" : nil],
+        ["admin/issuer_settings", "update", "/admin/issuer_setting", "PATCH", "発行元設定"],
+        ["admin/access_logs", "index", "/admin/access_logs", "GET", nil],
+      ]
+
+      created = 0
+      entries.each_with_index do |(ctrl, action, path, method, target), i|
+        user = (i % 4 == 0) && company_admin ? company_admin : admin_user
+        AccessLog.create!(
+          user_id: user.id,
+          user_name: user.user_profile&.name || "（未ログイン）",
+          user_email: user.email,
+          company_id: user.company_id || company.id,
+          controller_path: ctrl,
+          action_name: action,
+          request_path: path,
+          request_method: method,
+          ip_address: "127.0.0.1",
+          user_agent: "Mozilla/5.0 (Rails seed)",
+          target_summary: AccessLog.column_names.include?("target_summary") ? target : nil,
+          created_at: base_time + i.hours
+        )
+        created += 1
+      end
+      puts "  Created #{created} access log entries"
+    end
+  rescue => e
+    puts "  ERROR creating access logs: #{e.message}"
+    puts e.backtrace.first(3).join("\n")
+  end
+end
+
 puts ""
 puts "Seed completed!"
 puts ""
@@ -404,6 +487,7 @@ puts "  Items: #{Item.count}"
 puts "  Orders: #{Order.count} (in January #{SEED_YEAR}: #{Order.where(order_date: SEED_JANUARY).count})"
 puts "  発送依頼対象（confirmed/shipped）: #{Order.where(shipping_status: %i[confirmed shipped]).count}"
 puts "  Users: #{User.count}"
+puts "  Access logs: #{AccessLog.count}" if ActiveRecord::Base.connection.table_exists?("access_logs")
 puts ""
 puts "========== ログイン情報（共通パスワード: #{SEED_PASSWORD}） =========="
 puts ""

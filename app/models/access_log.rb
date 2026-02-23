@@ -15,4 +15,12 @@ class AccessLog < ApplicationRecord
     key = "#{controller_path.gsub('/', '.')}.#{action_name}"
     I18n.t("access_logs.actions.#{key}", default: "#{controller_path}##{action_name}")
   end
+
+  # 操作 + 対象をまとめた表示（例: 発注を更新: 発注 ORD-001）
+  def action_with_target
+    base = action_label
+    return base if target_summary.blank?
+
+    "#{base}: #{target_summary}"
+  end
 end

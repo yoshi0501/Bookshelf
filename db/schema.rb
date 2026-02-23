@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_27_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_28_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_000000) do
     t.string "user_agent", limit: 500
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "target_summary", limit: 255
     t.index ["company_id", "created_at"], name: "index_access_logs_on_company_id_and_created_at"
     t.index ["company_id"], name: "index_access_logs_on_company_id"
     t.index ["created_at"], name: "index_access_logs_on_created_at"

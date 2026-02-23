@@ -1124,6 +1124,57 @@ ja:
       action: "操作"
       path: "リクエストパス"
       ip: "IPアドレス"
+    actions:
+      orders:
+        create: "発注を作成"
+        update: "発注を更新"
+        destroy: "発注を削除"
+        ship: "発注を出荷"
+        deliver: "発注を配送完了"
+        cancel: "発注をキャンセル"
+        export: "発注をエクスポート"
+      order_approval_requests:
+        approve: "発注承認を承認"
+        reject: "発注承認を却下"
+      customers:
+        create: "センターを作成"
+        update: "センターを更新"
+        destroy: "センターを削除"
+        download_invoice: "請求書をダウンロード"
+        download_invoices_by_center: "センター別請求書をダウンロード"
+        download_statement: "明細書をダウンロード"
+        import: "センターを一括インポート"
+        download_invoices_bulk: "請求書を一括ダウンロード"
+      items:
+        create: "商品を作成"
+        update: "商品を更新"
+        destroy: "商品を削除"
+        import: "商品を一括インポート"
+      manufacturers:
+        create: "メーカーを作成"
+        update: "メーカーを更新"
+        destroy: "メーカーを削除"
+      shipping_requests:
+        register_shipment: "出荷を登録"
+        register_shipment_import: "出荷を一括登録"
+      admin:
+        companies:
+          create: "会社を作成"
+          update: "会社を更新"
+        company_payments:
+          create: "入金を登録"
+          update: "入金を更新"
+          destroy: "入金を削除"
+        approval_requests:
+          approve: "メンバー承認を承認"
+          reject: "メンバー承認を却下"
+        user_profiles:
+          update: "ユーザーを更新"
+          change_role: "ロールを変更"
+        issuer_settings:
+          update: "発行元設定を更新"
+        access_logs:
+          index: "アクセスログを参照"
 
   shared:
     navbar:

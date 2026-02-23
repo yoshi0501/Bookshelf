@@ -70,7 +70,8 @@ class AccessLogger
         request_path: controller.request.path,
         request_method: controller.request.request_method,
         ip_address: controller.request.remote_ip,
-        user_agent: controller.request.user_agent&.truncate(500)
+        user_agent: controller.request.user_agent&.truncate(500),
+        target_summary: target_summary_from(controller)
       )
     rescue => e
       Rails.logger.error "[AccessLogger] Failed to log: #{e.message}"
@@ -78,6 +79,45 @@ class AccessLogger
 
     def critical_action?(controller)
       CRITICAL_ACTIONS.include?([controller.controller_path, controller.action_name])
+    end
+
+    # コントローラのインスタンス変数から操作対象を推測して「何をしたか」を生成
+    def target_summary_from(controller)
+      return controller.access_log_target_summary if controller.respond_to?(:access_log_target_summary, true) && controller.send(:access_log_target_summary).present?
+
+      # 共通パターン: 各リソースの識別子を取得
+      if (order = controller.instance_variable_get(:@order))
+        return "発注 #{order.order_no}"
+      end
+      if (oar = controller.instance_variable_get(:@order_approval_request))
+        return "発注 #{oar.order&.order_no}"
+      end
+      if (customer = controller.instance_variable_get(:@customer))
+        return "センター #{customer.center_name} (#{customer.center_code})"
+      end
+      if (item = controller.instance_variable_get(:@item))
+        return "商品 #{item.item_code} (#{item.name})"
+      end
+      if (manufacturer = controller.instance_variable_get(:@manufacturer))
+        return "メーカー #{manufacturer.name} (#{manufacturer.code})"
+      end
+      if (company = controller.instance_variable_get(:@company))
+        return "会社 #{company.name}"
+      end
+      if (payment = controller.instance_variable_get(:@company_payment))
+        return "入金 #{payment.company&.name} #{payment.period_label}"
+      end
+      if (profile = controller.instance_variable_get(:@user_profile))
+        return "ユーザー #{profile.name} (#{profile.user&.email})"
+      end
+      if (req = controller.instance_variable_get(:@approval_request))
+        return "メンバー #{req.user_profile&.name} (#{req.user_profile&.user&.email})"
+      end
+      if (setting = controller.instance_variable_get(:@issuer_setting))
+        return "発行元設定"
+      end
+
+      nil
     end
   end
 end
