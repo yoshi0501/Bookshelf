@@ -23,6 +23,7 @@ if ENV["RESET"] == "1"
   Item.delete_all
   Customer.delete_all
   UserProfile.delete_all
+  AccessLog.delete_all if ActiveRecord::Base.connection.table_exists?("access_logs")
   Manufacturer.delete_all if ActiveRecord::Base.connection.table_exists?("manufacturers")
   User.delete_all
   Company.delete_all
