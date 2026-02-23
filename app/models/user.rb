@@ -21,7 +21,7 @@ class User < ApplicationRecord
 
   # Delegations
   delegate :role, :member_status, :name, :phone, to: :user_profile, allow_nil: true
-  delegate :normal?, :company_admin?, :internal_admin?, :manufacturer_user?, to: :user_profile, allow_nil: true, prefix: false
+  delegate :normal?, :approver?, :company_admin?, :internal_admin?, :manufacturer_user?, to: :user_profile, allow_nil: true, prefix: false
 
   # Instance methods
   def current_manufacturer

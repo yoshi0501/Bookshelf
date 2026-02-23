@@ -968,6 +968,7 @@ ja:
     roles:
       internal_admin: "内部管理者"
       company_admin: "会社管理者"
+      approver: "承認者"
       normal: "一般"
     status:
       active: "有効"

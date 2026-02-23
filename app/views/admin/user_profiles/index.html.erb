@@ -98,11 +98,13 @@
                   <% else %>
                     <% case profile.role %>
                     <% when "internal_admin" %>
-                      <span class="badge bg-danger">Internal Admin</span>
+                      <span class="badge bg-danger"><%= t('user_profiles.roles.internal_admin') %></span>
                     <% when "company_admin" %>
-                      <span class="badge bg-primary">Company Admin</span>
+                      <span class="badge bg-primary"><%= t('user_profiles.roles.company_admin') %></span>
+                    <% when "approver" %>
+                      <span class="badge bg-success"><%= t('user_profiles.roles.approver') %></span>
                     <% when "normal" %>
-                      <span class="badge bg-secondary">Normal</span>
+                      <span class="badge bg-secondary"><%= t('user_profiles.roles.normal') %></span>
                     <% end %>
                   <% end %>
                 </td>

@@ -4,7 +4,7 @@ class UserProfile < ApplicationRecord
   include Auditable
 
   # Enums
-  enum :role, { normal: 0, company_admin: 1, internal_admin: 2 }, prefix: true
+  enum :role, { normal: 0, approver: 1, company_admin: 2, internal_admin: 3 }, prefix: true
   enum :member_status, { pending: 0, active: 1, rejected: 2, unassigned: 3 }, prefix: true
 
   # Associations
@@ -75,6 +75,14 @@ class UserProfile < ApplicationRecord
 
   def internal_admin?
     role_internal_admin?
+  end
+
+  def approver?
+    role_approver?
+  end
+
+  def can_approve_orders?
+    role_approver? || role_company_admin? || role_internal_admin?
   end
 
   # メーカーとしてログインするユーザー（発送依頼のみ自社分を表示）
