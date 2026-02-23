@@ -4,11 +4,11 @@ class OrderApprovalRequestsController < ApplicationController
   before_action :set_order_approval_request, only: %i[show approve reject]
 
   def index
-    @pagy, @order_approval_requests = pagy(
-      policy_scope(OrderApprovalRequest)
-        .includes(order: [:customer, :ordered_by_user])
-        .recent
-    )
+    scope = policy_scope(OrderApprovalRequest)
+      .includes(order: [:customer, :ordered_by_user])
+      .order(:status, created_at: :desc) # 承認待ち(status=0)を先頭に
+    @pending_count = scope.status_pending.count
+    @pagy, @order_approval_requests = pagy(scope)
   end
 
   def show

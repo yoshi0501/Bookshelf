@@ -1,70 +1,95 @@
-<div class="mb-8 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 class="text-2xl font-bold text-gray-900">Approval Request</h1>
-    <p class="mt-1 text-sm text-gray-500">Request ID: <%= @approval_request.id %></p>
+    <h1 class="h2 fw-bold mb-2"><%= t('approval_requests.show.title') %></h1>
+    <p class="text-muted mb-0">
+      <span class="font-monospace">ID: <%= @approval_request.id %></span>
+    </p>
   </div>
-  <%= link_to "Back to List", admin_approval_requests_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+  <div>
+    <%= link_to admin_approval_requests_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('approval_requests.show.back') %>
+    <% end %>
+  </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Request Details</h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <dl>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">User Name</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.user_profile.name %></dd>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-info-circle me-2"></i><%= t('approval_requests.show.request_info') %>
+        </h5>
+        <small class="text-muted"><%= t('approval_requests.show.request_info_desc') %></small>
       </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Email</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.user_profile.user.email %></dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% case @approval_request.status %>
-          <% when "pending" %>
-            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Pending</span>
-          <% when "approved" %>
-            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Approved</span>
-          <% when "rejected" %>
-            <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Rejected</span>
-          <% end %>
-        </dd>
-      </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Requested At</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
-      </div>
-      <% if @approval_request.reviewed_at %>
-        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Reviewed By</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.reviewed_by&.email %></dd>
-        </div>
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Reviewed At</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.reviewed_at.strftime("%Y-%m-%d %H:%M") %></dd>
-        </div>
-        <% if @approval_request.review_comment.present? %>
-          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Comment</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @approval_request.review_comment %></dd>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.user_name') %></label>
+            <p class="mb-0 fw-medium"><%= @approval_request.user_profile.name %></p>
           </div>
-        <% end %>
-      <% end %>
-    </dl>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.email') %></label>
+            <p class="mb-0"><%= @approval_request.user_profile.user.email %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.status') %></label>
+            <p class="mb-0">
+              <% case @approval_request.status %>
+              <% when "pending" %>
+                <span class="badge bg-warning"><%= t('approval_requests.status.pending') %></span>
+              <% when "approved" %>
+                <span class="badge bg-success"><%= t('approval_requests.status.approved') %></span>
+              <% when "rejected" %>
+                <span class="badge bg-danger"><%= t('approval_requests.status.rejected') %></span>
+              <% end %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.requested_at') %></label>
+            <p class="mb-0"><%= @approval_request.created_at.strftime("%Y年%m月%d日 %H:%M") %></p>
+          </div>
+          <% if @approval_request.reviewed_at %>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.reviewed_by') %></label>
+              <p class="mb-0"><%= @approval_request.reviewed_by&.email || "-" %></p>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.reviewed_at') %></label>
+              <p class="mb-0"><%= @approval_request.reviewed_at.strftime("%Y年%m月%d日 %H:%M") %></p>
+            </div>
+            <% if @approval_request.review_comment.present? %>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold text-muted small mb-1"><%= t('approval_requests.show.comment') %></label>
+                <p class="mb-0"><%= @approval_request.review_comment %></p>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <% if @approval_request.status_pending? %>
-  <div class="mt-6 flex space-x-3">
-    <%= button_to "Approve", approve_admin_approval_request_path(@approval_request), method: :post, class: "rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500" %>
-    <%= form_with url: reject_admin_approval_request_path(@approval_request), method: :post, class: "flex items-center space-x-2" do %>
-      <input type="text" name="comment" placeholder="Rejection reason (optional)" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-      <button type="submit" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500">
-        Reject
-      </button>
-    <% end %>
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-check-circle me-2"></i><%= t('approval_requests.show.actions') %>
+      </h5>
+      <small class="text-muted"><%= t('approval_requests.show.actions_desc') %></small>
+    </div>
+    <div class="card-body">
+      <div class="d-flex gap-2 flex-wrap">
+        <%= button_to approve_admin_approval_request_path(@approval_request), method: :post, class: "btn btn-success" do %>
+          <i class="bi bi-check-circle me-1"></i><%= t('approval_requests.actions.approve') %>
+        <% end %>
+        <%= form_with url: reject_admin_approval_request_path(@approval_request), method: :post, class: "d-flex gap-2 flex-grow-1" do |f| %>
+          <%= f.text_field :comment, placeholder: t('approval_requests.show.rejection_reason_placeholder'), class: "form-control" %>
+          <%= f.button type: "submit", class: "btn btn-danger", data: { confirm: t('approval_requests.actions.confirm_reject') } do %>
+            <i class="bi bi-x-circle me-1"></i><%= t('approval_requests.actions.reject') %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </div>
 <% end %>

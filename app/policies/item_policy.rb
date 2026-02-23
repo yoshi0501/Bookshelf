@@ -30,6 +30,11 @@ class ItemPolicy < ApplicationPolicy
     internal_admin?
   end
 
+  def import?
+    # CSV一括登録は内部管理者のみ
+    internal_admin?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.user_profile&.active?
@@ -38,6 +43,7 @@ class ItemPolicy < ApplicationPolicy
         scope.all
       else
         company = user.current_company
+        return scope.none unless company
         # 自社の商品 + 自社に表示可能な商品
         scope.where(
           "(company_id = ? OR id IN (?))",

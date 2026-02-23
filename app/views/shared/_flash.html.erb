@@ -17,3 +17,13 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <% end %>
+
+<% if flash[:warning].present? %>
+  <div class="alert alert-warning alert-dismissible fade show shadow-sm mb-4" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+      <div class="flex-grow-1"><%= flash[:warning] %></div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% end %>

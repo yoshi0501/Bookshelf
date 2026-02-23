@@ -4,8 +4,9 @@
     <p class="text-muted mb-0"><%= t('items.index.description') %></p>
   </div>
   <% if current_user&.internal_admin? %>
-    <div>
+    <div class="d-flex gap-2">
       <%= link_to t('items.index.add_item'), new_item_path, class: "btn btn-primary btn-sm" %>
+      <%= link_to t('items.import.title'), import_items_path, class: "btn btn-outline-primary btn-sm" %>
     </div>
   <% end %>
 </div>
@@ -44,17 +45,17 @@
         <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
           <i class="bi bi-box text-muted fs-3"></i>
         </div>
-        <p class="text-muted fw-medium mb-3">販売商品がありません</p>
+        <p class="text-muted fw-medium mb-3">商品がありません</p>
         <p class="text-muted small">
           <% if @selected_company %>
-            <%= @selected_company.name %>に販売商品が登録されていません。
+            <%= @selected_company.name %>に商品が登録されていません。
           <% else %>
-            販売商品が登録されていません。
+            商品が登録されていません。
           <% end %>
         </p>
         <% if current_user&.internal_admin? %>
           <%= link_to new_item_path, class: "btn btn-primary" do %>
-            <i class="bi bi-plus-circle me-1"></i> 新規販売商品を追加
+            <i class="bi bi-plus-circle me-1"></i> 新規商品を追加
           <% end %>
         <% end %>
       </div>
@@ -63,6 +64,7 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
+              <th style="width: 64px;"></th>
               <th><%= t('items.table.code') %></th>
               <th><%= t('items.table.name') %></th>
               <th class="text-end"><%= t('items.table.unit_price') %></th>
@@ -74,6 +76,17 @@
           <tbody>
             <% @items.each do |item| %>
               <tr>
+                <td class="align-middle">
+                  <% if item.image.attached? %>
+                    <%= link_to item_path(item) do %>
+                      <%= image_tag item.image, class: "rounded", style: "width: 48px; height: 48px; object-fit: contain; background: #f8f9fa;" %>
+                    <% end %>
+                  <% else %>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded bg-light text-muted" style="width: 48px; height: 48px;">
+                      <i class="bi bi-image"></i>
+                    </span>
+                  <% end %>
+                </td>
                 <td class="font-monospace fw-semibold"><%= item.item_code %></td>
                 <td class="fw-medium"><%= item.name %></td>
                 <td class="text-end fw-semibold">

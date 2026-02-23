@@ -1,74 +1,87 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div>
-    <h1 class="h2 fw-bold mb-2">発注承認依頼</h1>
-    <p class="text-muted mb-0">承認待ちの発注一覧</p>
+    <h1 class="h2 fw-bold mb-2">
+      <i class="bi bi-clipboard-check text-primary me-2"></i>発注承認
+    </h1>
+    <p class="text-muted mb-0">承認待ちの発注を確認し、承認または却下してください</p>
   </div>
 </div>
 
-<div class="card shadow-sm border-0">
-  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-    <div>
-      <h5 class="card-title mb-1 fw-bold">発注承認依頼</h5>
-      <small class="text-muted">承認待ちの発注一覧</small>
+<% if @pending_count.to_i > 0 %>
+  <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+    <div class="flex-grow-1">
+      <strong>対応が必要です</strong> — <span class="fw-semibold"><%= @pending_count %>件</span>の承認待ちがあります。内容を確認して承認または却下してください。
+    </div>
+    <a href="#pending-list" class="btn btn-warning btn-sm">一覧で確認</a>
+  </div>
+<% end %>
+
+<% if @order_approval_requests.empty? %>
+  <div class="card shadow-sm border-0">
+    <div class="card-body text-center py-5">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary mb-3" style="width: 80px; height: 80px;">
+        <i class="bi bi-inbox fs-1"></i>
+      </div>
+      <h5 class="fw-semibold mb-2">承認依頼はありません</h5>
+      <p class="text-muted mb-0 small">現在、承認待ちの発注はありません。新しい依頼が来るとここに表示されます。</p>
     </div>
   </div>
-  <div class="card-body p-0">
-    <% if @order_approval_requests.empty? %>
-      <div class="text-center py-5">
-        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
-          <i class="bi bi-file-earmark-check text-muted fs-3"></i>
+<% else %>
+  <div class="row g-3" id="pending-list">
+    <% @order_approval_requests.each do |request| %>
+      <div class="col-12">
+        <div class="card shadow-sm border-0 border-start border-4 <%= request.status == 'pending' ? 'border-warning bg-warning bg-opacity-10' : request.status == 'approved' ? 'border-success' : 'border-danger' %>">
+          <div class="card-body py-3 py-md-4">
+            <div class="row align-items-center g-3">
+              <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="d-inline-flex align-items-center justify-content-center rounded bg-light" style="width: 44px; height: 44px;">
+                    <i class="bi bi-file-earmark-text text-primary fs-5"></i>
+                  </div>
+                  <div>
+                    <%= link_to order_approval_request_path(request), class: "text-decoration-none fw-bold text-dark" do %>
+                      <%= request.order.order_no %>
+                    <% end %>
+                    <div class="small text-muted">
+                      <i class="bi bi-calendar3 me-1"></i><%= request.order.order_date.strftime("%Y/%m/%d") %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-3 d-none d-md-block">
+                <span class="fw-medium text-dark"><%= request.order.customer.display_name %></span>
+                <div class="small text-muted"><%= request.order.ordered_by_user.name || request.order.ordered_by_user.email %></div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-2 text-md-end">
+                <span class="fw-bold text-primary"><%= number_to_currency(request.order.total_amount, unit: "¥", precision: 0) %></span>
+              </div>
+              <div class="col-6 col-md-4 col-lg-2 text-end">
+                <% case request.status %>
+                <% when "pending" %>
+                  <span class="badge bg-warning text-dark rounded-pill px-3 py-2">承認待ち</span>
+                <% when "approved" %>
+                  <span class="badge bg-success rounded-pill px-3 py-2">承認済み</span>
+                <% when "rejected" %>
+                  <span class="badge bg-danger rounded-pill px-3 py-2">却下</span>
+                <% end %>
+              </div>
+              <div class="col-12 col-lg-1 text-lg-end">
+                <%= link_to order_approval_request_path(request), class: "btn btn-outline-primary btn-sm" do %>
+                  詳細 <i class="bi bi-chevron-right ms-1"></i>
+                <% end %>
+              </div>
+            </div>
+            <div class="row mt-2 d-md-none">
+              <div class="col-12">
+                <span class="text-muted small"><%= request.order.customer.display_name %></span>
+                <span class="text-muted small ms-2"><%= time_ago_in_words(request.created_at) %>前</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p class="text-muted fw-medium mb-3">承認依頼はありません</p>
-        <p class="text-muted small">現在、承認待ちの発注はありません。</p>
-      </div>
-    <% else %>
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>発注番号</th>
-              <th>発注日</th>
-              <th>顧客</th>
-              <th>発注者</th>
-              <th class="text-end">合計金額</th>
-              <th>依頼日時</th>
-              <th>ステータス</th>
-              <th class="text-end">アクション</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @order_approval_requests.each do |request| %>
-              <tr>
-                <td>
-                  <%= link_to request.order.order_no, order_approval_request_path(request), class: "text-decoration-none fw-semibold" %>
-                </td>
-                <td class="text-muted"><%= request.order.order_date.strftime("%Y/%m/%d") %></td>
-                <td class="fw-medium"><%= request.order.customer.display_name %></td>
-                <td class="text-muted"><%= request.order.ordered_by_user.name || request.order.ordered_by_user.email %></td>
-                <td class="text-end fw-semibold">
-                  <%= number_to_currency(request.order.total_amount, unit: "¥", precision: 0) %>
-                </td>
-                <td class="text-muted"><%= time_ago_in_words(request.created_at) %>前</td>
-                <td>
-                  <% case request.status %>
-                  <% when "pending" %>
-                    <span class="badge bg-warning">承認待ち</span>
-                  <% when "approved" %>
-                    <span class="badge bg-success">承認済み</span>
-                  <% when "rejected" %>
-                    <span class="badge bg-danger">却下</span>
-                  <% end %>
-                </td>
-                <td class="text-end">
-                  <%= link_to "詳細", order_approval_request_path(request), class: "btn btn-sm btn-outline-primary" %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
       </div>
     <% end %>
   </div>
-</div>
-
-<%= render "shared/pagination", pagy: @pagy %>
+  <%= render "shared/pagination", pagy: @pagy %>
+<% end %>

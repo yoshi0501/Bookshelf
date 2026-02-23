@@ -43,6 +43,11 @@
           <%= text_area_tag "company[domains][]", company.domains.is_a?(Array) ? company.domains.join("\n") : "", rows: 4, class: "form-control font-monospace", placeholder: "example.com\nsubdomain.example.com", id: "company_domains" %>
           <div class="form-text"><%= t('companies.form.domains_help') %></div>
         </div>
+        <div class="col-12">
+          <%= f.label :payment_terms, t('companies.form.payment_terms'), class: "form-label fw-semibold" %>
+          <%= f.text_field :payment_terms, class: "form-control", placeholder: t('companies.form.payment_terms_placeholder') %>
+          <div class="form-text"><%= t('companies.form.payment_terms_help') %></div>
+        </div>
       </div>
     </div>
   </div>

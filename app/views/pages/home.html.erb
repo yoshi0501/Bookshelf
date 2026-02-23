@@ -1,18 +1,7 @@
 <div class="text-center">
   <div class="mb-5">
-    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-gradient shadow-lg mb-4" style="width: 80px; height: 80px;">
-      <i class="bi bi-file-earmark-text text-white" style="font-size: 2.5rem;"></i>
-    </div>
+    <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "mb-5", style: "height: 200px; width: auto; max-width: 100%;" %>
   </div>
-  <h1 class="display-3 fw-bold text-primary mb-4">
-    <%= t('pages.home.title') %>
-  </h1>
-  <p class="lead text-muted mb-3">
-    <%= t('pages.home.description') %>
-  </p>
-  <p class="text-muted mb-5">
-    <%= t('pages.home.tagline') %>
-  </p>
   <div class="d-flex gap-3 justify-content-center flex-wrap mb-5">
     <%= link_to new_user_session_path, class: "btn btn-primary btn-lg px-5 shadow-sm" do %>
       <%= t('pages.home.sign_in') %> <i class="bi bi-arrow-right ms-2"></i>

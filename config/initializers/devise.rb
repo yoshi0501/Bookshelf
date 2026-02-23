@@ -14,7 +14,7 @@ Devise.setup do |config|
 
   # Password
   config.stretches = Rails.env.test? ? 1 : 12
-  config.password_length = 12..128
+  config.password_length = 8..128
   config.email_regexp = /\A[^@\s]+@[^@\s]+\z/
 
   # Confirmable
@@ -56,7 +56,7 @@ Devise.setup do |config|
 
   # Navigation
   config.sign_out_via = :delete
-  config.responder.error_status = :unprocessable_content
+  config.responder.error_status = :unprocessable_entity
   config.responder.redirect_status = :see_other
 
   # Custom failure app for better error messages

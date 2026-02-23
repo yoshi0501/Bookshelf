@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'i18n'
+
 class DeviseFailureApp < Devise::FailureApp
   def redirect
     store_location!
@@ -9,28 +11,30 @@ class DeviseFailureApp < Devise::FailureApp
     redirect_to redirect_url
   end
 
-  def i18n_message
+  def i18n_message(default = nil)
     case warden_message
     when :not_found_in_database
-      "Invalid email or password."
+      I18n.t("devise.failure.not_found_in_database", default: default || "メールアドレスまたはパスワードが正しくありません。")
     when :invalid
-      "Invalid email or password."
+      I18n.t("devise.failure.invalid", default: default || "メールアドレスまたはパスワードが正しくありません。")
     when :invalid_token
-      "Invalid email or password."
+      I18n.t("devise.failure.invalid_token", default: default || "メールアドレスまたはパスワードが正しくありません。")
     when :timeout
-      "Your session expired. Please sign in again."
+      I18n.t("devise.failure.timeout", default: default || "セッションが期限切れです。再度ログインしてください。")
     when :unconfirmed
-      "You have to confirm your email address before continuing."
+      I18n.t("devise.failure.unconfirmed", default: default || "続行する前にメールアドレスを確認してください。")
     when :locked
-      "Your account is locked."
+      I18n.t("devise.failure.locked", default: default || "アカウントがロックされています。")
     when :pending_approval
-      "Your account is pending approval."
+      I18n.t("devise.failure.pending_approval", default: default || "アカウントは承認待ちです。")
     when :account_rejected
-      "Your account has been rejected."
+      I18n.t("devise.failure.account_rejected", default: default || "アカウントが拒否されました。")
     when :unassigned_company
-      "Your email domain is not associated with any company."
+      I18n.t("devise.failure.unassigned_company", default: default || "メールドメインがどの会社にも関連付けられていません。")
+    when :inactive
+      I18n.t("devise.failure.inactive", default: default || "アカウントが有効ではありません。管理者に連絡してください。")
     else
-      super
+      super(default)
     end
   end
 end

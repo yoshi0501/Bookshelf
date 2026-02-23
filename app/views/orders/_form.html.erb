@@ -34,38 +34,139 @@
     <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
       <div>
         <h5 class="card-title mb-1 fw-bold">
-          <i class="bi bi-list-ul me-2"></i><%= t('orders.form.order_lines') %>
+          <i class="bi bi-box-seam me-2"></i><%= t('orders.form.select_items') %>
         </h5>
-        <small class="text-muted"><%= t('orders.form.order_lines_desc') %></small>
+        <small class="text-muted"><%= t('orders.form.select_items_desc') %></small>
       </div>
+    </div>
+    <div class="card-body">
+      <% if @items.empty? %>
+        <div class="text-center py-5">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 64px; height: 64px;">
+            <i class="bi bi-box text-muted fs-3"></i>
+          </div>
+          <p class="text-muted fw-medium mb-0"><%= t('orders.form.no_items') %></p>
+        </div>
+      <% else %>
+        <div class="row g-3" id="item-cards">
+          <% @items.each do |item| %>
+            <div class="col-md-4 col-lg-3">
+              <div class="card h-100 item-card border shadow-sm" 
+                   data-item-id="<%= item.id %>"
+                   data-item-code="<%= item.item_code %>"
+                   data-item-name="<%= item.name %>"
+                   data-item-price="<%= item.unit_price %>"
+                   data-item-image-url="<%= item.image.attached? ? url_for(item.image) : '' %>"
+                   style="cursor: pointer; transition: all 0.2s;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center overflow-hidden" style="height: 180px;">
+                  <% if item.image.attached? %>
+                    <%= image_tag item.image, style: "width: 100%; height: 100%; object-fit: contain;", alt: item.name %>
+                  <% else %>
+                    <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"></i>
+                  <% end %>
+                </div>
+                <div class="card-body d-flex flex-column">
+                  <div class="mb-2">
+                    <span class="badge bg-secondary font-monospace small"><%= item.item_code %></span>
+                  </div>
+                  <h6 class="card-title fw-bold mb-2" style="min-height: 2.5rem;"><%= item.name %></h6>
+                  <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="fw-bold text-primary fs-5">
+                        <%= number_to_currency(item.unit_price, unit: "¥", precision: 0) %>
+                      </span>
+                      <% if item.co2_per_unit.present? %>
+                        <span class="badge bg-success">
+                          <i class="bi bi-cloud me-1"></i><%= item.co2_per_unit %>kg
+                        </span>
+                      <% end %>
+                    </div>
+                    <div class="input-group input-group-sm">
+                      <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity(<%= item.id %>)">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="number" 
+                             id="quantity-<%= item.id %>" 
+                             class="form-control text-center" 
+                             value="0" 
+                             min="0" 
+                             onchange="updateOrderLine(<%= item.id %>)"
+                             style="max-width: 60px;">
+                      <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity(<%= item.id %>)">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-list-ul me-2"></i><%= t('orders.form.order_lines') %>
+      </h5>
+      <small class="text-muted"><%= t('orders.form.order_lines_desc') %></small>
     </div>
     <div class="card-body">
       <div id="order-lines">
         <%= f.fields_for :order_lines do |line_form| %>
-          <div class="order-line border rounded p-3 mb-3 bg-light">
-            <div class="row g-3 align-items-end">
-              <div class="col-md-6">
-                <%= line_form.label :item_id, t('orders.form.item'), class: "form-label fw-semibold" %>
-                <%= line_form.collection_select :item_id, @items, :id, :display_name, { prompt: t('orders.form.select_item') }, { class: "form-select order-line-item-select" } %>
-              </div>
-              <div class="col-md-3">
-                <%= line_form.label :quantity, t('orders.form.quantity'), class: "form-label fw-semibold" %>
-                <%= line_form.number_field :quantity, min: 1, class: "form-control" %>
-              </div>
-              <div class="col-md-2">
-                <% if line_form.object.persisted? %>
-                  <label class="form-label fw-semibold"><%= t('orders.form.amount') %></label>
-                  <div class="form-control-plaintext fw-bold text-primary">
-                    <%= number_to_currency(line_form.object.amount, unit: "¥", precision: 0) %>
+          <%# 削除された商品は編集可能な状態では自動的に削除マークを付ける %>
+          <% if line_form.object.item.nil? && order.can_be_edited? %>
+            <%= line_form.hidden_field :id if line_form.object.persisted? %>
+            <%= line_form.hidden_field :_destroy, value: true %>
+            <% next %>
+          <% end %>
+          <div class="order-line-item" 
+               data-item-id="<%= line_form.object.item_id %>"
+               data-unit-price="<%= line_form.object.unit_price_snapshot || line_form.object.item&.unit_price || 0 %>">
+            <%= line_form.hidden_field :item_id %>
+            <%= line_form.hidden_field :id if line_form.object.persisted? %>
+            <%= line_form.hidden_field :_destroy, value: line_form.object.marked_for_destruction? %>
+            <div class="border rounded p-3 mb-3 <%= 'bg-danger bg-opacity-10' if line_form.object.marked_for_destruction? %>">
+              <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-light rounded d-flex align-items-center justify-content-center me-3 overflow-hidden" style="width: 60px; height: 60px;">
+                      <% if line_form.object.item&.image&.attached? %>
+                        <%= image_tag line_form.object.item.image, style: "width: 100%; height: 100%; object-fit: contain;", alt: line_form.object.item.name %>
+                      <% else %>
+                        <i class="bi bi-box-seam text-muted fs-4"></i>
+                      <% end %>
+                    </div>
+                    <div>
+                      <div class="fw-bold"><%= line_form.object.item&.name || t('orders.form.item_deleted') %></div>
+                      <small class="text-muted font-monospace"><%= line_form.object.item&.item_code || t('orders.form.item_deleted') %></small>
+                    </div>
                   </div>
-                <% end %>
-              </div>
-              <div class="col-md-1">
+                </div>
+                <div class="col-md-3">
+                  <%= line_form.label :quantity, t('orders.form.quantity'), class: "form-label fw-semibold small" %>
+                  <%= line_form.number_field :quantity, min: 1, class: "form-control", onchange: "updateLineAmount(this)" %>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-semibold small"><%= t('orders.form.unit_price') %></label>
+                  <div class="form-control-plaintext fw-medium unit-price" data-price="<%= line_form.object.unit_price_snapshot || line_form.object.item&.unit_price || 0 %>">
+                    <%= number_to_currency(line_form.object.unit_price_snapshot || line_form.object.item&.unit_price || 0, unit: "¥", precision: 0) %>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold small"><%= t('orders.form.amount') %></label>
+                  <div class="form-control-plaintext fw-bold text-primary line-amount">
+                    <%= number_to_currency(line_form.object.amount || 0, unit: "¥", precision: 0) %>
+                  </div>
+                </div>
                 <% if line_form.object.persisted? %>
-                  <label class="form-label">&nbsp;</label>
-                  <div class="form-check form-check-danger">
-                    <%= line_form.check_box :_destroy, class: "form-check-input" %>
-                    <%= line_form.label :_destroy, t('orders.form.remove_line'), class: "form-check-label small text-danger" %>
+                  <div class="col-md-12">
+                    <div class="form-check">
+                      <%= line_form.check_box :_destroy, class: "form-check-input", onchange: "toggleLineDestroy(this)" %>
+                      <%= line_form.label :_destroy, t('orders.form.remove_line'), class: "form-check-label text-danger" %>
+                    </div>
                   </div>
                 <% end %>
               </div>
@@ -73,15 +174,51 @@
           </div>
         <% end %>
       </div>
-      <div class="text-muted small mt-2">
-        <i class="bi bi-info-circle me-1"></i><%= t('orders.form.price_calc_note') %>
+      <div id="empty-message" class="text-center py-4 <%= 'd-none' if order.order_lines.any? %>">
+        <i class="bi bi-cart-x text-muted fs-1"></i>
+        <p class="text-muted mt-2"><%= t('orders.form.no_items_selected') %></p>
+      </div>
+      <div class="mt-3 border-top pt-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="fw-bold"><%= t('orders.form.total') %>:</span>
+          <span class="fw-bold text-primary fs-4" id="order-total">
+            <%= number_to_currency(order.total_amount || 0, unit: "¥", precision: 0) %>
+          </span>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="d-flex justify-content-end gap-2">
     <%= link_to t('shared.actions.cancel'), orders_path, class: "btn btn-outline-secondary" %>
-    <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+    <% if order.new_record? %>
+      <button type="button" class="btn btn-primary" id="order-submit-trigger" data-confirm-message="<%= t('orders.form.confirm_order_message', count: '__COUNT__') %>">
+        <%= t('orders.form.submit_order') %>
+      </button>
+      <%= f.submit t('orders.form.confirm_order_submit'), class: "d-none", id: "order-form-submit" %>
+    <% else %>
+      <%= f.submit t('shared.actions.save'), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if order.new_record? %>
+  <div class="modal fade" id="order-confirm-modal" tabindex="-1" aria-labelledby="order-confirm-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="order-confirm-modal-label"><%= t('orders.form.submit_order') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0" id="order-confirm-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><%= t('orders.form.confirm_order_cancel') %></button>
+          <button type="button" class="btn btn-primary" id="order-confirm-submit"><%= t('orders.form.confirm_order_submit') %></button>
+        </div>
+      </div>
+    </div>
   </div>
 <% end %>
 
@@ -102,28 +239,24 @@
     }
   }
 
-  function initItemSelects() {
-    // 商品選択フィールドをすべて初期化
-    const itemSelects = document.querySelectorAll('.order-line-item-select:not([data-tomselect-initialized])');
-    itemSelects.forEach(function(select) {
-      if (!select.tomselect) {
-        new TomSelect(select, {
-          placeholder: '<%= t('orders.form.select_item') %>',
-          allowEmptyOption: false,
-          searchPlaceholder: '商品を検索...',
-          noResultsText: '該当する商品が見つかりません',
-          noOptionsText: '選択可能な商品がありません',
-          loadingText: '読み込み中...',
-          plugins: ['clear_button']
-        });
-        select.setAttribute('data-tomselect-initialized', 'true');
+  // 商品カードのクリックイベント
+  document.querySelectorAll('.item-card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      // 数量入力フィールドやボタンがクリックされた場合は処理しない
+      if (e.target.closest('.input-group') || e.target.closest('button')) {
+        return;
+      }
+      const itemId = this.dataset.itemId;
+      const quantityInput = document.getElementById('quantity-' + itemId);
+      if (quantityInput && parseInt(quantityInput.value) === 0) {
+        quantityInput.value = 1;
+        updateOrderLine(itemId);
       }
     });
-  }
+  });
 
   function initAllSelects() {
     initCustomerSelect();
-    initItemSelects();
   }
 
   // DOMContentLoadedとTurboのイベントに対応
@@ -136,17 +269,292 @@
   // Turboのページロード時にも初期化
   document.addEventListener('turbo:load', initAllSelects);
   document.addEventListener('turbo:frame-load', initAllSelects);
+})();
 
-  // 動的に追加される明細行にも対応（MutationObserver）
+function increaseQuantity(itemId) {
+  const input = document.getElementById('quantity-' + itemId);
+  input.value = parseInt(input.value || 0) + 1;
+  updateOrderLine(itemId);
+}
+
+function decreaseQuantity(itemId) {
+  const input = document.getElementById('quantity-' + itemId);
+  const currentValue = parseInt(input.value || 0);
+  if (currentValue > 0) {
+    input.value = currentValue - 1;
+    updateOrderLine(itemId);
+  }
+}
+
+function updateOrderLine(itemId) {
+  const card = document.querySelector(`[data-item-id="${itemId}"]`);
+  const quantity = parseInt(document.getElementById('quantity-' + itemId).value || 0);
+  const itemCode = card.dataset.itemCode;
+  const itemName = card.dataset.itemName;
+  const itemPrice = parseFloat(card.dataset.itemPrice);
+
+  // 既存の明細行を確認
+  const existingLine = document.querySelector(`.order-line-item[data-item-id="${itemId}"]`);
+  
+  if (quantity > 0) {
+    if (existingLine) {
+      // 既存の明細行を更新
+      const quantityInput = existingLine.querySelector('input[type="number"]');
+      const destroyInput = existingLine.querySelector('input[name*="_destroy"]');
+      if (quantityInput) {
+        quantityInput.value = quantity;
+        if (destroyInput) destroyInput.value = 'false';
+      }
+      existingLine.closest('.border').classList.remove('bg-danger', 'bg-opacity-10');
+    } else {
+      // 新しい明細行を追加
+      const imageUrl = card.dataset.itemImageUrl || '';
+      addOrderLine(itemId, itemCode, itemName, itemPrice, quantity, imageUrl);
+    }
+  } else {
+    // 数量が0の場合は削除マーク
+    if (existingLine) {
+      const destroyInput = existingLine.querySelector('input[name*="_destroy"]');
+      if (destroyInput) {
+        destroyInput.value = 'true';
+        existingLine.closest('.border').classList.add('bg-danger', 'bg-opacity-10');
+      } else {
+        existingLine.remove();
+      }
+    }
+  }
+  
+  updateTotal();
+  updateEmptyMessage();
+  updateCardHighlight(itemId, quantity > 0);
+}
+
+function addOrderLine(itemId, itemCode, itemName, itemPrice, quantity, imageUrl) {
+  imageUrl = imageUrl || '';
   const orderLinesContainer = document.getElementById('order-lines');
-  if (orderLinesContainer) {
-    const observer = new MutationObserver(function(mutations) {
-      initItemSelects();
+  const timestamp = Date.now();
+  const index = orderLinesContainer.children.length;
+  const thumbHtml = imageUrl
+    ? `<img src="${imageUrl.replace(/"/g, '&quot;')}" style="width: 100%; height: 100%; object-fit: contain;" alt="${itemName.replace(/"/g, '&quot;')}">`
+    : '<i class="bi bi-box-seam text-muted fs-4"></i>';
+  const lineHtml = `
+    <div class="order-line-item border rounded p-3 mb-3" data-item-id="${itemId}">
+      <input type="hidden" name="order[order_lines_attributes][${index}][item_id]" value="${itemId}">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 bg-light rounded d-flex align-items-center justify-content-center me-3 overflow-hidden" style="width: 60px; height: 60px;">
+              ${thumbHtml}
+            </div>
+            <div>
+              <div class="fw-bold">${itemName}</div>
+              <small class="text-muted font-monospace">${itemCode}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small"><%= t('orders.form.quantity') %></label>
+          <input type="number" 
+                 name="order[order_lines_attributes][${index}][quantity]" 
+                 value="${quantity}" 
+                 min="1" 
+                 class="form-control" 
+                 onchange="updateLineAmount(this)">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small"><%= t('orders.form.unit_price') %></label>
+          <div class="form-control-plaintext fw-medium unit-price" data-price="${itemPrice}">
+            ¥${itemPrice.toLocaleString()}
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small"><%= t('orders.form.amount') %></label>
+          <div class="form-control-plaintext fw-bold text-primary line-amount">
+            ¥${(itemPrice * quantity).toLocaleString()}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  orderLinesContainer.insertAdjacentHTML('beforeend', lineHtml);
+  updateTotal();
+  updateEmptyMessage();
+}
+
+function updateLineAmount(input) {
+  const line = input.closest('.order-line-item');
+  const quantity = parseInt(input.value || 0);
+  const itemId = line.dataset.itemId;
+  
+  // 既存の明細行の場合はdata-unit-priceから、新規の場合はカードから価格を取得
+  let unitPrice = parseFloat(line.dataset.unitPrice || 0);
+  if (!unitPrice || isNaN(unitPrice)) {
+    const card = document.querySelector(`.item-card[data-item-id="${itemId}"]`);
+    unitPrice = parseFloat(card ? card.dataset.itemPrice : 0);
+  }
+  
+  const amount = unitPrice * quantity;
+  
+  const amountElement = line.querySelector('.line-amount');
+  if (amountElement) {
+    if (isNaN(amount)) {
+      amountElement.textContent = '¥0';
+    } else {
+      amountElement.textContent = '¥' + amount.toLocaleString();
+    }
+  }
+  
+  // カード側の数量も更新
+  const cardQuantityInput = document.getElementById('quantity-' + itemId);
+  if (cardQuantityInput) {
+    cardQuantityInput.value = quantity;
+    updateCardHighlight(itemId, quantity > 0);
+  }
+  
+  updateTotal();
+}
+
+function updateTotal() {
+  let total = 0;
+  document.querySelectorAll('.order-line-item').forEach(function(line) {
+    const destroyInput = line.querySelector('input[name*="_destroy"]');
+    if (!destroyInput || destroyInput.value !== 'true') {
+      const quantityInput = line.querySelector('input[type="number"]');
+      if (quantityInput) {
+        const quantity = parseInt(quantityInput.value || 0);
+        
+        // 既存の明細行の場合はdata-unit-priceから、新規の場合はカードから価格を取得
+        let unitPrice = parseFloat(line.dataset.unitPrice || 0);
+        if (!unitPrice || isNaN(unitPrice)) {
+          const itemId = line.dataset.itemId;
+          const card = document.querySelector(`.item-card[data-item-id="${itemId}"]`);
+          unitPrice = parseFloat(card ? card.dataset.itemPrice : 0);
+        }
+        
+        if (!isNaN(unitPrice) && !isNaN(quantity)) {
+          total += unitPrice * quantity;
+        }
+      }
+    }
+  });
+  
+  const totalElement = document.getElementById('order-total');
+  if (totalElement) {
+    if (isNaN(total)) {
+      totalElement.textContent = '¥0';
+    } else {
+      totalElement.textContent = '¥' + total.toLocaleString();
+    }
+  }
+}
+
+function updateEmptyMessage() {
+  const emptyMessage = document.getElementById('empty-message');
+  const hasLines = document.querySelectorAll('.order-line-item').length > 0;
+  if (emptyMessage) {
+    if (hasLines) {
+      emptyMessage.classList.add('d-none');
+    } else {
+      emptyMessage.classList.remove('d-none');
+    }
+  }
+}
+
+function updateCardHighlight(itemId, isSelected) {
+  const card = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (card) {
+    if (isSelected) {
+      card.classList.add('border-primary', 'border-2');
+      card.style.transform = 'scale(1.02)';
+    } else {
+      card.classList.remove('border-primary', 'border-2');
+      card.style.transform = 'scale(1)';
+    }
+  }
+}
+
+function toggleLineDestroy(checkbox) {
+  const line = checkbox.closest('.order-line-item');
+  if (checkbox.checked) {
+    line.closest('.border').classList.add('bg-danger', 'bg-opacity-10');
+    const itemId = line.dataset.itemId;
+    const quantityInput = document.getElementById('quantity-' + itemId);
+    if (quantityInput) {
+      quantityInput.value = 0;
+      updateCardHighlight(itemId, false);
+    }
+  } else {
+    line.closest('.border').classList.remove('bg-danger', 'bg-opacity-10');
+  }
+  updateTotal();
+  updateEmptyMessage();
+}
+
+// 新規発注: 「発注」クリックで合計数量を表示する確認モーダル
+(function() {
+  const trigger = document.getElementById('order-submit-trigger');
+  const form = document.querySelector('form[data-turbo="false"]') || document.querySelector('form');
+  const modalEl = document.getElementById('order-confirm-modal');
+  const messageEl = document.getElementById('order-confirm-message');
+  const confirmSubmitBtn = document.getElementById('order-confirm-submit');
+  const formSubmitBtn = document.getElementById('order-form-submit');
+
+  function getTotalQuantity() {
+    let total = 0;
+    document.querySelectorAll('.order-line-item').forEach(function(line) {
+      const destroyInput = line.querySelector('input[name*="_destroy"]');
+      if (!destroyInput || destroyInput.value !== 'true') {
+        const quantityInput = line.querySelector('input[type="number"]');
+        if (quantityInput) total += parseInt(quantityInput.value || 0, 10);
+      }
     });
-    observer.observe(orderLinesContainer, {
-      childList: true,
-      subtree: true
+    return total;
+  }
+
+  if (trigger && modalEl && messageEl && confirmSubmitBtn && formSubmitBtn) {
+    trigger.addEventListener('click', function() {
+      const total = getTotalQuantity();
+      if (total <= 0) {
+        alert('<%= t("orders.form.no_items_selected") %>');
+        return;
+      }
+      const template = trigger.getAttribute('data-confirm-message') || '最終__COUNT__個の発注でよろしいでしょうか？';
+      messageEl.textContent = template.replace('__COUNT__', total);
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    });
+
+    confirmSubmitBtn.addEventListener('click', function() {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      formSubmitBtn.click();
     });
   }
 })();
+
+// 初期化時に既存の明細行をハイライトと金額を再計算
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.order-line-item').forEach(function(line) {
+    const itemId = line.dataset.itemId;
+    const quantityInput = line.querySelector('input[type="number"]');
+    if (itemId && quantityInput && parseInt(quantityInput.value) > 0) {
+      const cardQuantityInput = document.getElementById('quantity-' + itemId);
+      if (cardQuantityInput) {
+        cardQuantityInput.value = quantityInput.value;
+      }
+      updateCardHighlight(itemId, true);
+      
+      // 金額を再計算
+      const quantity = parseInt(quantityInput.value || 0);
+      const unitPrice = parseFloat(line.dataset.unitPrice || 0);
+      const amount = unitPrice * quantity;
+      const amountElement = line.querySelector('.line-amount');
+      if (amountElement && !isNaN(amount)) {
+        amountElement.textContent = '¥' + amount.toLocaleString();
+      }
+    }
+  });
+  updateTotal();
+});
 </script>

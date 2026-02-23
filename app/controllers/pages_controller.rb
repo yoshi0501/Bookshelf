@@ -6,7 +6,11 @@ class PagesController < ApplicationController
 
   def home
     if user_signed_in?
-      redirect_to dashboard_path
+      if current_user.respond_to?(:manufacturer_user?) && current_user.manufacturer_user?
+        redirect_to shipping_requests_path
+      else
+        redirect_to dashboard_path
+      end
     end
   end
 

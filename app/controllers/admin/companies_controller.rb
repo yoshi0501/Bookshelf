@@ -59,7 +59,7 @@ module Admin
 
     def company_params
       permitted = params.require(:company).permit(
-        :name, :code, :order_prefix, :is_active, "domains" => []
+        :name, :code, :order_prefix, :is_active, :payment_terms, "domains" => []
       )
       
       # Convert textarea domains to array if it's a string

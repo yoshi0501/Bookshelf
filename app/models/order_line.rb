@@ -27,6 +27,8 @@ class OrderLine < ApplicationRecord
     return unless item && quantity
 
     self.unit_price_snapshot ||= item.unit_price
+    self.cost_price_snapshot = item.cost_price.to_d if item.respond_to?(:cost_price)
+    self.shipping_cost_snapshot = item.shipping_cost.to_d if item.respond_to?(:shipping_cost)
     self.amount = unit_price_snapshot * quantity
     self.co2_amount = (item.co2_per_unit || 0) * quantity
   end

@@ -15,18 +15,54 @@
           <%= f.collection_select :company_id, @companies, :id, :name, 
               { prompt: t('items.form.select_company') }, 
               { class: "form-select" } %>
+          <small class="form-text text-muted"><%= t('items.form.company_help') %></small>
         </div>
 
         <div class="col-md-6">
           <%= f.label :item_code, t('items.form.item_code'), class: "form-label fw-semibold" %>
           <%= f.text_field :item_code, class: "form-control font-monospace" %>
         </div>
+
+        <% if @manufacturers %>
+          <div class="col-md-6">
+            <%= f.label :manufacturer_id, t('items.form.manufacturer'), class: "form-label fw-semibold" %>
+            <%= f.collection_select :manufacturer_id, @manufacturers, :id, :display_name,
+                { include_blank: t('items.form.no_manufacturer') },
+                { class: "form-select" } %>
+          </div>
+        <% end %>
       </div>
       <div class="row g-3 mt-2">
         <div class="col-md-12">
           <%= f.label :name, t('items.form.name'), class: "form-label fw-semibold" %>
           <%= f.text_field :name, class: "form-control" %>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom">
+      <h5 class="card-title mb-1 fw-bold">
+        <i class="bi bi-image me-2"></i><%= t('items.form.image') %>
+      </h5>
+      <small class="text-muted"><%= t('items.form.image_desc') %></small>
+    </div>
+    <div class="card-body">
+      <% if item.image.attached? %>
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-muted small mb-2 d-block"><%= t('items.form.current_image') %></label>
+          <%= image_tag item.image, class: "img-thumbnail", style: "max-height: 200px; max-width: 200px; object-fit: contain;" %>
+        </div>
+        <div class="form-check mb-3">
+          <%= check_box_tag "item[remove_image]", "1", false, class: "form-check-input", id: "item_remove_image" %>
+          <%= label_tag "item_remove_image", t('items.form.remove_image'), class: "form-check-label" %>
+        </div>
+      <% end %>
+      <div class="mb-0">
+        <%= f.label :image, item.image.attached? ? t('items.form.change_image') : t('items.form.upload_image'), class: "form-label fw-semibold" %>
+        <%= f.file_field :image, accept: "image/*", class: "form-control" %>
+        <small class="form-text text-muted"><%= t('items.form.image_help') %></small>
       </div>
     </div>
   </div>
@@ -55,6 +91,24 @@
             <span class="input-group-text">kg</span>
           </div>
         </div>
+
+        <div class="col-md-6">
+          <%= f.label :cost_price, t('items.form.cost_price'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <span class="input-group-text">¥</span>
+            <%= f.number_field :cost_price, step: 0.01, min: 0, class: "form-control" %>
+          </div>
+          <small class="form-text text-muted"><%= t('items.form.cost_price_help') %></small>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :shipping_cost, t('items.form.shipping_cost'), class: "form-label fw-semibold" %>
+          <div class="input-group">
+            <span class="input-group-text">¥</span>
+            <%= f.number_field :shipping_cost, step: 0.01, min: 0, class: "form-control" %>
+          </div>
+          <small class="form-text text-muted"><%= t('items.form.shipping_cost_help') %></small>
+        </div>
       </div>
     </div>
   </div>
@@ -71,29 +125,26 @@
         <% company_id = item.company_id %>
         <% if company_id.present? %>
           <%= hidden_field_tag "item[visible_company_ids][]", company_id %>
+          <% reg_company = @companies.find { |c| c.id == company_id } %>
+          <% if reg_company %>
+            <p class="text-muted small mb-3">
+              <span class="fw-medium"><%= t('items.form.visible_companies_registered') %></span>
+              <%= reg_company.name %>（<%= reg_company.code %>）
+            </p>
+          <% end %>
         <% end %>
         <div class="row g-2">
           <% @companies.each do |company| %>
-            <% is_seller_company = company.id == item.company_id %>
+            <% next if company.id == company_id %>
             <div class="col-md-6">
               <div class="form-check">
-                <% if is_seller_company %>
-                  <%= check_box_tag "item[visible_company_ids][]", company.id, true,
-                      class: "form-check-input", 
-                      id: "item_visible_company_#{company.id}",
-                      disabled: true %>
-                <% else %>
-                  <%= check_box_tag "item[visible_company_ids][]", company.id, 
-                      (item.persisted? && item.visible_companies.include?(company)),
-                      class: "form-check-input", 
-                      id: "item_visible_company_#{company.id}" %>
-                <% end %>
+                <%= check_box_tag "item[visible_company_ids][]", company.id, 
+                    (item.persisted? && item.visible_companies.include?(company)),
+                    class: "form-check-input", 
+                    id: "item_visible_company_#{company.id}" %>
                 <%= label_tag "item[visible_company_ids][]", company.name, 
                     class: "form-check-label", 
                     for: "item_visible_company_#{company.id}" %>
-                <% if is_seller_company %>
-                  <small class="text-muted ms-2">（販売元）</small>
-                <% end %>
               </div>
             </div>
           <% end %>

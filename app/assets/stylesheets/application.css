@@ -13,3 +13,28 @@
  *= require_tree .
  *= require_self
  */
+
+/* ソート可能なテーブルヘッダー */
+.sortable-th {
+  white-space: nowrap;
+  cursor: default;
+}
+.sortable-th .sortable-th-link {
+  padding: 0.15rem 0;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.sortable-th .sortable-th-link:hover {
+  color: var(--bs-primary) !important;
+  background-color: rgba(13, 110, 253, 0.08);
+}
+.sortable-th .sortable-th-icon {
+  font-size: 1.1em;
+  opacity: 0.85;
+}
+.sortable-th .sortable-th-link:not(.text-primary) .sortable-th-icon {
+  opacity: 0.5;
+}
+.sortable-th .sortable-th-link:hover .sortable-th-icon {
+  opacity: 1;
+}

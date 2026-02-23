@@ -14,10 +14,13 @@ class Company < ApplicationRecord
   has_many :orders, dependent: :restrict_with_error
   has_many :order_lines, dependent: :restrict_with_error
   has_many :integration_logs, dependent: :destroy
+  has_many :company_payments, dependent: :destroy
+  has_many :access_logs, dependent: :nullify
 
   # Validations
   validates :name, presence: true, length: { maximum: 255 }
   validates :code, presence: true, uniqueness: true, length: { maximum: 50 }
+  validates :payment_terms, length: { maximum: 255 }, allow_blank: true
   validates :order_prefix, presence: true, length: { maximum: 10 },
             format: { with: /\A[A-Z0-9]+\z/, message: "must be uppercase alphanumeric" }
   validates :order_seq, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -36,6 +39,11 @@ class Company < ApplicationRecord
       return company if company.domains.any? { |d| d.downcase == domain }
     end
     nil
+  end
+
+  # 請求書用：住所を1行で返す
+  def full_address
+    [postal_code, prefecture, city, address1, address2].compact_blank.join(" ")
   end
 
   # Instance methods

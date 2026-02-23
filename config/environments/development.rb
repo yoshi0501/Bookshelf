@@ -31,6 +31,13 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # メール内のリンク（確認メール等）で必要（Missing host to link to! を防ぐ）
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("MAILER_HOST", "localhost"),
+    port: ENV.fetch("MAILER_PORT", "3000").to_i,
+    protocol: "http"
+  }
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -51,4 +58,7 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+
+  # Active Storage: 開発環境ではローカルディスクを使用
+  config.active_storage.service = :local
 end

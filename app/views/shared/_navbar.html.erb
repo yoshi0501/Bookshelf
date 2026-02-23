@@ -1,61 +1,122 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
   <div class="container-fluid">
-    <%= link_to dashboard_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
-      <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
-      <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+    <% if manufacturer_user? %>
+      <%= link_to shipping_requests_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+        <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
+        <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+      <% end %>
+    <% else %>
+      <%= link_to dashboard_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+        <%= image_tag "pla-re-logo.png", alt: t('shared.navbar.brand'), class: "me-2", style: "height: 40px; width: auto;" %>
+        <span class="fw-bold fs-5 text-dark"><%= t('shared.navbar.brand') %></span>
+      <% end %>
     <% end %>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
+        <% if manufacturer_user? %>
+          <li class="nav-item">
+            <%= link_to dashboard_path, class: "nav-link #{controller_name == 'dashboard' ? 'active fw-semibold' : ''}" do %>
+              <i class="bi bi-house-door me-1"></i><%= t('shared.navbar.dashboard') %>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to shipping_requests_path, class: "nav-link #{controller_name == 'shipping_requests' ? 'active fw-semibold' : ''}" do %>
+              <i class="bi bi-truck me-1"></i>発送依頼
+            <% end %>
+          </li>
+        <% else %>
         <li class="nav-item">
           <%= link_to dashboard_path, class: "nav-link #{request.path == dashboard_path ? 'active fw-semibold' : ''}" do %>
             <i class="bi bi-house-door me-1"></i> <%= t('shared.navbar.dashboard') %>
           <% end %>
         </li>
-        <% if current_user&.internal_admin? || current_user&.company_admin? %>
+        <% unless current_user&.normal? %>
+          <% if current_user&.internal_admin? || current_user&.company_admin? %>
+            <li class="nav-item">
+              <%= link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.customers') %>
+              <% end %>
+            </li>
+          <% end %>
           <li class="nav-item">
-            <%= link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.customers') %>
+            <%= link_to items_path, class: "nav-link #{controller_name == 'items' ? 'active fw-semibold' : ''}" do %>
+              <%= t('shared.navbar.items') %>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to manufacturers_path, class: "nav-link #{controller_name == 'manufacturers' ? 'active fw-semibold' : ''}" do %>
+              メーカー
             <% end %>
           </li>
         <% end %>
-        <li class="nav-item">
-          <%= link_to items_path, class: "nav-link #{controller_name == 'items' ? 'active fw-semibold' : ''}" do %>
-            <%= t('shared.navbar.items') %>
-          <% end %>
-        </li>
         <li class="nav-item">
           <%= link_to orders_path, class: "nav-link #{controller_name == 'orders' ? 'active fw-semibold' : ''}" do %>
             <%= t('shared.navbar.orders') %>
           <% end %>
         </li>
-        <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
+        <% unless current_user&.normal? %>
           <li class="nav-item">
-            <%= link_to order_approval_requests_path, class: "nav-link #{controller_name == 'order_approval_requests' ? 'active fw-semibold' : ''}" do %>
-              発注承認
+            <%= link_to shipping_requests_path, class: "nav-link #{controller_name == 'shipping_requests' ? 'active fw-semibold' : ''}" do %>
+              発送依頼
             <% end %>
           </li>
         <% end %>
-        <% if current_user&.user_profile&.can_access_admin_dashboard? %>
-          <li class="nav-item">
-            <%= link_to admin_approval_requests_path, class: "nav-link #{controller_name == 'approval_requests' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.approvals') %>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to admin_user_profiles_path, class: "nav-link #{controller_name == 'user_profiles' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.members') %>
-            <% end %>
-          </li>
+        <% unless current_user&.normal? %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? || current_user&.user_profile&.subordinates&.any? %>
+            <li class="nav-item">
+              <% pending_count = @pending_order_approvals_count.to_i %>
+              <%= link_to order_approval_requests_path, class: "nav-link d-inline-flex align-items-center gap-1 #{controller_name == 'order_approval_requests' ? 'active fw-semibold' : ''} #{pending_count > 0 ? 'text-warning' : ''}" do %>
+                発注承認
+                <% if pending_count > 0 %>
+                  <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.7rem;"><%= pending_count %>件待ち</span>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+            <li class="nav-item">
+              <% pending_approvals = @pending_approval_requests_count.to_i %>
+              <%= link_to admin_approval_requests_path, class: "nav-link d-inline-flex align-items-center gap-1 #{controller_name == 'approval_requests' ? 'active fw-semibold' : ''} #{pending_approvals > 0 ? 'text-warning' : ''}" do %>
+                <%= t('shared.navbar.approvals') %>
+                <% if pending_approvals > 0 %>
+                  <span class="badge bg-warning text-dark rounded-pill ms-1" style="font-size: 0.7rem;"><%= pending_approvals %>件待ち</span>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.user_profile&.can_access_admin_dashboard? %>
+            <li class="nav-item">
+              <%= link_to admin_user_profiles_path, class: "nav-link #{controller_name == 'user_profiles' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.members') %>
+              <% end %>
+            </li>
+          <% end %>
+          <% if current_user&.internal_admin? %>
+            <li class="nav-item">
+              <%= link_to admin_issuer_setting_path, class: "nav-link #{controller_name == 'issuer_settings' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.issuer_setting') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to admin_companies_path, class: "nav-link #{controller_name == 'companies' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.companies') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to admin_company_payments_path, class: "nav-link #{controller_name == 'company_payments' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.company_payments') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to admin_access_logs_path, class: "nav-link #{controller_name == 'access_logs' ? 'active fw-semibold' : ''}" do %>
+                <%= t('shared.navbar.access_logs') %>
+              <% end %>
+            </li>
+          <% end %>
         <% end %>
-        <% if current_user&.internal_admin? %>
-          <li class="nav-item">
-            <%= link_to admin_companies_path, class: "nav-link #{controller_name == 'companies' ? 'active fw-semibold' : ''}" do %>
-              <%= t('shared.navbar.companies') %>
-            <% end %>
-          </li>
         <% end %>
       </ul>
       <div class="d-flex align-items-center gap-3">
@@ -64,6 +125,8 @@
             <div class="rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
               <% if current_user&.internal_admin? %>
                 <span class="text-white small fw-bold">A</span>
+              <% elsif manufacturer_user? %>
+                <span class="text-white small fw-bold">M</span>
               <% else %>
                 <span class="text-white small fw-bold"><%= current_company&.name&.first&.upcase %></span>
               <% end %>
@@ -71,6 +134,8 @@
             <div class="d-flex flex-column text-start">
               <% if current_user&.internal_admin? %>
                 <small class="fw-semibold text-dark">システム管理者</small>
+              <% elsif manufacturer_user? %>
+                <small class="fw-semibold text-dark">メーカー: <%= current_manufacturer&.name %></small>
               <% else %>
                 <small class="fw-semibold text-dark"><%= current_company&.name %></small>
               <% end %>

@@ -1,0 +1,55 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('issuer_settings.show.title') %></h1>
+    <p class="text-muted mb-0"><%= t('issuer_settings.show.description') %></p>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_admin_issuer_setting_path, class: "btn btn-primary btn-sm" do %>
+      <i class="bi bi-pencil me-1"></i><%= t('issuer_settings.show.edit') %>
+    <% end %>
+    <%= link_to admin_companies_path, class: "btn btn-outline-secondary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('shared.actions.back') %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold">
+      <i class="bi bi-building me-2"></i><%= t('issuer_settings.show.issuer_info') %>
+    </h5>
+    <small class="text-muted"><%= t('issuer_settings.show.issuer_info_desc') %></small>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.name') %></label>
+        <p class="mb-0 fw-medium"><%= @issuer_setting.name.presence || "-" %></p>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.address') %></label>
+        <p class="mb-0"><%= @issuer_setting.full_address.presence || "-" %></p>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.phone') %></label>
+        <p class="mb-0"><%= @issuer_setting.phone.presence || "-" %></p>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.fax') %></label>
+        <p class="mb-0"><%= @issuer_setting.fax.presence || "-" %></p>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.registration_number') %></label>
+        <p class="mb-0 font-monospace"><%= @issuer_setting.registration_number.presence || "-" %></p>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.bank_account_1') %></label>
+        <p class="mb-0"><%= @issuer_setting.bank_account_1.presence || "-" %></p>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold text-muted small mb-1"><%= t('issuer_settings.form.bank_account_2') %></label>
+        <p class="mb-0"><%= @issuer_setting.bank_account_2.presence || "-" %></p>
+      </div>
+    </div>
+  </div>
+</div>

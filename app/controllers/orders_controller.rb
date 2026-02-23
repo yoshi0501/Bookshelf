@@ -5,14 +5,31 @@ class OrdersController < ApplicationController
   before_action :load_form_data, only: %i[new create edit update]
 
   def index
-    orders = policy_scope(Order).recent.includes(:customer, :ordered_by_user)
+    orders = policy_scope(Order).includes(:customer, :ordered_by_user, :order_approval_request)
 
-    # Filters
+    # 自分の発注のみ（内部管理者以外、一般・会社管理者が利用）
+    if params[:mine].present? && !current_user&.internal_admin?
+      orders = orders.by_ordered_by(current_user.id)
+    end
+
+    # 検索・フィルタ
     orders = orders.search_by_order_no(params[:order_no]) if params[:order_no].present?
     orders = orders.by_status(params[:status]) if params[:status].present?
     if params[:date_from].present? && params[:date_to].present?
       orders = orders.by_date_range(params[:date_from], params[:date_to])
     end
+
+    # ソート（未指定時は発注日・作成日の新しい順）
+    sort_column = params[:sort].presence
+    sort_direction = params[:direction].presence == "asc" ? :asc : :desc
+    orders = case sort_column
+             when "order_no" then orders.reorder(order_no: sort_direction)
+             when "order_date" then orders.reorder(order_date: sort_direction, created_at: sort_direction)
+             when "customer" then orders.left_joins(:customer).reorder(Arel.sql("customers.center_name #{sort_direction}"))
+             when "status" then orders.reorder(shipping_status: sort_direction)
+             when "total_amount" then orders.reorder(total_amount: sort_direction)
+             else orders.recent
+             end
 
     @pagy, @orders = pagy(orders)
   end
@@ -85,7 +102,7 @@ class OrdersController < ApplicationController
   def ship
     authorize @order
 
-    if @order.ship!(params[:tracking_no], params[:ship_date] || Date.current)
+    if @order.ship!(params[:tracking_no], params[:ship_date] || Date.current, shipping_carrier: params[:shipping_carrier])
       redirect_to @order, notice: t("orders.shipped")
     else
       redirect_to @order, alert: t("orders.ship_failed")
@@ -119,6 +136,7 @@ class OrdersController < ApplicationController
     orders = policy_scope(Order).includes(:order_lines, :customer, :items)
 
     # Apply same filters as index
+    orders = orders.by_ordered_by(current_user.id) if params[:mine].present? && !current_user&.internal_admin?
     orders = orders.search_by_order_no(params[:order_no]) if params[:order_no].present?
     orders = orders.by_status(params[:status]) if params[:status].present?
     if params[:date_from].present? && params[:date_to].present?
@@ -143,18 +161,19 @@ class OrdersController < ApplicationController
   private
 
   def set_order
-    @order = policy_scope(Order).find(params[:id])
+    @order = policy_scope(Order).includes(order_approval_request: :reviewed_by).find(params[:id])
   end
 
   def load_form_data
     @customers = policy_scope(Customer).active.order(:center_code)
-    @items = policy_scope(Item).active.ordered_by_code
+    # 発注画面では有効な商品のみを表示（is_active: true）
+    @items = policy_scope(Item).where(is_active: true).ordered_by_code
   end
 
   def order_params
     params.require(:order).permit(
       :order_date, :customer_id, :shipping_status,
-      :ship_date, :tracking_no, :delivered_date,
+      :ship_date, :tracking_no, :delivered_date, :shipping_carrier,
       order_lines_attributes: %i[id item_id quantity _destroy]
     ).tap do |permitted|
       # Ensure company_id is set for nested order_lines

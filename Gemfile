@@ -47,6 +47,13 @@ gem 'devise-security', '~> 0.18'
 # CSV export
 gem 'csv'
 
+# PDF generation
+gem 'prawn', '~> 2.4'
+gem 'prawn-table', '~> 0.2'
+
+# ZIP (請求書一括ダウンロード)
+gem 'rubyzip', '~> 2.3'
+
 # Windows timezone data
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 

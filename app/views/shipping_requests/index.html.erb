@@ -1,0 +1,88 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h2 fw-bold mb-2"><%= t('shipping_requests.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('shipping_requests.index.description') %></p>
+  </div>
+</div>
+
+<%= form_with url: shipping_requests_path, method: :get, local: true, class: "card shadow-sm border-0 mb-4" do |f| %>
+  <div class="card-body">
+    <div class="row g-3 align-items-end mb-2">
+      <div class="col-auto">
+        <span class="fw-semibold small"><%= t('shipping_requests.index.display_month') %></span>
+        <%= link_to t('shipping_requests.index.this_month'), shipping_requests_path(month: Date.current.strftime("%Y-%m"), company_id: @selected_company&.id), class: "btn btn-outline-secondary btn-sm ms-2" %>
+        <%= link_to t('shipping_requests.index.last_month'), shipping_requests_path(month: 1.month.ago.strftime("%Y-%m"), company_id: @selected_company&.id), class: "btn btn-outline-secondary btn-sm" %>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small"><%= t('shipping_requests.index.month_picker') %></label>
+        <%= month_field_tag :month, @date_from.to_s[0..6], class: "form-control form-control-sm" %>
+      </div>
+      <div class="col-md-2">
+        <%= submit_tag t('shipping_requests.index.filter'), class: "btn btn-primary btn-sm", name: nil %>
+      </div>
+    </div>
+    <div class="row g-3 align-items-end">
+      <% if current_user&.internal_admin? && @companies.size > 1 %>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small"><%= t('shipping_requests.index.select_company') %></label>
+          <%= select_tag :company_id, options_from_collection_for_select(@companies, :id, :name, @selected_company&.id), class: "form-select form-select-sm", include_blank: false %>
+        </div>
+      <% end %>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small"><%= t('shipping_requests.index.date_from') %></label>
+        <%= date_field_tag :date_from, @date_from, class: "form-control form-control-sm" %>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold small"><%= t('shipping_requests.index.date_to') %></label>
+        <%= date_field_tag :date_to, @date_to, class: "form-control form-control-sm" %>
+      </div>
+      <div class="col-md-2">
+        <%= submit_tag t('shipping_requests.index.filter'), class: "btn btn-primary btn-sm" %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="card-title mb-1 fw-bold"><%= t('shipping_requests.index.title') %></h5>
+    <small class="text-muted"><%= @date_from %> 〜 <%= @date_to %><%= " （#{@selected_company.name}）" if @selected_company %></small>
+  </div>
+  <div class="card-body p-0">
+    <% if @manufacturers.empty? %>
+      <div class="text-center py-5">
+        <p class="text-muted fw-medium mb-0"><%= t('shipping_requests.index.no_manufacturers_with_lines') %></p>
+      </div>
+    <% else %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= t('shipping_requests.index.manufacturer') %></th>
+              <th><%= t('shipping_requests.index.order_count') %></th>
+              <th class="text-end"><span class="visually-hidden">操作</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @manufacturers.each do |m| %>
+              <% count = @manufacturers_with_counts[m.id] || 0 %>
+              <% next if count.zero? %>
+              <tr>
+                <td><%= m.display_name %></td>
+                <td><%= count %> 件の明細</td>
+                <td class="text-end">
+                  <%= link_to shipping_request_path(m, date_from: @date_from, date_to: @date_to), class: "btn btn-outline-primary btn-sm me-1" do %>
+                    <i class="bi bi-eye me-1"></i><%= t('shipping_requests.index.view_request') %>
+                  <% end %>
+                  <%= link_to shipping_request_pdf_path(m, date_from: @date_from, date_to: @date_to), class: "btn btn-outline-secondary btn-sm", target: "_blank" do %>
+                    <i class="bi bi-file-pdf me-1"></i><%= t('shipping_requests.index.pdf') %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>

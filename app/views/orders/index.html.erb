@@ -4,14 +4,24 @@
     <p class="text-muted mb-0"><%= t('orders.index.description') %></p>
   </div>
   <div class="d-flex gap-2">
-    <%= link_to t('orders.index.export_csv'), export_orders_path(format: :csv, order_no: params[:order_no], status: params[:status], date_from: params[:date_from], date_to: params[:date_to]), class: "btn btn-outline-secondary btn-sm" %>
-    <%= link_to t('orders.index.new_order'), new_order_path, class: "btn btn-primary btn-sm" %>
+    <% unless current_user&.internal_admin? %>
+      <%= link_to t('orders.index.export_csv'), export_orders_path(format: :csv, order_no: params[:order_no], status: params[:status], date_from: params[:date_from], date_to: params[:date_to], mine: params[:mine]), class: "btn btn-outline-secondary btn-sm" %>
+      <%= link_to t('orders.index.new_order'), new_order_path, class: "btn btn-primary btn-sm" %>
+    <% end %>
   </div>
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
   <div class="card-body">
     <%= form_with url: orders_path, method: :get, class: "row g-3" do |f| %>
+      <%= f.hidden_field :sort, value: params[:sort] %>
+      <%= f.hidden_field :direction, value: params[:direction] %>
+      <% unless current_user&.internal_admin? %>
+        <div class="col-md-3">
+          <%= f.label :mine, t('orders.index.scope'), class: "form-label" %>
+          <%= f.select :mine, [[t('orders.index.scope_all'), ''], [t('orders.index.scope_my_orders'), '1']], { selected: params[:mine] }, class: "form-select form-select-sm" %>
+        </div>
+      <% end %>
       <div class="col-md-3">
         <%= f.label :order_no, t('orders.index.order_no'), class: "form-label" %>
         <%= f.text_field :order_no, value: params[:order_no], class: "form-control form-control-sm", placeholder: t('orders.index.search') %>
@@ -50,8 +60,10 @@
           <i class="bi bi-file-earmark-text text-muted fs-3"></i>
         </div>
         <p class="text-muted fw-medium mb-3">発注がありません</p>
-        <%= link_to new_order_path, class: "btn btn-primary" do %>
-          <i class="bi bi-plus-circle me-1"></i> 新規発注を作成
+        <% unless current_user&.internal_admin? %>
+          <%= link_to new_order_path, class: "btn btn-primary" do %>
+            <i class="bi bi-plus-circle me-1"></i> 新規発注を作成
+          <% end %>
         <% end %>
       </div>
     <% else %>
@@ -59,11 +71,11 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th><%= t('orders.table.order_no') %></th>
-              <th><%= t('orders.table.date') %></th>
-              <th><%= t('orders.table.customer') %></th>
-              <th><%= t('orders.table.status') %></th>
-              <th class="text-end"><%= t('orders.table.amount') %></th>
+              <th><%= orders_sort_link("order_no", t('orders.table.order_no')) %></th>
+              <th><%= orders_sort_link("order_date", t('orders.table.date')) %></th>
+              <th><%= orders_sort_link("customer", t('orders.table.customer')) %></th>
+              <th><%= orders_sort_link("status", t('orders.table.status')) %></th>
+              <th class="text-end"><%= orders_sort_link("total_amount", t('orders.table.amount')) %></th>
               <th class="text-end"><%= t('orders.table.actions') %></th>
             </tr>
           </thead>
@@ -76,7 +88,7 @@
                 <td class="text-muted"><%= order.order_date.strftime("%Y/%m/%d") %></td>
                 <td class="fw-medium"><%= order.customer.center_name %></td>
                 <td>
-                  <%= render "orders/status_badge", status: order.shipping_status %>
+                  <%= render "orders/status_badge", status: order.shipping_status, order: order %>
                 </td>
                 <td class="text-end fw-semibold">
                   <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>

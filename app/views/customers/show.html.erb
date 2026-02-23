@@ -1,48 +1,324 @@
-<div class="mb-8 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 class="text-2xl font-bold text-gray-900"><%= @customer.center_name %></h1>
-    <p class="mt-1 text-sm text-gray-500">Customer Code: <%= @customer.center_code %></p>
+    <h1 class="h2 fw-bold mb-2"><%= @customer.center_name %></h1>
+    <p class="text-muted mb-0">
+      <span class="font-monospace"><%= @customer.center_code %></span>
+      <% if @customer.company %>
+        <span class="ms-3">
+          <i class="bi bi-building me-1"></i><%= @customer.company.name %>
+        </span>
+      <% end %>
+    </p>
   </div>
-  <div class="flex space-x-3">
-    <% if current_user&.internal_admin? %>
-      <%= link_to "Edit", edit_customer_path(@customer), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+  <div class="d-flex gap-2">
+    <% if @customer.is_billing_center? %>
+      <div class="dropdown">
+        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="invoiceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-pdf me-1"></i><%= t('customers.show.download_invoice') %>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="invoiceDropdown">
+          <% (0..11).each do |i| %>
+            <% target_date = Date.current - i.months %>
+            <li>
+              <%= link_to download_invoice_customer_path(@customer, year: target_date.year, month: target_date.month), 
+                  class: "dropdown-item", 
+                  data: { turbo: false } do %>
+                <%= target_date.strftime('%Y年%m月') %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="invoiceByCenterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-zip me-1"></i><%= t('customers.invoice_by_center.button') %>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="invoiceByCenterDropdown">
+          <% (0..11).each do |i| %>
+            <% target_date = Date.current - i.months %>
+            <li>
+              <%= link_to download_invoices_by_center_customer_path(@customer, year: target_date.year, month: target_date.month), class: "dropdown-item", data: { turbo: false } do %>
+                <%= target_date.strftime('%Y年%m月') %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
     <% end %>
-    <%= link_to "Back to List", customers_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="statementDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-file-text me-1"></i><%= t('customers.show.download_statement') %>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="statementDropdown">
+        <% (0..11).each do |i| %>
+          <% target_date = Date.current - i.months %>
+          <li>
+            <%= link_to download_statement_customer_path(@customer, year: target_date.year, month: target_date.month), class: "dropdown-item", data: { turbo: false } do %>
+              <%= target_date.strftime('%Y年%m月') %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+    <% if current_user&.internal_admin? %>
+      <%= link_to edit_customer_path(@customer), class: "btn btn-outline-secondary btn-sm" do %>
+        <i class="bi bi-pencil me-1"></i><%= t('customers.show.edit') %>
+      <% end %>
+    <% end %>
+    <%= link_to customers_path, class: "btn btn-outline-primary btn-sm" do %>
+      <i class="bi bi-arrow-left me-1"></i><%= t('customers.show.back') %>
+    <% end %>
   </div>
 </div>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg font-medium leading-6 text-gray-900">Customer Information</h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <dl>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Center Code</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.center_code %></dd>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-info-circle me-2"></i><%= t('customers.show.basic_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.basic_info_desc') %></small>
       </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Center Name</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.center_name %></dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Postal Code</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.postal_code %></dd>
-      </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Address</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @customer.full_address %></dd>
-      </div>
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @customer.is_active %>
-            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
-          <% else %>
-            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Inactive</span>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.center_code') %></label>
+            <p class="mb-0 fw-medium font-monospace"><%= @customer.center_code %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.center_name') %></label>
+            <p class="mb-0 fw-medium"><%= @customer.center_name %></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.status') %></label>
+            <p class="mb-0">
+              <% if @customer.is_active %>
+                <span class="badge bg-success"><%= t('customers.status.active') %></span>
+              <% else %>
+                <span class="badge bg-secondary"><%= t('customers.status.inactive') %></span>
+              <% end %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.is_billing_center') %></label>
+            <p class="mb-0">
+              <% if @customer.is_billing_center? %>
+                <span class="badge bg-primary"><i class="bi bi-receipt me-1"></i>請求先</span>
+              <% else %>
+                <span class="text-muted">-</span>
+              <% end %>
+            </p>
+          </div>
+          <% unless @customer.is_billing_center? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.billing_center') %></label>
+              <p class="mb-0">
+                <% if @customer.billing_center %>
+                  <i class="bi bi-receipt me-1"></i><%= @customer.billing_center.display_name %>
+                <% else %>
+                  <span class="text-muted">-</span>
+                <% end %>
+              </p>
+            </div>
           <% end %>
-        </dd>
+        </div>
       </div>
-    </dl>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-geo-alt me-2"></i><%= t('customers.show.address_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.address_info_desc') %></small>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.postal_code') %></label>
+            <p class="mb-0"><%= @customer.postal_code || "-" %></p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.prefecture') %></label>
+            <p class="mb-0"><%= @customer.prefecture || "-" %></p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.city') %></label>
+            <p class="mb-0"><%= @customer.city || "-" %></p>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.address1') %></label>
+            <p class="mb-0"><%= @customer.address1 || "-" %></p>
+          </div>
+          <% if @customer.address2.present? %>
+            <div class="col-md-12">
+              <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.address2') %></label>
+              <p class="mb-0"><%= @customer.address2 %></p>
+            </div>
+          <% end %>
+          <div class="col-md-12">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.full_address') %></label>
+            <p class="mb-0 text-muted"><%= @customer.full_address.present? ? @customer.full_address : "-" %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if @customer.is_billing_center? %>
+      <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="card-title mb-1 fw-bold">
+            <i class="bi bi-geo-alt me-2"></i><%= t('customers.show.linked_receiving_centers') %>
+          </h5>
+          <small class="text-muted"><%= t('customers.show.linked_receiving_centers_desc') %></small>
+        </div>
+        <div class="card-body">
+          <% if @customer.customers.any? %>
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th><%= t('customers.table.code') %></th>
+                    <th><%= t('customers.table.name') %></th>
+                    <th><%= t('customers.table.status') %></th>
+                    <th class="text-end"><%= t('customers.table.actions') %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @customer.customers.order(:center_code).each do |receiving_center| %>
+                    <tr>
+                      <td class="font-monospace"><%= receiving_center.center_code %></td>
+                      <td><%= receiving_center.center_name %></td>
+                      <td>
+                        <% if receiving_center.is_active %>
+                          <span class="badge bg-success"><%= t('customers.status.active') %></span>
+                        <% else %>
+                          <span class="badge bg-secondary"><%= t('customers.status.inactive') %></span>
+                        <% end %>
+                      </td>
+                      <td class="text-end">
+                        <%= link_to t('shared.actions.view'), customer_path(receiving_center), class: "btn btn-sm btn-outline-primary" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <p class="text-muted mb-0"><%= t('customers.show.no_linked_receiving_centers') %></p>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @receiving_centers_with_orders&.any? %>
+        <div class="card shadow-sm border-0 mt-4">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="card-title mb-1 fw-bold">
+              <i class="bi bi-cart-check me-2"></i><%= t('customers.show.receiving_centers_orders') %>
+            </h5>
+            <small class="text-muted"><%= t('customers.show.receiving_centers_orders_desc') %></small>
+          </div>
+          <div class="card-body">
+            <% @receiving_centers_with_orders.each do |data| %>
+              <% receiving_center = data[:receiving_center] %>
+              <% orders = data[:orders] %>
+              <% total_orders_count = data[:total_orders_count] %>
+              <% total_amount = data[:total_amount] %>
+              
+              <div class="mb-4 pb-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h6 class="fw-bold mb-1">
+                      <i class="bi bi-building me-1"></i><%= receiving_center.center_name %>
+                      <span class="font-monospace text-muted small ms-2">(<%= receiving_center.center_code %>)</span>
+                    </h6>
+                    <small class="text-muted">
+                      <%= t('customers.show.total_orders') %>: <%= total_orders_count %>件
+                      <% if total_amount > 0 %>
+                        | <%= t('customers.show.total_amount') %>: <%= number_to_currency(total_amount, unit: "¥", precision: 0) %>
+                      <% end %>
+                    </small>
+                  </div>
+                  <%= link_to customer_path(receiving_center), class: "btn btn-sm btn-outline-primary" do %>
+                    <i class="bi bi-eye me-1"></i><%= t('shared.actions.view') %>
+                  <% end %>
+                </div>
+                
+                <% if orders.any? %>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th><%= t('orders.table.order_no') %></th>
+                          <th><%= t('orders.table.date') %></th>
+                          <th><%= t('orders.table.status') %></th>
+                          <th class="text-end"><%= t('orders.table.amount') %></th>
+                          <th class="text-end"><%= t('orders.table.actions') %></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% orders.each do |order| %>
+                          <tr>
+                            <td class="font-monospace"><%= order.order_no %></td>
+                            <td class="text-muted"><%= order.order_date %></td>
+                            <td>
+                              <%= render "orders/status_badge", status: order.shipping_status, order: order %>
+                            </td>
+                            <td class="text-end fw-semibold">
+                              <%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %>
+                            </td>
+                            <td class="text-end">
+                              <%= link_to t('shared.actions.view'), order_path(order), class: "btn btn-sm btn-outline-primary" %>
+                            </td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                  <% if total_orders_count > orders.count %>
+                    <div class="mt-2 text-end">
+                      <%= link_to orders_path(customer_id: receiving_center.id), class: "btn btn-sm btn-link text-decoration-none" do %>
+                        <%= t('customers.show.view_all_orders') %> (<%= total_orders_count %>件)
+                        <i class="bi bi-arrow-right ms-1"></i>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <p class="text-muted mb-0"><%= t('customers.show.no_orders') %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="card-title mb-1 fw-bold">
+          <i class="bi bi-building me-2"></i><%= t('customers.show.company_info') %>
+        </h5>
+        <small class="text-muted"><%= t('customers.show.company_info_desc') %></small>
+      </div>
+      <div class="card-body">
+        <% if @customer.company %>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.company') %></label>
+            <p class="mb-0 fw-medium">
+              <i class="bi bi-building me-1"></i><%= @customer.company.name %>
+            </p>
+          </div>
+          <div class="mb-0">
+            <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.show.company_code') %></label>
+            <p class="mb-0 font-monospace"><%= @customer.company.code %></p>
+          </div>
+        <% else %>
+          <p class="text-muted mb-0"><%= t('customers.show.no_company') %></p>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

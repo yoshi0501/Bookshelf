@@ -1,11 +1,23 @@
 <%
-  badge_classes = case status
+  # 承認依頼の状態を優先表示（承認待ち → 承認依頼中、却下 → 却下）
+  display_status = status
+  if local_assigns[:order].present? && local_assigns[:order].respond_to?(:order_approval_request)
+    req = local_assigns[:order].order_approval_request
+    display_status = "pending_approval" if req&.status_pending?
+    display_status = "rejected" if req&.status_rejected?
+  end
+
+  badge_classes = case display_status
   when "draft"
     "bg-secondary"
+  when "pending_approval"
+    "bg-warning text-dark"
+  when "rejected"
+    "bg-danger"
   when "confirmed"
     "bg-primary"
   when "shipped"
-    "bg-warning"
+    "bg-info"
   when "delivered"
     "bg-success"
   when "cancelled"
@@ -15,5 +27,5 @@
   end
 %>
 <span class="badge <%= badge_classes %>">
-  <%= t("orders.status.#{status}") %>
+  <%= t("orders.status.#{display_status}") %>
 </span>
