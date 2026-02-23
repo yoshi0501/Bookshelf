@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_23_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_27_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -132,6 +132,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_000000) do
     t.datetime "updated_at", null: false
     t.bigint "billing_center_id"
     t.boolean "is_billing_center", default: false, null: false
+    t.bigint "approver_user_profile_id"
+    t.index ["approver_user_profile_id"], name: "index_customers_on_approver_user_profile_id"
     t.index ["billing_center_id"], name: "index_customers_on_billing_center_id"
     t.index ["company_id", "center_code"], name: "index_customers_on_company_id_and_center_code", unique: true
     t.index ["company_id", "is_active"], name: "index_customers_on_company_id_and_is_active"
@@ -297,6 +299,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_000000) do
     t.bigint "supervisor_id"
     t.bigint "manufacturer_id"
     t.string "payment_terms"
+    t.bigint "billing_center_id"
+    t.index ["billing_center_id"], name: "index_user_profiles_on_billing_center_id"
     t.index ["company_id", "member_status"], name: "index_user_profiles_on_company_id_and_member_status"
     t.index ["company_id", "role"], name: "index_user_profiles_on_company_id_and_role"
     t.index ["company_id"], name: "index_user_profiles_on_company_id"
@@ -361,6 +365,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_000000) do
   add_foreign_key "company_payments", "companies"
   add_foreign_key "customers", "companies"
   add_foreign_key "customers", "customers", column: "billing_center_id", on_delete: :restrict
+  add_foreign_key "customers", "user_profiles", column: "approver_user_profile_id"
   add_foreign_key "integration_logs", "companies"
   add_foreign_key "integration_logs", "orders"
   add_foreign_key "item_companies", "companies"
@@ -377,6 +382,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_000000) do
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "users", column: "ordered_by_user_id"
   add_foreign_key "user_profiles", "companies"
+  add_foreign_key "user_profiles", "customers", column: "billing_center_id"
   add_foreign_key "user_profiles", "manufacturers"
   add_foreign_key "user_profiles", "user_profiles", column: "supervisor_id"
   add_foreign_key "user_profiles", "users"
