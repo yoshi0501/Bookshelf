@@ -75,7 +75,6 @@
               <th><%= t('user_profiles.table.name') %></th>
               <th><%= t('user_profiles.table.email') %></th>
               <th><%= t('user_profiles.table.role') %></th>
-              <th>上司</th>
               <th><%= t('user_profiles.table.phone') %></th>
               <th class="text-end"><%= t('user_profiles.table.actions') %></th>
             </tr>
@@ -108,7 +107,6 @@
                     <% end %>
                   <% end %>
                 </td>
-                <td class="text-muted"><%= profile.supervisor&.name || "-" %></td>
                 <td class="text-muted"><%= profile.phone || "-" %></td>
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end">

@@ -1,0 +1,10 @@
+---
+description: Bookshelf リポジトリのデフォルトブランチは master（main ではない）
+alwaysApply: true
+---
+
+# Git デフォルトブランチ
+
+- このリポジトリ（Bookshelf）の**デフォルトブランチは `master`** です。`main` ではありません。
+- プル・チェックアウト・マージの指示では `main` ではなく **`master`** を使う。
+- 例: `git checkout master` / `git pull origin master`

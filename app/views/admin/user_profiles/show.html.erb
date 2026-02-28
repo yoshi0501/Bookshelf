@@ -89,18 +89,6 @@
               <% end %>
             </p>
           </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold text-muted small mb-1"><%= t('user_profiles.show.supervisor') %></label>
-            <p class="mb-0">
-              <% if @user_profile.supervisor %>
-                <i class="bi bi-person-badge me-1"></i><%= @user_profile.supervisor.name %>
-                <small class="text-muted">(<%= @user_profile.supervisor.user.email %>)</small>
-              <% else %>
-                <span class="text-muted"><%= t('user_profiles.show.no_supervisor') %></span>
-                <small class="text-muted d-block"><%= t('user_profiles.show.no_supervisor_desc') %></small>
-              <% end %>
-            </p>
-          </div>
         </div>
       </div>
     </div>

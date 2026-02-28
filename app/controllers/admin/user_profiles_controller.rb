@@ -3,7 +3,6 @@
   module Admin
   class UserProfilesController < ApplicationController
     before_action :set_user_profile, only: %i[show edit update change_role]
-    before_action :load_supervisor_options, only: %i[edit update]
     before_action :load_billing_center_options, only: %i[edit update]
 
     def index
@@ -46,7 +45,7 @@
           .manufacturer_accounts
           .order(:name)
       elsif @selected_company
-        base = policy_scope(UserProfile).includes(:user, :company, :manufacturer, :supervisor).active_members
+        base = policy_scope(UserProfile).includes(:user, :company, :manufacturer).active_members
         user_profiles_scope = current_user.internal_admin? ?
           base.for_company_including_manufacturers(@selected_company) :
           base.for_company(@selected_company)
@@ -83,7 +82,6 @@
         redirect_to admin_user_profile_path(@user_profile), notice: t("user_profiles.updated")
       else
         @manufacturers = current_user.internal_admin? ? Manufacturer.ordered_by_code : []
-        load_supervisor_options
         render :edit, status: :unprocessable_entity
       end
     end
@@ -122,41 +120,6 @@
       @user_profile = policy_scope(UserProfile).find(params[:id])
     end
 
-    def load_supervisor_options
-      # 編集対象のユーザープロファイルの会社を基準に上司候補を取得
-      # 同じ会社の管理者と、内部管理者（company_idがnil）の両方を含める
-      target_company = @user_profile&.company
-      
-      base_scope = UserProfile
-        .active_members
-        .where(role: [:company_admin, :internal_admin])
-        .where.not(id: @user_profile&.id)
-        .includes(:user)
-      
-      if target_company
-        # 編集対象が会社に所属している場合、その会社の管理者と内部管理者を含める
-        # SQL: (company_id = ? AND role = 'company_admin') OR (company_id IS NULL AND role = 'internal_admin')
-        @supervisor_options = base_scope
-          .where(
-            "(company_id = ? AND role = ?) OR (company_id IS NULL AND role = ?)",
-            target_company.id,
-            UserProfile.roles[:company_admin],
-            UserProfile.roles[:internal_admin]
-          )
-          .order(:name)
-          .map { |profile| [profile.name, profile.id] }
-      else
-        # 編集対象が会社に所属していない場合（内部管理者など）、内部管理者のみ
-        @supervisor_options = base_scope
-          .where(role: :internal_admin)
-          .order(:name)
-          .map { |profile| [profile.name, profile.id] }
-      end
-      
-      # デバッグ用: 空の場合は空配列を返す
-      @supervisor_options ||= []
-    end
-
     def load_billing_center_options
       target_company = @user_profile&.company
       if target_company
@@ -172,7 +135,7 @@
     end
 
     def user_profile_params
-      permitted = %i[name phone supervisor_id payment_terms billing_center_id]
+      permitted = %i[name phone payment_terms billing_center_id]
       permitted += %i[manufacturer_id company_id] if current_user.internal_admin?
       params.require(:user_profile).permit(permitted)
     end

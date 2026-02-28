@@ -37,14 +37,6 @@
           <%= f.text_field :payment_terms, class: "form-control", placeholder: t('user_profiles.form.payment_terms_placeholder') %>
           <div class="form-text"><%= t('user_profiles.form.payment_terms_help') %></div>
         </div>
-
-        <div class="col-md-6">
-          <%= f.label :supervisor_id, t('user_profiles.form.supervisor'), class: "form-label fw-semibold" %>
-          <%= f.collection_select :supervisor_id, @supervisor_options, :last, :first, 
-              { include_blank: t('user_profiles.form.select_supervisor') }, 
-              { class: "form-select" } %>
-          <div class="form-text"><%= t('user_profiles.form.supervisor_help') %></div>
-        </div>
         <% if @billing_center_options&.any? %>
           <div class="col-md-6">
             <%= f.label :billing_center_id, t('user_profiles.form.billing_center'), class: "form-label fw-semibold" %>

@@ -11,8 +11,6 @@ class UserProfile < ApplicationRecord
   belongs_to :user
   belongs_to :company, optional: true
   belongs_to :manufacturer, optional: true
-  belongs_to :supervisor, class_name: "UserProfile", optional: true
-  has_many :subordinates, class_name: "UserProfile", foreign_key: "supervisor_id", dependent: :nullify
   has_many :approval_requests, dependent: :destroy
   # 所属請求センター（異動時はここを更新）。請求センターのみ指定可
   belongs_to :billing_center, class_name: "Customer", optional: true
@@ -28,8 +26,6 @@ class UserProfile < ApplicationRecord
   validates :member_status, presence: true
   validates :company_id, presence: true, unless: :company_optional?
   validate :manufacturer_belongs_to_company_if_both_present
-  validate :supervisor_must_be_same_company
-  validate :cannot_be_own_supervisor
   validate :billing_center_must_be_billing_and_same_company, if: :billing_center_id?
 
   # Scopes
@@ -95,14 +91,6 @@ class UserProfile < ApplicationRecord
     respond_to?(:manufacturer_id) && manufacturer_id.present?
   end
 
-  def supervisor_user
-    supervisor&.user
-  end
-
-  def has_supervisor?
-    supervisor.present?
-  end
-
   private
 
   def company_optional?
@@ -115,22 +103,6 @@ class UserProfile < ApplicationRecord
 
     unless manufacturer.company_id == company_id
       errors.add(:manufacturer_id, "must belong to the selected company")
-    end
-  end
-
-  def supervisor_must_be_same_company
-    return unless supervisor_id.present? && company_id.present?
-
-    unless supervisor&.company_id == company_id
-      errors.add(:supervisor_id, "must belong to the same company")
-    end
-  end
-
-  def cannot_be_own_supervisor
-    return unless supervisor_id.present?
-
-    if supervisor_id == id
-      errors.add(:supervisor_id, "cannot be yourself")
     end
   end
 
