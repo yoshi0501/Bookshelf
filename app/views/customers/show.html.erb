@@ -122,7 +122,7 @@
               </p>
             </div>
           <% end %>
-          <% if @customer.is_billing_center? %>
+          <% unless @customer.is_billing_center? %>
             <div class="col-md-12">
               <label class="form-label fw-semibold text-muted small mb-1"><%= t('customers.form.approver') %></label>
               <p class="mb-0">

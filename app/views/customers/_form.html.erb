@@ -37,7 +37,7 @@
               { class: "form-select", id: "customer_billing_center_id", required: !customer.is_billing_center? } %>
           <div class="form-text"><%= t('customers.form.billing_center_help') %></div>
         </div>
-        <div class="col-md-6" id="approver_field" style="<%= 'display: none;' unless customer.is_billing_center? %>">
+        <div class="col-md-6" id="approver_field" style="<%= 'display: none;' if customer.is_billing_center? %>">
           <%= f.label :approver_user_profile_id, t('customers.form.approver'), class: "form-label fw-semibold" %>
           <%= f.collection_select :approver_user_profile_id, @approver_candidates || [], :last, :first,
               { include_blank: t('customers.form.select_approver') },
@@ -150,7 +150,7 @@
     const billingCenterSelect = document.getElementById('customer_billing_center_id');
     const approverField = document.getElementById('approver_field');
     if (approverField) {
-      approverField.style.display = isBillingCenter ? 'block' : 'none';
+      approverField.style.display = isBillingCenter ? 'none' : 'block';
     }
     if (isBillingCenter) {
       billingCenterField.style.display = 'none';

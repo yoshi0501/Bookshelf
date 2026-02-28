@@ -2,6 +2,8 @@
 
 # センターへの承認者・メンバー所属をCSVで一括更新する。
 # CSV: center_code, approver_email, member_emails（member_emails はカンマ区切り、任意）
+# - approver_email: 受注センターの承認者（受注センターのみ有効）
+# - member_emails: 請求センターへの所属（請求センターのみ有効）
 # 異動時の一括変更に利用する。
 class CenterAssignmentCsvImporter
   attr_reader :company, :errors, :updated_centers, :updated_members
@@ -51,30 +53,38 @@ class CenterAssignmentCsvImporter
       return
     end
 
-    center = Customer.for_company(company).billing_centers.find_by(center_code: center_code)
+    center = Customer.for_company(company).find_by(center_code: center_code)
     unless center
       @errors << I18n.t("customers.import_assignments.center_not_found", line: line_no, code: center_code)
       return
     end
 
-    # 承認者を更新
-    if approver_email.present?
-      approver = UserProfile.for_company(company).joins(:user).find_by(users: { email: approver_email })
-      unless approver
-        @errors << I18n.t("customers.import_assignments.approver_not_found", line: line_no, email: approver_email)
-      elsif center.approver_user_profile_id != approver.id
-        center.update!(approver_user_profile_id: approver.id)
-        @updated_centers += 1
+    # 承認者を更新（受注センターのみ）
+    if !center.is_billing_center?
+      if approver_email.present?
+        approver = UserProfile.for_company(company).joins(:user).find_by(users: { email: approver_email })
+        unless approver
+          @errors << I18n.t("customers.import_assignments.approver_not_found", line: line_no, email: approver_email)
+        elsif center.approver_user_profile_id != approver.id
+          center.update!(approver_user_profile_id: approver.id)
+          @updated_centers += 1
+        end
+      else
+        if center.approver_user_profile_id.present?
+          center.update!(approver_user_profile_id: nil)
+          @updated_centers += 1
+        end
       end
-    else
-      if center.approver_user_profile_id.present?
-        center.update!(approver_user_profile_id: nil)
-        @updated_centers += 1
-      end
+    elsif approver_email.present?
+      @errors << I18n.t("customers.import_assignments.approver_only_for_receiving", line: line_no, code: center_code)
     end
 
-    # メンバー所属を更新（該当センターにまとめて紐付け）
+    # メンバー所属を更新（請求センターのみ。該当センターにまとめて紐付け）
     if member_emails_str.present?
+      unless center.is_billing_center?
+        @errors << I18n.t("customers.import_assignments.members_only_for_billing", line: line_no, code: center_code)
+        return
+      end
       member_emails = member_emails_str.split(/[,，\s]+/).map(&:strip).reject(&:blank?)
       member_emails.each do |email|
         profile = UserProfile.for_company(company).joins(:user).find_by(users: { email: email })

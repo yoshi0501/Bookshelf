@@ -106,6 +106,16 @@ companies.each_with_index do |company, company_index|
   puts "  Created 5 centers for #{company.name}"
 end
 
+# 受注センターに承認者を設定（発注承認フロー用）
+companies.each do |company|
+  receiving = Customer.where(company: company, is_billing_center: false).first
+  admin = User.joins(:user_profile).find_by(user_profiles: { company_id: company.id, role: :company_admin })
+  if receiving && admin&.user_profile
+    receiving.update!(approver_user_profile_id: admin.user_profile.id)
+    puts "  Set approver for #{receiving.center_name}: #{admin.user_profile.name}"
+  end
+end
+
 # メーカーはプラットフォーム共通マスタ（会社に属さず、1メーカーが複数会社に供給）
 platform_manufacturers = []
 if ActiveRecord::Base.connection.table_exists?("manufacturers")

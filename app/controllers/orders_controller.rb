@@ -186,24 +186,24 @@ class OrdersController < ApplicationController
   end
 
   def create_approval_request_and_send_email
-    # 発注者の上司を取得
-    supervisor = current_user.user_profile.supervisor_user
-    
-    # 上司が設定されていない場合は承認フローをスキップして自動承認
-    if supervisor.nil?
+    # 受注センター（配送先）の承認者を取得
+    approver_user = @order.customer&.approver_user_profile&.user
+
+    # 承認者が設定されていない場合は承認フローをスキップして自動承認
+    if approver_user.nil?
       @order.update!(shipping_status: :confirmed)
       return
     end
 
-    # 上司が設定されている場合は承認依頼を作成してメール送信
+    # 承認者が設定されている場合は承認依頼を作成してメール送信
     approval_request = @order.build_order_approval_request(
       company: @order.company,
       status: :pending
     )
     approval_request.save!
 
-    # 上司にメール送信
-    OrderMailer.approval_request(@order, [supervisor]).deliver_later
+    # 承認者にメール送信
+    OrderMailer.approval_request(@order, [approver_user]).deliver_later
   end
 
   def generate_csv(orders)

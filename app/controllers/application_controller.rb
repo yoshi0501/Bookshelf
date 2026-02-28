@@ -112,7 +112,7 @@ class ApplicationController < ActionController::Base
     return unless user_signed_in?
     return if devise_controller?
     return unless current_user.user_profile&.active?
-    return unless current_user.user_profile&.can_access_admin_dashboard? || current_user.user_profile&.subordinates&.any?
+    return unless current_user.user_profile&.can_access_admin_dashboard? || current_user.user_profile&.centers_as_approver&.any?
 
     scope = Pundit.policy_scope(current_user, OrderApprovalRequest)
     @pending_order_approvals_count = scope.status_pending.count
